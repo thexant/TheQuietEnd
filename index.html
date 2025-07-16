@@ -565,7 +565,21 @@
                 padding: 1rem;
             }
         }
-
+	.discord-icon {
+	    width: 24px;
+	    height: 24px;
+	    background-image: url('https://img.icons8.com/color/512/discord-logo.png');
+	    background-size: contain;
+	    background-repeat: no-repeat;
+	    background-position: center;
+	    display: inline-block;
+	    filter: brightness(1.2);
+	    transition: filter 0.3s ease;
+	}
+	
+	.discord-button:hover .discord-icon {
+	    filter: brightness(1.4) drop-shadow(0 0 8px rgba(88, 101, 242, 0.6));
+	}
         /* Animation for rotating elements */
         @keyframes rotate-slow {
             from { transform: rotate(0deg); }
@@ -694,7 +708,7 @@
                 <div class="discord-section">
                     <p>Connect with other pilots and get notified when the beta goes live:</p>
                     <a href="https://discord.gg/JsJcnTKyQn" class="discord-button" target="_blank">
-                        <span class="discord-icon">🚀</span>
+                        <span class="discord-icon"></span>
                         <span class="discord-text">JOIN DISCORD</span>
                     </a>
                     <p style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-secondary);">
