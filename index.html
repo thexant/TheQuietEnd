@@ -736,10 +736,10 @@
                 // Start countdown
                 this.startCountdown();
                 
-                // Cycle themes every 20 seconds
+                // Cycle themes every 2 minutes (less frequent)
                 setInterval(() => {
                     this.cycleTheme();
-                }, 20000);
+                }, 120000);
                 
                 // Animate systems checks
                 this.animateSystemsCheck();
@@ -748,12 +748,23 @@
             }
             
             setLaunchDate() {
-                // Set launch date to 7 days from now (modify as needed)
-                const now = new Date();
-                this.launchDate = new Date(now.getTime() + (7 * 24 * 60 * 60 * 1000));
+                // ================================
+                // LAUNCH DATE CONFIGURATION
+                // ================================
                 
-                // For testing, you can set a specific date:
-                // this.launchDate = new Date('2025-08-01T00:00:00');
+                // OPTION 1: Set a specific launch date (RECOMMENDED)
+                // Format: 'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS'
+                // Examples:
+                // this.launchDate = new Date('2025-08-15');           // August 15, 2025 at midnight
+                // this.launchDate = new Date('2025-08-15 18:00:00');  // August 15, 2025 at 6 PM
+                
+                this.launchDate = new Date('2025-08-01 00:00:00');  // CHANGE THIS DATE
+                
+                // OPTION 2: Set relative to current date (days from now)
+                // Uncomment the lines below and comment out the line above
+                // const now = new Date();
+                // const daysFromNow = 14; // Change this number
+                // this.launchDate = new Date(now.getTime() + (daysFromNow * 24 * 60 * 60 * 1000));
             }
             
             startCountdown() {
@@ -823,7 +834,7 @@
                 // Repeat animation every 10 seconds
                 setTimeout(() => {
                     this.animateSystemsCheck();
-                }, 60000);
+                }, 10000);
             }
         }
         
