@@ -18,8 +18,8 @@ const DISCORD_INVITE_URL = "https://discord.gg/JsJcnTKyQn";
 // WIKI AND MAP LINKS
 // ========================================
 // Replace these URLs with your actual wiki and map URLs
-const WIKI_URL = "https://thexant.github.io/TheQuietEnd/offline/";
-const MAP_URL = "https://thexant.github.io/TheQuietEnd/offline/";
+const WIKI_URL = "https://thequietend.servegame.com/wiki";
+const MAP_URL = "https://thequietend.servegame.com/map";
 
 // ========================================
 // GAME INFORMATION CONTENT
