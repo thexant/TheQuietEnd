@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Preparing for Launch - The Quiet End</title>
+    <title>Preparing for Second Launch - The Quiet End</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono:wght@400&family=Tektur:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -802,7 +802,7 @@
                 // this.launchDate = new Date('2025-08-15');           // August 15, 2025 at midnight
                 // this.launchDate = new Date('2025-08-15 18:00:00');  // August 15, 2025 at 6 PM
                 
-                this.launchDate = new Date('2025-07-16T20:15:00.000Z');
+                this.launchDate = new Date('2025-07-17T21:00:00.000Z');
                 
                 // OPTION 2: Set relative to current date (days from now)
                 // Uncomment the lines below and comment out the line above
