@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Quiet End | Maintenance Mode</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono:wght@400&family=Tektur:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* Additional styles for maintenance page */
+        .maintenance-banner {
+            background: linear-gradient(145deg, var(--error-color), var(--warning-color));
+            color: var(--primary-bg);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 12px;
+            box-shadow: 
+                0 0 40px rgba(255, 136, 0, 0.6),
+                inset 0 1px 0 rgba(255, 170, 0, 0.4);
+            animation: maintenance-pulse 3s infinite;
+        }
+        
+        @keyframes maintenance-pulse {
+            0%, 100% { box-shadow: 0 0 40px rgba(255, 136, 0, 0.6); }
+            50% { box-shadow: 0 0 60px rgba(255, 136, 0, 0.8); }
+        }
+        
+        .maintenance-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 0 20px rgba(255, 136, 0, 0.8));
+        }
+        
+        .maintenance-title {
+            font-family: 'Tektur', monospace;
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+        }
+        
+        .maintenance-message {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            opacity: 0.95;
+        }
+        
+        .info-section {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(var(--glow-primary), 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+        
+        .info-title {
+            font-family: 'Tektur', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-shadow: 0 0 8px var(--glow-primary);
+            margin-bottom: 1rem;
+        }
+        
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 136, 0, 0.1);
+            border: 1px solid var(--warning-color);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--warning-color);
+            margin-top: 1rem;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--warning-color);
+            animation: blink 1.5s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+    </style>
+</head>
+<body>
+    <!-- CRT Effects -->
+    <div class="scanlines"></div>
+    <div class="static-overlay"></div>
+    
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Header Section -->
+        <header class="game-header">
+            <div class="terminal-indicator">
+                <div class="power-light" style="background: var(--warning-color); box-shadow: 0 0 15px var(--warning-color);"></div>
+                <span class="terminal-id">TERM-MAINT</span>
+            </div>
+            <h1 class="game-title">THE QUIET END</h1>
+            <div class="game-subtitle">◦ DISCORD SPACE SANDBOX RPG ◦</div>
+        </header>
+
+        <!-- Maintenance Banner -->
+        <div class="maintenance-banner">
+            <div class="maintenance-icon">🔧</div>
+            <h2 class="maintenance-title">SYSTEM MAINTENANCE IN PROGRESS</h2>
+            <div class="maintenance-message">
+                The galaxy is currently undergoing scheduled maintenance.<br>
+                All game systems, including the Discord bot, galaxy map, and wiki are temporarily offline.<br>
+                We apologize for the inconvenience and will restore access as soon as possible.
+            </div>
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>MAINTENANCE MODE ACTIVE</span>
+            </div>
+        </div>
+
+        <!-- Game Info for New Visitors -->
+        <section class="game-info-panel">
+            <div class="panel-header">
+                <div class="status-light" style="background: var(--warning-color); box-shadow: 0 0 12px var(--warning-color);"></div>
+                <h2>ABOUT THE QUIET END</h2>
+            </div>
+            <div class="panel-content">
+                <div class="info-section">
+                    <div class="info-title">WHAT IS THE QUIET END?</div>
+                    <p><strong>The Quiet End</strong> is an immersive Discord-based space sandbox RPG set in a slowly dying galaxy where human civilization teeters on the edge of collapse.</p>
+                    
+                    <p>Navigate dangerous space corridors as an independent pilot in a universe where every transmission might be your last. Experience a living galaxy where your choices matter and death is permanent.</p>
+                    
+                    <p>Trade goods between colonies, take on dangerous jobs, upgrade your ship, and survive in a persistent universe populated by dynamic NPCs and fellow pilots. But beware - the galaxy itself is dying, and administrators can trigger apocalyptic events that destroy entire star systems.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Grid (to show what players can expect) -->
+        <section class="features-panel">
+            <div class="panel-header">
+                <div class="status-light" style="background: var(--warning-color); box-shadow: 0 0 12px var(--warning-color);"></div>
+                <h2>GAME FEATURES</h2>
+            </div>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">💰</div>
+                    <div class="feature-title">TRADE & WORK</div>
+                    <div class="feature-desc">Dynamic economy with real-time market fluctuations</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🚀</div>
+                    <div class="feature-title">SPACE TRAVEL</div>
+                    <div class="feature-desc">Navigate dangerous corridors between hundreds of unique locations</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">⚔️</div>
+                    <div class="feature-title">PERMADEATH</div>
+                    <div class="feature-desc">Your choices matter - death is permanent</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🏭</div>
+                    <div class="feature-title">SHIP UPGRADES</div>
+                    <div class="feature-desc">Customize your vessel for any role</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📡</div>
+                    <div class="feature-title">RADIO SYSTEM</div>
+                    <div class="feature-desc">Realistic communications with signal degradation</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🌌</div>
+                    <div class="feature-title">LIVING GALAXY</div>
+                    <div class="feature-desc">Thousands of NPCs with their own schedules and histories</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="game-footer">
+            <div class="footer-content">
+                <div class="footer-text">THE QUIET END - CURRENTLY UNDER MAINTENANCE</div>
+                <div class="footer-subtext">Check back soon to join the galaxy and shape your story</div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Basic theme cycling script -->
+    <script>
+        // Simple theme cycling for maintenance page
+        const themes = ['blue', 'amber', 'green', 'red', 'purple'];
+        let currentTheme = 0;
+        
+        function setTheme(themeName) {
+            themes.forEach(theme => {
+                document.body.classList.remove(`theme-${theme}`);
+            });
+            document.body.classList.add(`theme-${themeName}`);
+        }
+        
+        // Start with amber theme (fitting for maintenance/warning)
+        setTheme('amber');
+        
+        // Cycle through themes every 30 seconds
+        setInterval(() => {
+            currentTheme = (currentTheme + 1) % themes.length;
+            setTheme(themes[currentTheme]);
+        }, 30000);
+        
+        console.log('🔧 Maintenance page active');
+    </script>
+</body>
+</html>
