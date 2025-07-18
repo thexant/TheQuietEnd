@@ -3,591 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Preparing for Second Launch - The Quiet End</title>
+    <title>The Quiet End | Maintenance Mode</title>
+    <link rel="stylesheet" href="css/style.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono:wght@400&family=Tektur:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
-        /* CSS Variables for Color Themes */
-        :root {
-            --primary-color: #00ffff;
-            --secondary-color: #00cccc;
-            --accent-color: #0088cc;
-            --warning-color: #ff8800;
-            --success-color: #00ff88;
-            --error-color: #ff3333;
-            
-            --primary-bg: #000408;
-            --secondary-bg: #0a0f1a;
-            --accent-bg: #1a2332;
-            --text-primary: #e0ffff;
-            --text-secondary: #88ccdd;
-            --text-muted: #556677;
-            --border-color: #003344;
-            --shadow-dark: rgba(0, 0, 0, 0.9);
-            
-            --glow-primary: rgba(0, 255, 255, 0.6);
-            --glow-secondary: rgba(0, 204, 204, 0.4);
-            --gradient-holo: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 204, 204, 0.2));
-            --gradient-panel: linear-gradient(145deg, rgba(10, 15, 26, 0.95), rgba(26, 35, 50, 0.95));
-        }
-
-        .theme-blue {
-            --primary-color: #00ffff;
-            --secondary-color: #00cccc;
-            --accent-color: #0088cc;
-            --glow-primary: rgba(0, 255, 255, 0.6);
-            --glow-secondary: rgba(0, 204, 204, 0.4);
-            --gradient-holo: linear-gradient(135deg, rgba(0, 255, 255, 0.1), rgba(0, 204, 204, 0.2));
-            --text-primary: #e0ffff;
-            --text-secondary: #88ccdd;
-            --border-color: #003344;
-        }
-
-        .theme-amber {
-            --primary-color: #ffaa00;
-            --secondary-color: #cc8800;
-            --accent-color: #ff6600;
-            --glow-primary: rgba(255, 170, 0, 0.6);
-            --glow-secondary: rgba(204, 136, 0, 0.4);
-            --gradient-holo: linear-gradient(135deg, rgba(255, 170, 0, 0.1), rgba(204, 136, 0, 0.2));
-            --text-primary: #fff0e0;
-            --text-secondary: #ddcc88;
-            --border-color: #443300;
-        }
-
-        .theme-green {
-            --primary-color: #00ff88;
-            --secondary-color: #00cc66;
-            --accent-color: #00aa44;
-            --glow-primary: rgba(0, 255, 136, 0.6);
-            --glow-secondary: rgba(0, 204, 102, 0.4);
-            --gradient-holo: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 204, 102, 0.2));
-            --text-primary: #e0ffe8;
-            --text-secondary: #88dd99;
-            --border-color: #003322;
-        }
-
-        .theme-red {
-            --primary-color: #ff4444;
-            --secondary-color: #cc2222;
-            --accent-color: #aa0000;
-            --glow-primary: rgba(255, 68, 68, 0.6);
-            --glow-secondary: rgba(204, 34, 34, 0.4);
-            --gradient-holo: linear-gradient(135deg, rgba(255, 68, 68, 0.1), rgba(204, 34, 34, 0.2));
-            --text-primary: #ffe0e0;
-            --text-secondary: #dd8888;
-            --border-color: #330000;
-        }
-
-        .theme-purple {
-            --primary-color: #aa44ff;
-            --secondary-color: #8822cc;
-            --accent-color: #6600aa;
-            --glow-primary: rgba(170, 68, 255, 0.6);
-            --glow-secondary: rgba(136, 34, 204, 0.4);
-            --gradient-holo: linear-gradient(135deg, rgba(170, 68, 255, 0.1), rgba(136, 34, 204, 0.2));
-            --text-primary: #f0e0ff;
-            --text-secondary: #cc88dd;
-            --border-color: #220033;
-        }
-
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Share Tech Mono', 'Courier New', monospace;
-            background: var(--primary-bg);
-            color: var(--text-primary);
-            overflow-x: hidden;
-            min-height: 100vh;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            line-height: 1.6;
-        }
-
-        /* CRT Effects */
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(ellipse 100% 100% at 50% 50%, transparent 98%, rgba(0,0,0,0.1) 100%),
-                radial-gradient(ellipse 200% 100% at 50% 0%, rgba(0, 255, 255, 0.02) 0%, transparent 50%),
-                radial-gradient(ellipse 200% 100% at 50% 100%, rgba(0, 255, 255, 0.02) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .scanlines {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: repeating-linear-gradient(
-                0deg,
-                transparent,
-                transparent 1px,
-                rgba(0, 255, 255, 0.03) 1px,
-                rgba(0, 255, 255, 0.03) 3px
-            );
-            pointer-events: none;
-            z-index: 5;
-            animation: flicker 4s infinite linear;
-        }
-
-        .static-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><defs><filter id="noise"><feTurbulence baseFrequency="0.9" numOctaves="1" stitchTiles="stitch"/></filter></defs><rect width="100%" height="100%" filter="url(%23noise)" opacity="0.02"/></svg>');
-            pointer-events: none;
-            z-index: 3;
-            animation: static-drift 12s infinite linear;
-        }
-
-        @keyframes flicker {
-            0%, 97%, 100% { opacity: 1; }
-            98% { opacity: 0.92; }
-            99% { opacity: 1; }
-            99.5% { opacity: 0.95; }
-        }
-
-        @keyframes static-drift {
-            0% { transform: translateX(0) translateY(0); }
-            25% { transform: translateX(-0.5px) translateY(0.5px); }
-            50% { transform: translateX(0.5px) translateY(-0.5px); }
-            75% { transform: translateX(-0.3px) translateY(-0.3px); }
-            100% { transform: translateX(0) translateY(0); }
-        }
-
-        .main-container {
-            position: relative;
-            z-index: 10;
-            min-height: 100vh;
-            padding: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .launch-header {
-            text-align: center;
-            margin-bottom: 3rem;
-            background: var(--gradient-panel);
-            border: 2px solid var(--primary-color);
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 
-                0 0 40px var(--glow-primary),
-                inset 0 1px 0 rgba(0, 255, 255, 0.2),
-                0 8px 32px var(--shadow-dark);
-            backdrop-filter: blur(10px);
-        }
-
-        .terminal-indicator {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-
-        .power-light {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: var(--success-color);
-            box-shadow: 0 0 15px var(--success-color);
-            animation: power-pulse 2s infinite;
-        }
-
-        @keyframes power-pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-
-        .terminal-id {
-            font-family: 'Tektur', monospace;
-            font-weight: 700;
-        }
-
-        .game-title {
-            margin: 0;
-            font-family: 'Tektur', monospace;
-            font-size: 3rem;
-            font-weight: 900;
-            color: var(--primary-color);
-            text-shadow: 
-                0 0 10px var(--glow-primary),
-                0 0 20px var(--glow-primary),
-                0 0 30px var(--glow-primary);
-            filter: drop-shadow(0 0 8px var(--glow-primary));
-            margin-bottom: 0.5rem;
-        }
-
-        .game-subtitle {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            font-weight: 400;
-            opacity: 0.9;
-            letter-spacing: 3px;
-            margin-bottom: 1rem;
-        }
-
-        .launch-status {
-            font-size: 1.2rem;
-            color: var(--primary-color);
-            text-shadow: 0 0 10px var(--glow-primary);
-            font-family: 'Tektur', monospace;
-            font-weight: 700;
-        }
-
-        .content-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .launch-panel {
-            background: var(--gradient-panel);
-            border: 2px solid var(--primary-color);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 
-                0 0 30px var(--glow-primary),
-                inset 0 1px 0 rgba(0, 255, 255, 0.2),
-                0 4px 20px var(--shadow-dark);
-            backdrop-filter: blur(5px);
-        }
-
-        .launch-panel.full-width {
-            grid-column: 1 / -1;
-        }
-
-        .panel-header {
-            background: linear-gradient(145deg, var(--primary-color), var(--secondary-color));
+        /* Additional styles for maintenance page */
+        .maintenance-banner {
+            background: linear-gradient(145deg, var(--error-color), var(--warning-color));
             color: var(--primary-bg);
-            padding: 1rem 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border-radius: 12px;
+            box-shadow: 
+                0 0 40px rgba(255, 136, 0, 0.6),
+                inset 0 1px 0 rgba(255, 170, 0, 0.4);
+            animation: maintenance-pulse 3s infinite;
         }
-
-        .status-light {
+        
+        @keyframes maintenance-pulse {
+            0%, 100% { box-shadow: 0 0 40px rgba(255, 136, 0, 0.6); }
+            50% { box-shadow: 0 0 60px rgba(255, 136, 0, 0.8); }
+        }
+        
+        .maintenance-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            filter: drop-shadow(0 0 20px rgba(255, 136, 0, 0.8));
+        }
+        
+        .maintenance-title {
+            font-family: 'Tektur', monospace;
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+        }
+        
+        .maintenance-message {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            opacity: 0.95;
+        }
+        
+        .info-section {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(var(--glow-primary), 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+        
+        .info-title {
+            font-family: 'Tektur', monospace;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-shadow: 0 0 8px var(--glow-primary);
+            margin-bottom: 1rem;
+        }
+        
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 136, 0, 0.1);
+            border: 1px solid var(--warning-color);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--warning-color);
+            margin-top: 1rem;
+        }
+        
+        .status-dot {
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background: var(--success-color);
-            box-shadow: 0 0 12px var(--success-color);
-            animation: status-pulse 1.5s infinite;
+            background: var(--warning-color);
+            animation: blink 1.5s infinite;
         }
-
-        @keyframes status-pulse {
+        
+        @keyframes blink {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        .panel-header h2 {
-            margin: 0;
-            font-family: 'Tektur', monospace;
-            font-size: 1.1rem;
-            font-weight: 700;
-            text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
-        }
-
-        .panel-content {
-            padding: 1.5rem;
-            line-height: 1.8;
-            font-size: 0.9rem;
-        }
-
-        .launch-message {
-            text-align: center;
-            font-size: 1.1rem;
-            margin-bottom: 2rem;
-            color: var(--text-primary);
-        }
-
-        .countdown-display {
-            text-align: center;
-            margin: 2rem 0;
-        }
-
-        .countdown-title {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 1rem;
-        }
-
-        .countdown-timer {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .countdown-item {
-            background: rgba(0, 255, 255, 0.1);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1rem;
-            text-align: center;
-            min-width: 80px;
-        }
-
-        .countdown-number {
-            font-family: 'Tektur', monospace;
-            font-size: 2rem;
-            font-weight: 900;
-            color: var(--primary-color);
-            text-shadow: 0 0 15px var(--glow-primary);
-            display: block;
-            line-height: 1;
-            margin-bottom: 0.5rem;
-        }
-
-        .countdown-label {
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .systems-check {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 0.5rem;
-        }
-
-        .system-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem;
-            background: rgba(0, 255, 255, 0.05);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            transition: all 0.3s ease;
-        }
-
-        .system-item:hover {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 10px var(--glow-primary);
-        }
-
-        .system-name {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-        }
-
-        .system-status {
-            font-family: 'Tektur', monospace;
-            font-weight: 700;
-            font-size: 0.8rem;
-        }
-
-        .status-ready {
-            color: var(--success-color);
-            text-shadow: 0 0 8px var(--success-color);
-        }
-
-        .status-pending {
-            color: var(--warning-color);
-            text-shadow: 0 0 8px var(--warning-color);
-        }
-
-        .status-testing {
-            color: var(--primary-color);
-            text-shadow: 0 0 8px var(--glow-primary);
-            animation: testing-pulse 2s infinite;
-        }
-
-        @keyframes testing-pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.6; }
-        }
-	.status-wanted {
-	    color: #ff3333;
-	    text-shadow: 
-	        0 0 8px #ff3333,
-	        0 0 15px #ff3333,
-	        0 0 25px #ff3333;
-	    animation: wanted-pulse 1.5s infinite;
-	    font-weight: 900;
-	}
-	
-	@keyframes wanted-pulse {
-	    0%, 100% { 
-	        opacity: 1;
-	        text-shadow: 
-	            0 0 8px #ff3333,
-	            0 0 15px #ff3333,
-	            0 0 25px #ff3333;
-	    }
-	    50% { 
-	        opacity: 0.7;
-	        text-shadow: 
-	            0 0 5px #ff3333,
-	            0 0 10px #ff3333,
-	            0 0 20px #ff3333,
-	            0 0 30px #ff3333;
-	    }
-	}
-        .discord-section {
-            text-align: center;
-            padding: 1.5rem;
-        }
-
-        .discord-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem 2rem;
-            background: var(--gradient-holo);
-            border: 2px solid #5865F2;
-            border-radius: 8px;
-            text-decoration: none;
-            color: var(--text-primary);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(3px);
-            margin-top: 1rem;
-        }
-
-        .discord-button:hover {
-            border-color: #5865F2;
-            box-shadow: 0 0 25px rgba(88, 101, 242, 0.6);
-            transform: translateY(-2px);
-        }
-
-        .discord-icon {
-            font-size: 1.5rem;
-        }
-
-        .discord-text {
-            font-family: 'Tektur', monospace;
-            font-weight: 700;
-            color: #5865F2;
-            text-shadow: 0 0 8px rgba(88, 101, 242, 0.6);
-        }
-
-        .launch-features {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            padding: 1.5rem;
-        }
-
-        .feature-preview {
-            background: rgba(0, 255, 255, 0.1);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 1rem;
-            text-align: center;
-            transition: all 0.3s ease;
-        }
-
-        .feature-preview:hover {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 15px var(--glow-primary);
-            transform: translateY(-2px);
-        }
-
-        .feature-icon {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-            display: block;
-        }
-
-        .feature-title {
-            font-family: 'Tektur', monospace;
-            font-size: 0.9rem;
-            font-weight: 700;
-            color: var(--primary-color);
-            text-shadow: 0 0 5px var(--glow-primary);
-            margin-bottom: 0.5rem;
-        }
-
-        .feature-desc {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            line-height: 1.4;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .main-container {
-                padding: 1rem;
-            }
-            
-            .content-grid {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-            
-            .game-title {
-                font-size: 2rem;
-            }
-            
-            .countdown-timer {
-                flex-wrap: wrap;
-                gap: 0.5rem;
-            }
-            
-            .countdown-item {
-                min-width: 60px;
-                padding: 0.75rem;
-            }
-            
-            .countdown-number {
-                font-size: 1.5rem;
-            }
-            
-            .launch-features {
-                grid-template-columns: 1fr;
-                padding: 1rem;
-            }
-        }
-	.discord-icon {
-	    width: 24px;
-	    height: 24px;
-	    background-image: url('https://img.icons8.com/color/512/discord-logo.png');
-	    background-size: contain;
-	    background-repeat: no-repeat;
-	    background-position: center;
-	    display: inline-block;
-	    filter: brightness(1.2);
-	    transition: filter 0.3s ease;
-	}
-	
-	.discord-button:hover .discord-icon {
-	    filter: brightness(1.4) drop-shadow(0 0 8px rgba(88, 101, 242, 0.6));
-	}
-        /* Animation for rotating elements */
-        @keyframes rotate-slow {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        .rotating-icon {
-            animation: rotate-slow 20s linear infinite;
+            50% { opacity: 0.3; }
         }
     </style>
 </head>
@@ -599,293 +99,120 @@
     <!-- Main Container -->
     <div class="main-container">
         <!-- Header Section -->
-        <header class="launch-header">
+        <header class="game-header">
             <div class="terminal-indicator">
-                <div class="power-light"></div>
-                <span class="terminal-id">TERM-LAUNCH</span>
+                <div class="power-light" style="background: var(--warning-color); box-shadow: 0 0 15px var(--warning-color);"></div>
+                <span class="terminal-id">TERM-MAINT</span>
             </div>
-            <h1 class="game-title">THE QUIET END | BETA</h1>
+            <h1 class="game-title">THE QUIET END</h1>
             <div class="game-subtitle">◦ DISCORD SPACE SANDBOX RPG ◦</div>
-            <div class="launch-status">PREPARING FOR SECOND BETA LAUNCH</div>
         </header>
 
-        <!-- Main Content -->
-        <main class="content-grid">
-            <!-- Launch Message -->
-            <section class="launch-panel full-width">
-                <div class="panel-header">
-                    <div class="status-light"></div>
-                    <h2>BETA PREPARATION</h2>
-                </div>
-                <div class="panel-content">
-                    <div class="launch-message">
-                        The galaxy awaits generation. Final systems checks are underway.<br>
-                        Soon, pilots will venture into the dying reaches of human space.<br>
-                        <strong>Join our Discord community to be notified when the beta launch begins.</strong>
-                    </div>
+        <!-- Maintenance Banner -->
+        <div class="maintenance-banner">
+            <div class="maintenance-icon">🔧</div>
+            <h2 class="maintenance-title">SYSTEM MAINTENANCE IN PROGRESS</h2>
+            <div class="maintenance-message">
+                The galaxy is currently undergoing scheduled maintenance.<br>
+                All game systems, including the Discord bot, galaxy map, and wiki are temporarily offline.<br>
+                We apologize for the inconvenience and will restore access as soon as possible.
+            </div>
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>MAINTENANCE MODE ACTIVE</span>
+            </div>
+        </div>
+
+        <!-- Game Info for New Visitors -->
+        <section class="game-info-panel">
+            <div class="panel-header">
+                <div class="status-light" style="background: var(--warning-color); box-shadow: 0 0 12px var(--warning-color);"></div>
+                <h2>ABOUT THE QUIET END</h2>
+            </div>
+            <div class="panel-content">
+                <div class="info-section">
+                    <div class="info-title">WHAT IS THE QUIET END?</div>
+                    <p><strong>The Quiet End</strong> is an immersive Discord-based space sandbox RPG set in a slowly dying galaxy where human civilization teeters on the edge of collapse.</p>
                     
-                    <div class="countdown-display">
-                        <div class="countdown-title">ESTIMATED BETA LAUNCH WINDOW</div>
-                        <div class="countdown-timer" id="countdown">
-                            <div class="countdown-item">
-                                <span class="countdown-number" id="days">--</span>
-                                <span class="countdown-label">Days</span>
-                            </div>
-                            <div class="countdown-item">
-                                <span class="countdown-number" id="hours">--</span>
-                                <span class="countdown-label">Hours</span>
-                            </div>
-                            <div class="countdown-item">
-                                <span class="countdown-number" id="minutes">--</span>
-                                <span class="countdown-label">Minutes</span>
-                            </div>
-                            <div class="countdown-item">
-                                <span class="countdown-number" id="seconds">--</span>
-                                <span class="countdown-label">Seconds</span>
-                            </div>
-                        </div>
-                        <div style="font-size: 0.8rem; color: var(--text-muted); font-style: italic;">
-                            * Countdown is approximate - actual launch time may vary depending on numerous factors
-                        </div>
-                    </div>
+                    <p>Navigate dangerous space corridors as an independent pilot in a universe where every transmission might be your last. Experience a living galaxy where your choices matter and death is permanent.</p>
+                    
+                    <p>Trade goods between colonies, take on dangerous jobs, upgrade your ship, and survive in a persistent universe populated by dynamic NPCs and fellow pilots. But beware - the galaxy itself is dying, and administrators can trigger apocalyptic events that destroy entire star systems.</p>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- Systems Check -->
-            <section class="launch-panel">
-                <div class="panel-header">
-                    <div class="status-light"></div>
-                    <h2>SYSTEMS STATUS</h2>
+        <!-- Features Grid (to show what players can expect) -->
+        <section class="features-panel">
+            <div class="panel-header">
+                <div class="status-light" style="background: var(--warning-color); box-shadow: 0 0 12px var(--warning-color);"></div>
+                <h2>GAME FEATURES</h2>
+            </div>
+            <div class="features-grid">
+                <div class="feature-item">
+                    <div class="feature-icon">💰</div>
+                    <div class="feature-title">TRADE & WORK</div>
+                    <div class="feature-desc">Dynamic economy with real-time market fluctuations</div>
                 </div>
-                <div class="panel-content">
-                    <div class="systems-check">
-                        <div class="system-item">
-                            <span class="system-name">Galaxy Generator</span>
-                            <span class="system-status status-ready">READY</span>
-                        </div>
-                        <div class="system-item">
-                            <span class="system-name">NPC Systems</span>
-                            <span class="system-status status-ready">READY</span>
-                        </div>
-                        <div class="system-item">
-                            <span class="system-name">Economy Simulation</span>
-                            <span class="system-status status-ready">READY</span>
-                        </div>
-                        <div class="system-item">
-                            <span class="system-name">Radio Networks</span>
-                            <span class="system-status status-ready">READY</span>
-                        </div>
-                        <div class="system-item">
-                            <span class="system-name">Player Database</span>
-                            <span class="system-status status-ready">READY</span>
-                        </div>
-                        <div class="system-item">
-                            <span class="system-name">Event Generator</span>
-                            <span class="system-status status-ready">READY</span>
-                        </div>
-                        <div class="system-item">
-                            <span class="system-name">Web Interface</span>
-                            <span class="system-status status-ready">READY</span>
-                        </div>
-                        <div class="system-item">
-                            <span class="system-name">Discord Bot</span>
-                            <span class="system-status status-ready">READY</span>
-                        </div>
-	                <div class="system-item">
-                            <span class="system-name">Beta Testers</span>
-                            <span class="system-status status-wanted">WANTED!</span>
-                        </div>
-                    </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🚀</div>
+                    <div class="feature-title">SPACE TRAVEL</div>
+                    <div class="feature-desc">Navigate dangerous corridors between hundreds of unique locations</div>
                 </div>
-            </section>
+                <div class="feature-item">
+                    <div class="feature-icon">⚔️</div>
+                    <div class="feature-title">PERMADEATH</div>
+                    <div class="feature-desc">Your choices matter - death is permanent</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🏭</div>
+                    <div class="feature-title">SHIP UPGRADES</div>
+                    <div class="feature-desc">Customize your vessel for any role</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">📡</div>
+                    <div class="feature-title">RADIO SYSTEM</div>
+                    <div class="feature-desc">Realistic communications with signal degradation</div>
+                </div>
+                <div class="feature-item">
+                    <div class="feature-icon">🌌</div>
+                    <div class="feature-title">LIVING GALAXY</div>
+                    <div class="feature-desc">Thousands of NPCs with their own schedules and histories</div>
+                </div>
+            </div>
+        </section>
 
-            <!-- Discord Section -->
-            <section class="launch-panel">
-                <div class="panel-header">
-                    <div class="status-light"></div>
-                    <h2>JOIN THE BETA</h2>
-                </div>
-                <div class="discord-section">
-                    <p>Connect with other pilots and get notified when the beta goes live:</p>
-                    <a href="https://discord.gg/JsJcnTKyQn" class="discord-button" target="_blank">
-                        <span class="discord-icon"></span>
-                        <span class="discord-text">JOIN DISCORD</span>
-                    </a>
-                    <p style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-secondary);">
-                        Be among the first to explore the dying galaxy.<br>
-                        Get exclusive beta access! Submit ideas and suggestions!
-                    </p>
-                </div>
-            </section>
-
-            <!-- Features Preview -->
-            <section class="launch-panel full-width">
-                <div class="panel-header">
-                    <div class="status-light"></div>
-                    <h2>WHAT AWAITS IN THE VOID</h2>
-                </div>
-                <div class="launch-features">
-                    <div class="feature-preview">
-                        <span class="feature-icon rotating-icon">🌌</span>
-                        <div class="feature-title">PROCEDURAL GALAXY</div>
-                        <div class="feature-desc">Explore a dynamically generated network of star systems, locations, NPC's and more</div>
-                    </div>
-                    <div class="feature-preview">
-                        <span class="feature-icon">💀</span>
-                        <div class="feature-title">PERMADEATH</div>
-                        <div class="feature-desc">Every decision matters in this unforgiving universe</div>
-                    </div>
-                    <div class="feature-preview">
-                        <span class="feature-icon">📡</span>
-                        <div class="feature-title">RADIO NETWORKS</div>
-                        <div class="feature-desc">Communicate across the void with realistic signal degradation</div>
-                    </div>
-                    <div class="feature-preview">
-                        <span class="feature-icon">🏭</span>
-                        <div class="feature-title">LIVING ECONOMY</div>
-                        <div class="feature-desc">Markets that respond to player actions and galactic events</div>
-                    </div>
-                    <div class="feature-preview">
-                        <div class="feature-icon">🎲</div>
-                        <div class="feature-title">DYNAMIC EVENTS</div>
-                        <div class="feature-desc">Dynamic random events will test your characters skills and breathe new life into each session</div>
-                    </div>
-		    <div class="feature-preview">
-			<div class="feature-icon">⏫</div>
-			<div class="feature-title">ADVANCE IN THE GALAXY</div>
-			<div class="feature-desc">Level up your character, buy a home, own and manage entire colonies</div>
-		    </div>			
-                </div>
-            </section>
-        </main>
+        <!-- Footer -->
+        <footer class="game-footer">
+            <div class="footer-content">
+                <div class="footer-text">THE QUIET END - CURRENTLY UNDER MAINTENANCE</div>
+                <div class="footer-subtext">Check back soon to join the galaxy and shape your story</div>
+            </div>
+        </footer>
     </div>
 
+    <!-- Basic theme cycling script -->
     <script>
-        // Launch Page Controller
-        class LaunchPageController {
-            constructor() {
-                this.themes = ['blue', 'green', 'amber', 'purple', 'red'];
-                this.currentThemeIndex = 0;
-                this.launchDate = null;
-                this.init();
-            }
-            
-            init() {
-                // Set initial theme to blue (optimistic)
-                document.body.classList.add('theme-blue');
-                
-                // Set a sample launch date (you can modify this)
-                this.setLaunchDate();
-                
-                // Start countdown
-                this.startCountdown();
-                
-                // Cycle themes every 2 minutes (less frequent)
-                setInterval(() => {
-                    this.cycleTheme();
-                }, 120000);
-                
-                // Animate systems checks
-                this.animateSystemsCheck();
-                
-                console.log('🚀 Launch page initialized');
-            }
-            
-            setLaunchDate() {
-                // ================================
-                // LAUNCH DATE CONFIGURATION
-                // ================================
-                
-                // OPTION 1: Set a specific launch date (RECOMMENDED)
-                // Format: 'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS'
-                // Examples:
-                // this.launchDate = new Date('2025-08-15');           // August 15, 2025 at midnight
-                // this.launchDate = new Date('2025-08-15 18:00:00');  // August 15, 2025 at 6 PM
-                
-                this.launchDate = new Date('2025-07-17T21:00:00.000Z');
-                
-                // OPTION 2: Set relative to current date (days from now)
-                // Uncomment the lines below and comment out the line above
-                // const now = new Date();
-                // const daysFromNow = 14; // Change this number
-                // this.launchDate = new Date(now.getTime() + (daysFromNow * 24 * 60 * 60 * 1000));
-            }
-            
-            startCountdown() {
-                this.updateCountdown();
-                
-                // Update every second
-                setInterval(() => {
-                    this.updateCountdown();
-                }, 1000);
-            }
-            
-            updateCountdown() {
-                if (!this.launchDate) return;
-                
-                const now = new Date().getTime();
-                const distance = this.launchDate.getTime() - now;
-                
-                if (distance < 0) {
-                    // Launch date has passed
-                    document.getElementById('days').textContent = '00';
-                    document.getElementById('hours').textContent = '00';
-                    document.getElementById('minutes').textContent = '00';
-                    document.getElementById('seconds').textContent = '00';
-                    return;
-                }
-                
-                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-                
-                document.getElementById('days').textContent = days.toString().padStart(2, '0');
-                document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
-                document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
-                document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
-            }
-            
-            cycleTheme() {
-                // Remove current theme
-                this.themes.forEach(theme => {
-                    document.body.classList.remove(`theme-${theme}`);
-                });
-                
-                // Move to next theme
-                this.currentThemeIndex = (this.currentThemeIndex + 1) % this.themes.length;
-                
-                // Apply new theme
-                document.body.classList.add(`theme-${this.themes[this.currentThemeIndex]}`);
-                
-                console.log(`🎨 Theme changed to: ${this.themes[this.currentThemeIndex]}`);
-            }
-            
-            animateSystemsCheck() {
-                const systems = document.querySelectorAll('.system-item');
-                let delay = 0;
-                
-                systems.forEach(system => {
-                    setTimeout(() => {
-                        system.style.transform = 'translateX(-5px)';
-                        setTimeout(() => {
-                            system.style.transform = 'translateX(0)';
-                        }, 200);
-                    }, delay);
-                    delay += 100;
-                });
-                
-                // Repeat animation every 10 seconds
-                setTimeout(() => {
-                    this.animateSystemsCheck();
-                }, 10000);
-            }
+        // Simple theme cycling for maintenance page
+        const themes = ['blue', 'amber', 'green', 'red', 'purple'];
+        let currentTheme = 0;
+        
+        function setTheme(themeName) {
+            themes.forEach(theme => {
+                document.body.classList.remove(`theme-${theme}`);
+            });
+            document.body.classList.add(`theme-${themeName}`);
         }
         
-        // Initialize when page loads
-        document.addEventListener('DOMContentLoaded', () => {
-            new LaunchPageController();
-        });
+        // Start with amber theme (fitting for maintenance/warning)
+        setTheme('amber');
+        
+        // Cycle through themes every 30 seconds
+        setInterval(() => {
+            currentTheme = (currentTheme + 1) % themes.length;
+            setTheme(themes[currentTheme]);
+        }, 30000);
+        
+        console.log('🔧 Maintenance page active');
     </script>
 </body>
 </html>
