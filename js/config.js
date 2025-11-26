@@ -12,14 +12,14 @@
 // DISCORD INVITE LINK
 // ========================================
 // Replace the URL below with your Discord server invite link
-const DISCORD_INVITE_URL = "https://discord.gg/JsJcnTKyQn";
+const DISCORD_INVITE_URL = "https://discord.gg/ra9TjJKzxn";
 
 // ========================================
 // WIKI AND MAP LINKS
 // ========================================
 // Replace these URLs with your actual wiki and map URLs
-const WIKI_URL = "https://thequietend.servegame.com/wiki";
-const MAP_URL = "https://thequietend.servegame.com/map";
+const WIKI_URL = "http://thequietend.servegame.com/wiki";
+const MAP_URL = "http://thequietend.servegame.com/map";
 
 // ========================================
 // GAME INFORMATION CONTENT
