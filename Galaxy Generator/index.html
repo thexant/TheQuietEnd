@@ -1,0 +1,1803 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Galaxy Generator | The Quiet End</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=B612+Mono:wght@400;700&family=Share+Tech+Mono&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        --ink: #9fd6b9;
+        --muted: #6f8f80;
+        --metal: #0a0d0d;
+        --deep: #040606;
+        --rust: #c59b4b;
+        --signal: #76e2b7;
+        --amber: #d2a95a;
+        --line: rgba(118, 226, 183, 0.18);
+        --grid: rgba(118, 226, 183, 0.06);
+        --glow: rgba(118, 226, 183, 0.25);
+        --danger: #d98b66;
+        --panel: rgba(5, 7, 7, 0.95);
+        --radius: 3px;
+        --font-title: "B612 Mono", "Courier New", monospace;
+        --font-body: "Share Tech Mono", "Courier New", monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: var(--font-body);
+        color: var(--ink);
+        background:
+          linear-gradient(180deg, #020303 0%, #0b0f10 52%, #040505 100%);
+        position: relative;
+        overflow-x: hidden;
+        text-shadow: 0 0 10px rgba(118, 226, 183, 0.2), 1px 0 0 rgba(118, 226, 183, 0.12);
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image:
+          linear-gradient(transparent 96%, rgba(118, 226, 183, 0.04) 100%),
+          linear-gradient(90deg, transparent 96%, rgba(118, 226, 183, 0.05) 100%);
+        background-size: 48px 48px;
+        opacity: 0.25;
+        pointer-events: none;
+      }
+
+      .scanlines {
+        position: fixed;
+        inset: 0;
+        background-image: repeating-linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.02),
+          rgba(255, 255, 255, 0.02) 1px,
+          transparent 1px,
+          transparent 3px
+        );
+        opacity: 0.15;
+        pointer-events: none;
+        mix-blend-mode: screen;
+      }
+
+      header {
+        padding: 44px 7vw 18px;
+        border-bottom: 1px solid rgba(118, 226, 183, 0.12);
+        position: relative;
+        z-index: 2;
+      }
+
+      .brand {
+        display: grid;
+        gap: 12px;
+        max-width: 760px;
+      }
+
+      .signal {
+        font-family: var(--font-body);
+        text-transform: uppercase;
+        font-size: 0.82rem;
+        letter-spacing: 0.2em;
+        color: var(--signal);
+        border: 1px solid var(--line);
+        padding: 10px 14px;
+        border-radius: var(--radius);
+        background: rgba(4, 6, 6, 0.9);
+        box-shadow: inset 0 0 12px rgba(118, 226, 183, 0.14);
+        text-shadow: 0 0 12px rgba(118, 226, 183, 0.45);
+      }
+
+      h1 {
+        margin: 0;
+        font-family: var(--font-title);
+        font-size: clamp(2rem, 3.2vw, 3.2rem);
+        font-weight: 700;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        text-shadow: 0 0 16px rgba(118, 226, 183, 0.18);
+      }
+
+      .intro {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.95rem;
+        line-height: 1.6;
+      }
+
+      main {
+        padding: 26px 7vw 70px;
+        display: grid;
+        gap: 26px;
+        position: relative;
+        z-index: 2;
+      }
+
+      .nav {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .nav button {
+        font-family: var(--font-body);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-size: 0.72rem;
+        padding: 10px 16px;
+        border-radius: var(--radius);
+        border: 1px solid var(--line);
+        background: rgba(4, 6, 6, 0.95);
+        color: var(--ink);
+        cursor: pointer;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .nav button.active {
+        border-color: rgba(118, 226, 183, 0.7);
+        box-shadow: 0 0 14px rgba(118, 226, 183, 0.18);
+      }
+
+      .panel {
+        display: none;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--panel);
+        padding: 22px;
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.45);
+      }
+
+      .panel.active {
+        display: block;
+        animation: pulseIn 0.4s ease;
+      }
+
+      .panel h2 {
+        margin: 0 0 14px;
+        font-family: var(--font-title);
+        font-size: 1.1rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--amber);
+      }
+
+      .panel p {
+        margin: 0 0 18px;
+        color: var(--muted);
+        font-size: 0.92rem;
+        line-height: 1.6;
+      }
+
+      .grid {
+        display: grid;
+        gap: 16px;
+      }
+
+      .grid.two {
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        font-size: 0.82rem;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        color: var(--signal);
+      }
+
+      input,
+      select,
+      textarea {
+        font-family: var(--font-body);
+        background: rgba(3, 5, 5, 0.9);
+        border: 1px solid rgba(118, 226, 183, 0.28);
+        border-radius: var(--radius);
+        padding: 8px 10px;
+        color: var(--ink);
+        font-size: 0.92rem;
+      }
+
+      textarea {
+        min-height: 100px;
+        resize: vertical;
+      }
+
+      .form-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .form-row button {
+        font-family: var(--font-body);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-size: 0.72rem;
+        padding: 10px 18px;
+        border-radius: var(--radius);
+        border: 1px solid rgba(118, 226, 183, 0.35);
+        background: rgba(4, 6, 6, 0.96);
+        color: var(--ink);
+        cursor: pointer;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .form-row button:hover {
+        border-color: rgba(118, 226, 183, 0.7);
+      }
+
+      .form-row button.primary {
+        border-color: rgba(118, 226, 183, 0.75);
+        color: var(--signal);
+        box-shadow: 0 0 12px rgba(118, 226, 183, 0.2);
+      }
+
+      .form-row button.warn {
+        border-color: rgba(210, 169, 90, 0.6);
+        color: var(--amber);
+      }
+
+      .summary {
+        display: grid;
+        gap: 10px;
+        border: 1px solid var(--line);
+        padding: 14px 16px;
+        border-radius: var(--radius);
+        background: rgba(4, 6, 6, 0.85);
+      }
+
+      .summary span {
+        color: var(--muted);
+      }
+
+      .summary strong {
+        color: var(--signal);
+      }
+
+      .map-shell {
+        display: grid;
+        gap: 14px;
+      }
+
+      .map-header {
+        display: grid;
+        gap: 10px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 14px 16px;
+        background: rgba(4, 6, 6, 0.9);
+      }
+
+      .map-header h3 {
+        margin: 0;
+        font-family: var(--font-title);
+        font-size: 0.95rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--amber);
+      }
+
+      .map-header p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+
+      .map-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .map-toolbar label {
+        font-size: 0.7rem;
+        letter-spacing: 0.16em;
+      }
+
+      .map-toolbar button {
+        font-family: var(--font-body);
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+        font-size: 0.68rem;
+        padding: 8px 12px;
+        border-radius: var(--radius);
+        border: 1px solid rgba(118, 226, 183, 0.35);
+        background: rgba(4, 6, 6, 0.96);
+        color: var(--ink);
+        cursor: pointer;
+      }
+
+      .map-toolbar button.primary {
+        border-color: rgba(118, 226, 183, 0.75);
+        color: var(--signal);
+      }
+
+      .map-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--muted);
+      }
+
+      .map-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--muted);
+      }
+
+      .legend-swatch {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        border: 1px solid rgba(118, 226, 183, 0.4);
+        background: var(--signal);
+      }
+
+      .legend-line {
+        width: 24px;
+        height: 2px;
+        border-radius: 999px;
+        background: rgba(118, 226, 183, 0.4);
+      }
+
+      .map-wrap {
+        position: relative;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        overflow: hidden;
+        background: rgba(2, 4, 4, 0.9);
+        min-height: 420px;
+      }
+
+      canvas {
+        display: block;
+        width: 100%;
+        height: 60vh;
+        min-height: 420px;
+      }
+
+      .info-panel {
+        position: absolute;
+        right: 16px;
+        top: 16px;
+        width: min(320px, 92%);
+        background: rgba(4, 6, 6, 0.95);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 14px 16px;
+        display: none;
+        z-index: 2;
+      }
+
+      .info-panel.visible {
+        display: block;
+      }
+
+      .info-panel h3 {
+        margin: 0 0 10px;
+        font-family: var(--font-title);
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+      }
+
+      .info-panel p {
+        margin: 0 0 8px;
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+
+      .info-panel .close {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        border: 1px solid rgba(118, 226, 183, 0.4);
+        background: transparent;
+        color: var(--signal);
+        font-size: 0.7rem;
+        padding: 4px 6px;
+        cursor: pointer;
+      }
+
+      .map-tooltip {
+        position: fixed;
+        transform: translate(12px, 12px);
+        background: rgba(4, 6, 6, 0.92);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 8px 10px;
+        font-size: 0.75rem;
+        color: var(--ink);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.15s ease;
+        z-index: 5;
+      }
+
+      .map-tooltip.visible {
+        opacity: 1;
+      }
+      .wiki-grid {
+        display: grid;
+        gap: 16px;
+      }
+
+      .wiki-card {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        padding: 14px 16px;
+        background: rgba(4, 6, 6, 0.9);
+      }
+
+      .wiki-card h3 {
+        margin: 0 0 8px;
+        font-family: var(--font-title);
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+      }
+
+      .wiki-card p,
+      .wiki-card li {
+        margin: 0 0 6px;
+        color: var(--muted);
+        font-size: 0.88rem;
+        line-height: 1.5;
+      }
+
+      .wiki-card ul {
+        margin: 0;
+        padding-left: 18px;
+      }
+
+      .pill {
+        display: inline-block;
+        border: 1px solid rgba(118, 226, 183, 0.4);
+        color: var(--signal);
+        text-transform: uppercase;
+        letter-spacing: 0.18em;
+        font-size: 0.65rem;
+        padding: 4px 8px;
+        border-radius: 999px;
+        margin-right: 6px;
+      }
+
+      .muted {
+        color: var(--muted);
+      }
+
+      .danger {
+        color: var(--danger);
+      }
+
+      .list {
+        max-height: 260px;
+        overflow-y: auto;
+        border-top: 1px solid rgba(118, 226, 183, 0.12);
+        margin-top: 10px;
+        padding-top: 10px;
+      }
+
+      .list button {
+        display: block;
+        width: 100%;
+        text-align: left;
+        border: 1px solid rgba(118, 226, 183, 0.18);
+        border-radius: var(--radius);
+        background: rgba(2, 4, 4, 0.85);
+        color: var(--ink);
+        padding: 8px 10px;
+        margin-bottom: 8px;
+        cursor: pointer;
+        font-family: var(--font-body);
+        font-size: 0.85rem;
+        letter-spacing: 0.08em;
+      }
+
+      footer {
+        padding: 0 7vw 32px;
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+
+      @keyframes pulseIn {
+        from {
+          opacity: 0.4;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (max-width: 900px) {
+        header {
+          padding: 32px 6vw 16px;
+        }
+
+        main {
+          padding: 22px 6vw 60px;
+        }
+
+        canvas {
+          height: 52vh;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="scanlines" aria-hidden="true"></div>
+    <header>
+      <div class="brand">
+        <div class="signal">Galaxy Generator Console</div>
+        <h1>Galaxy Generator</h1>
+        <p class="intro">
+          Generate a Quiet End galaxy with locations, routes, NPCs, logs, and history.
+          Review the map and wiki to explore the generated data.
+        </p>
+      </div>
+    </header>
+
+    <main>
+      <div class="nav" role="tablist">
+        <button class="active" data-panel="generator" role="tab">Generator</button>
+        <button data-panel="map" role="tab">Map</button>
+        <button data-panel="wiki" role="tab">Wiki</button>
+      </div>
+
+      <section class="panel active" id="panel-generator" role="tabpanel">
+        <h2>Galaxy Inputs</h2>
+        <p>
+          Fill in the parameters below or leave them blank for randomized values.
+          Generated data is stored locally in your browser.
+        </p>
+        <div class="grid two">
+          <label>
+            Galaxy Name
+            <input type="text" id="galaxy-name" placeholder="Random if blank" />
+          </label>
+          <label>
+            Start Date (DD-MM-YYYY)
+            <input type="text" id="start-date" placeholder="Random 2700-2799" />
+          </label>
+          <label>
+            Number of Major Locations (10-500)
+            <input type="number" id="num-locations" min="10" max="500" placeholder="Random if blank" />
+          </label>
+        </div>
+        <div class="form-row" style="margin-top: 16px;">
+          <button class="primary" id="generate-btn">Generate Galaxy</button>
+          <button class="warn" id="reset-btn">Reset Local Data</button>
+          <button id="export-btn">Export JSON</button>
+          <label style="gap: 4px; font-size: 0.7rem;">
+            Import JSON
+            <input type="file" id="import-file" accept="application/json" />
+          </label>
+        </div>
+        <div class="summary" id="summary-block" style="margin-top: 18px;">
+          <div><span>Status:</span> <strong id="summary-status">Idle</strong></div>
+          <div><span>Galaxy:</span> <strong id="summary-name">None loaded</strong></div>
+          <div><span>Locations:</span> <strong id="summary-locations">0</strong></div>
+          <div><span>Corridors:</span> <strong id="summary-corridors">0</strong></div>
+          <div><span>NPCs:</span> <strong id="summary-npcs">0</strong></div>
+          <div><span>Logs:</span> <strong id="summary-logs">0</strong></div>
+          <div><span>History Events:</span> <strong id="summary-history">0</strong></div>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-map" role="tabpanel">
+        <h2>Galaxy Map</h2>
+        <p>
+          Click a node to view details. Toggle routes and labels as needed.
+          This map is rendered locally in the browser.
+        </p>
+        <div class="map-shell">
+          <div class="map-header">
+            <h3>Navigation Console</h3>
+            <p>Drag to pan, scroll to zoom, and click nodes or corridors for readouts.</p>
+            <div class="map-toolbar">
+              <label>
+                Show Routes
+                <select id="toggle-routes">
+                  <option value="true">True</option>
+                  <option value="false">False</option>
+                </select>
+              </label>
+              <label>
+                Show Labels
+                <select id="toggle-labels">
+                  <option value="false">False</option>
+                  <option value="true">True</option>
+                </select>
+              </label>
+              <label>
+                Show Dormant Routes
+                <select id="toggle-dormant">
+                  <option value="false">False</option>
+                  <option value="true">True</option>
+                </select>
+              </label>
+              <label>
+                Focus
+                <select id="focus-type">
+                  <option value="all">All</option>
+                  <option value="colony">Colonies</option>
+                  <option value="space_station">Stations</option>
+                  <option value="outpost">Outposts</option>
+                  <option value="gate">Gates</option>
+                </select>
+              </label>
+              <label>
+                Find Location
+                <input type="text" id="map-search" placeholder="Name or system" />
+              </label>
+              <button id="map-locate" class="primary">Locate</button>
+              <button id="map-fit">Fit</button>
+              <button id="map-reset">Reset</button>
+              <div class="map-meta">
+                <span id="map-zoom">Zoom 100%</span>
+              </div>
+            </div>
+            <div class="map-legend">
+              <span class="legend-swatch"><span class="legend-dot"></span> Colonies</span>
+              <span class="legend-swatch"><span class="legend-dot" style="background:#76e2b7;"></span> Stations</span>
+              <span class="legend-swatch"><span class="legend-dot" style="background:#6f8f80;"></span> Outposts</span>
+              <span class="legend-swatch"><span class="legend-dot" style="background:#d2a95a;"></span> Gates</span>
+              <span class="legend-swatch"><span class="legend-line"></span> Local / Gated</span>
+              <span class="legend-swatch"><span class="legend-line" style="background:rgba(210,169,90,0.4);"></span> Ungated</span>
+            </div>
+          </div>
+          <div class="map-wrap">
+            <canvas id="map-canvas"></canvas>
+            <div class="info-panel" id="map-info">
+              <button class="close" id="map-info-close">X</button>
+              <div id="map-info-body"></div>
+            </div>
+          </div>
+          <div class="map-tooltip" id="map-tooltip"></div>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-wiki" role="tabpanel">
+        <h2>Galaxy Wiki</h2>
+        <p>
+          Browse the generated data. Use the quick filters to jump to
+          locations, corridors, NPCs, and recent logs.
+        </p>
+        <div class="grid two">
+          <label>
+            Search Locations
+            <input type="text" id="search-locations" placeholder="Filter by name or system" />
+          </label>
+          <label>
+            Search Corridors
+            <input type="text" id="search-corridors" placeholder="Filter by route name" />
+          </label>
+        </div>
+        <div class="wiki-grid" style="margin-top: 18px;">
+          <div class="wiki-card" id="wiki-galaxy"></div>
+          <div class="wiki-card" id="wiki-locations"></div>
+          <div class="wiki-card" id="wiki-corridors"></div>
+          <div class="wiki-card" id="wiki-npcs"></div>
+          <div class="wiki-card" id="wiki-logs"></div>
+          <div class="wiki-card" id="wiki-history"></div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Galaxy Generator is an offline tool. Export your galaxy data for backup
+      or import to resume work later.
+    </footer>
+
+    <script>
+      const storageKey = "tqe.galaxy.generator";
+      const panels = document.querySelectorAll(".panel");
+      const navButtons = document.querySelectorAll(".nav button");
+
+      const state = {
+        galaxy: null,
+        locations: [],
+        corridors: [],
+        npcs: [],
+        logs: [],
+        history: []
+      };
+
+      const nameData = {
+        galaxyPrefixes: ["Quiet", "Rust", "Silent", "Distant", "Hollow", "Ash", "Iron", "Drift", "Cold", "Fringe"],
+        galaxyNouns: ["Lattice", "Reach", "Network", "Span", "Veil", "Archive", "Rift", "Wake", "Circuit", "Front"],
+        locationPrefixes: [
+          "Acheron", "Anchor", "Arc", "Atlas", "Bastion", "Citadel", "Cobalt", "Crimson", "Delta", "Echo",
+          "Erebus", "Faint", "Forge", "Gate", "Garrison", "Haven", "Helix", "Iron", "Kepler", "Lumen",
+          "Meridian", "Nexus", "Nova", "Obsidian", "Omega", "Pillar", "Relay", "Sable", "Titan", "Vesper"
+        ],
+        locationNames: [
+          "Station", "Outpost", "Colony", "Harbor", "Array", "Bastion", "Hold", "Spire", "Shelter", "Depot",
+          "Crown", "Reach", "Field", "Hollow", "Vale", "Line", "Crossing", "Bridge", "Lift", "Anchor"
+        ],
+        systems: [
+          "Aster", "Cenotaph", "Delphini", "Elysium", "Erebus", "Helios", "Kepler", "Vesper", "Atlas", "Rigil",
+          "Nyx", "Orion", "Solace", "Tartarus", "Vega", "Vanguard", "Rhea", "Hades", "Cygni", "Perseus"
+        ],
+        corridorNames: [
+          "Conduit", "Corridor", "Spur", "Thread", "Passage", "Route", "Channel", "Span", "Weave", "Trace"
+        ],
+        gateNames: [
+          "Anchor Frame", "Transit Ring", "Gate Hub", "Transfer Node", "Alignment Frame", "Routing Point",
+          "Link Point", "Interface", "Threshold", "Nexus Arch"
+        ],
+        npcFirst: [
+          "Ada", "Bran", "Cato", "Dara", "Eli", "Faye", "Galen", "Hale", "Isen", "Juno", "Kira", "Lio",
+          "Mara", "Nash", "Orla", "Pax", "Quin", "Rhea", "Sato", "Tess"
+        ],
+        npcLast: [
+          "Arlen", "Beck", "Croft", "Dane", "Estes", "Fenn", "Graves", "Holt", "Ives", "Jett", "Kane", "Lock",
+          "Marek", "Noll", "Orin", "Pike", "Quell", "Rowe", "Sloan", "Vale"
+        ],
+        factions: [
+          "Independent", "Union", "Consortium", "Frontier League", "Spine Authority", "Drift Syndicate"
+        ],
+        logMessages: {
+          colony: [
+            "Agricultural output exceeded projections.",
+            "Residential districts expanded to meet new arrivals.",
+            "Terraforming bays holding steady with minor variance.",
+            "Supply stockpiles stable after convoy arrival."
+          ],
+          space_station: [
+            "Docking bay rotation upgraded without incident.",
+            "Comms array restored after minor outage.",
+            "Refinery throughput up for the quarter.",
+            "Security patrols reported no boarders."
+          ],
+          outpost: [
+            "Long range scan flagged a weak corridor pulse.",
+            "Generator fuel reserves at 62 percent.",
+            "Perimeter sensors recalibrated.",
+            "Supply cache sealed for next cycle."
+          ],
+          gate: [
+            "Corridor stability within acceptable drift.",
+            "Transit queue cleared ahead of schedule.",
+            "Alignment rig replaced after wear warning.",
+            "Traffic control routines updated."
+          ],
+          generic: [
+            "All systems nominal. No incidents logged.",
+            "Routine maintenance completed successfully.",
+            "Quiet shift. Good time for paperwork.",
+            "Sensor sweep confirmed clear lanes."
+          ]
+        },
+        historyEvents: [
+          "First corridor surge logged across the inner span.",
+          "Supply convoy rerouted through the outer drift.",
+          "Gate network stabilized after a week of turbulence.",
+          "Archive crew recovered lost flight logs from the fringe.",
+          "A dormant relay relit in the deep lanes.",
+          "Corridor traffic treaty signed between station blocs.",
+          "A migration wave reached the outer colonies.",
+          "Survey drones charted a new passage through the veil."
+        ]
+      };
+
+      const mapCanvas = document.getElementById("map-canvas");
+      const mapCtx = mapCanvas.getContext("2d");
+      const mapInfo = document.getElementById("map-info");
+      const mapInfoBody = document.getElementById("map-info-body");
+      const mapTooltip = document.getElementById("map-tooltip");
+      const mapZoomLabel = document.getElementById("map-zoom");
+      const mapWrap = document.querySelector(".map-wrap");
+
+      const mapState = {
+        scale: 0.85,
+        minScale: 0.25,
+        maxScale: 4,
+        offsetX: 0,
+        offsetY: 0,
+        isDragging: false,
+        dragStart: { x: 0, y: 0 },
+        pixelRatio: window.devicePixelRatio || 1,
+        width: 0,
+        height: 0
+      };
+
+      const summaryStatus = document.getElementById("summary-status");
+      const summaryName = document.getElementById("summary-name");
+      const summaryLocations = document.getElementById("summary-locations");
+      const summaryCorridors = document.getElementById("summary-corridors");
+      const summaryNpcs = document.getElementById("summary-npcs");
+      const summaryLogs = document.getElementById("summary-logs");
+      const summaryHistory = document.getElementById("summary-history");
+      function switchPanel(name) {
+        panels.forEach((panel) => {
+          panel.classList.toggle("active", panel.id === `panel-${name}`);
+        });
+        navButtons.forEach((btn) => {
+          btn.classList.toggle("active", btn.dataset.panel === name);
+        });
+        if (name === "map") {
+          setTimeout(setupCanvas, 60);
+        }
+      }
+
+      navButtons.forEach((btn) => {
+        btn.addEventListener("click", () => switchPanel(btn.dataset.panel));
+      });
+
+      function hashString(input) {
+        let hash = 2166136261;
+        for (let i = 0; i < input.length; i += 1) {
+          hash ^= input.charCodeAt(i);
+          hash = Math.imul(hash, 16777619);
+        }
+        return hash >>> 0;
+      }
+
+      function createRng(seedText) {
+        let seed = hashString(seedText || "quiet-end");
+        return function rng() {
+          seed ^= seed << 13;
+          seed ^= seed >>> 17;
+          seed ^= seed << 5;
+          return ((seed >>> 0) % 100000) / 100000;
+        };
+      }
+
+      function pick(rng, list) {
+        return list[Math.floor(rng() * list.length)];
+      }
+
+      function pad2(value) {
+        return value.toString().padStart(2, "0");
+      }
+
+      function randomDate(rng) {
+        const year = Math.floor(2700 + rng() * 100);
+        const month = Math.floor(1 + rng() * 12);
+        const day = Math.floor(1 + rng() * 28);
+        return `${pad2(day)}-${pad2(month)}-${year}`;
+      }
+
+      function randomGalaxyName(rng) {
+        return `${pick(rng, nameData.galaxyPrefixes)} ${pick(rng, nameData.galaxyNouns)} ${Math.floor(10 + rng() * 90)}`;
+      }
+
+      function randomLocationName(rng, type) {
+        const prefix = pick(rng, nameData.locationPrefixes);
+        let suffix = pick(rng, nameData.locationNames);
+        if (type === "gate") {
+          suffix = pick(rng, nameData.gateNames);
+        }
+        return `${prefix} ${suffix}`;
+      }
+
+      function randomNpcName(rng) {
+        return `${pick(rng, nameData.npcFirst)} ${pick(rng, nameData.npcLast)}`;
+      }
+
+      function buildGalaxy(options) {
+        const baseSeed = `${options.galaxyName}-${options.startDate}-${options.numLocations}`;
+        const rng = createRng(baseSeed);
+        const numLocations = options.numLocations;
+        const galaxyName = options.galaxyName || randomGalaxyName(rng);
+        const startDate = options.startDate || randomDate(rng);
+
+        const locations = [];
+        const corridors = [];
+        const npcs = [];
+        const logs = [];
+        const history = [];
+
+        const majorCount = Math.max(3, numLocations);
+        const gateCount = Math.max(4, Math.round(majorCount / 8));
+
+        function generateLocation(type) {
+          const system = pick(rng, nameData.systems);
+          const wealth = Math.max(1, Math.round(rng() * 10));
+          const populationBase = type === "colony" ? 120000 : type === "space_station" ? 30000 : type === "outpost" ? 5000 : 2000;
+          const population = Math.round(populationBase * (0.5 + rng()));
+          return {
+            id: locations.length + 1,
+            name: randomLocationName(rng, type),
+            type,
+            system,
+            x: Math.round(rng() * 1000),
+            y: Math.round(rng() * 1000),
+            wealth,
+            population,
+            faction: pick(rng, nameData.factions),
+            description: `${type.replace("_", " ")} holding in the ${system} system.`,
+            services: {
+              fuel: rng() > 0.3,
+              repairs: rng() > 0.4,
+              medical: rng() > 0.5,
+              trade: rng() > 0.4
+            }
+          };
+        }
+
+        for (let i = 0; i < majorCount; i += 1) {
+          const roll = rng();
+          let type = "colony";
+          if (roll > 0.55 && roll <= 0.8) {
+            type = "space_station";
+          } else if (roll > 0.8) {
+            type = "outpost";
+          }
+          locations.push(generateLocation(type));
+        }
+
+        for (let i = 0; i < gateCount; i += 1) {
+          const gate = generateLocation("gate");
+          gate.gate_status = rng() > 0.8 ? "moving" : rng() > 0.9 ? "unused" : "active";
+          gate.population = 0;
+          gate.services = { fuel: true, repairs: true, medical: true, trade: true };
+          locations.push(gate);
+        }
+
+        const gates = locations.filter((loc) => loc.type === "gate");
+        const majors = locations.filter((loc) => loc.type !== "gate");
+
+        function distance(a, b) {
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        let corridorId = 1;
+
+        majors.forEach((loc) => {
+          let nearest = gates[0];
+          let nearestDistance = Infinity;
+          gates.forEach((gate) => {
+            const dist = distance(loc, gate);
+            if (dist < nearestDistance) {
+              nearestDistance = dist;
+              nearest = gate;
+            }
+          });
+          corridors.push({
+            id: corridorId += 1,
+            origin: loc.id,
+            destination: nearest.id,
+            origin_name: loc.name,
+            destination_name: nearest.name,
+            name: `${pick(rng, nameData.corridorNames)} Local Space`,
+            travel_time: Math.round(180 + rng() * 420),
+            danger_level: Math.max(1, Math.round(rng() * 5)),
+            corridor_type: "local_space",
+            is_active: rng() > 0.05
+          });
+        });
+
+        gates.forEach((gate) => {
+          const connectionCount = 2 + Math.floor(rng() * 3);
+          for (let i = 0; i < connectionCount; i += 1) {
+            const other = pick(rng, gates);
+            if (other.id === gate.id) {
+              continue;
+            }
+            corridors.push({
+              id: corridorId += 1,
+              origin: gate.id,
+              destination: other.id,
+              origin_name: gate.name,
+              destination_name: other.name,
+              name: `${pick(rng, nameData.corridorNames)} ${gate.system} - ${other.system}`,
+              travel_time: Math.round(600 + rng() * 1800),
+              danger_level: Math.max(1, Math.round(rng() * 8)),
+              corridor_type: "gated",
+              is_active: rng() > 0.15
+            });
+          }
+        });
+
+        majors.forEach((loc) => {
+          if (rng() > 0.35) {
+            return;
+          }
+          const other = pick(rng, majors);
+          if (other.id === loc.id) {
+            return;
+          }
+          corridors.push({
+            id: corridorId += 1,
+            origin: loc.id,
+            destination: other.id,
+            origin_name: loc.name,
+            destination_name: other.name,
+            name: `${pick(rng, nameData.corridorNames)} Ungated`,
+            travel_time: Math.round(720 + rng() * 2100),
+            danger_level: Math.max(2, Math.round(2 + rng() * 8)),
+            corridor_type: "ungated",
+            is_active: rng() > 0.2
+          });
+        });
+
+        const npcCount = Math.max(4, Math.round(locations.length / 3));
+        for (let i = 0; i < npcCount; i += 1) {
+          const baseLocation = pick(rng, majors);
+          const callsign = `${String.fromCharCode(65 + Math.floor(rng() * 26))}${String.fromCharCode(65 + Math.floor(rng() * 26))}-${Math.floor(10 + rng() * 90)}`;
+          const alignmentRoll = rng();
+          let alignment = "neutral";
+          if (alignmentRoll > 0.75) alignment = "hostile";
+          if (alignmentRoll < 0.3) alignment = "loyal";
+          npcs.push({
+            id: i + 1,
+            name: randomNpcName(rng),
+            callsign,
+            alignment,
+            location: baseLocation.id,
+            location_name: baseLocation.name,
+            credits: Math.round(500 + rng() * 12000)
+          });
+        }
+
+        locations.forEach((loc) => {
+          if (rng() > 0.25) {
+            return;
+          }
+          const entries = 2 + Math.floor(rng() * 3);
+          for (let i = 0; i < entries; i += 1) {
+            const author = randomNpcName(rng);
+            const messagePool = nameData.logMessages[loc.type] || nameData.logMessages.generic;
+            logs.push({
+              location_id: loc.id,
+              location_name: loc.name,
+              author,
+              message: pick(rng, messagePool),
+              timestamp: startDate
+            });
+          }
+        });
+
+        const historyCount = 6 + Math.floor(rng() * 6);
+        for (let i = 0; i < historyCount; i += 1) {
+          history.push({
+            date: randomDate(rng),
+            event: pick(rng, nameData.historyEvents)
+          });
+        }
+
+        return {
+          galaxy: {
+            name: galaxyName,
+            start_date: startDate,
+            time_scale: 4.0,
+            summary: `${galaxyName} seeded on ${startDate}.`
+          },
+          locations,
+          corridors,
+          npcs,
+          logs,
+          history
+        };
+      }
+
+      function applyGalaxyData(data) {
+        state.galaxy = data.galaxy;
+        state.locations = data.locations || [];
+        state.corridors = data.corridors || [];
+        state.npcs = data.npcs || [];
+        state.logs = data.logs || [];
+        state.history = data.history || [];
+        persistState();
+        renderAll();
+      }
+
+      function persistState() {
+        const payload = JSON.stringify(state);
+        localStorage.setItem(storageKey, payload);
+      }
+
+      function loadState() {
+        const raw = localStorage.getItem(storageKey);
+        if (!raw) {
+          return;
+        }
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.galaxy) {
+            state.galaxy = parsed.galaxy;
+            state.locations = parsed.locations || [];
+            state.corridors = parsed.corridors || [];
+            state.npcs = parsed.npcs || [];
+            state.logs = parsed.logs || [];
+            state.history = parsed.history || [];
+          }
+        } catch (err) {
+          console.warn("Failed to load stored galaxy data", err);
+        }
+      }
+
+      function clearState() {
+        localStorage.removeItem(storageKey);
+        state.galaxy = null;
+        state.locations = [];
+        state.corridors = [];
+        state.npcs = [];
+        state.logs = [];
+        state.history = [];
+        renderAll();
+      }
+
+      function renderSummary() {
+        summaryStatus.textContent = state.galaxy ? "Loaded" : "Idle";
+        summaryName.textContent = state.galaxy ? state.galaxy.name : "None loaded";
+        summaryLocations.textContent = state.locations.length;
+        summaryCorridors.textContent = state.corridors.length;
+        summaryNpcs.textContent = state.npcs.length;
+        summaryLogs.textContent = state.logs.length;
+        summaryHistory.textContent = state.history.length;
+      }
+      function renderWiki() {
+        const galaxyCard = document.getElementById("wiki-galaxy");
+        const locationsCard = document.getElementById("wiki-locations");
+        const corridorsCard = document.getElementById("wiki-corridors");
+        const npcsCard = document.getElementById("wiki-npcs");
+        const logsCard = document.getElementById("wiki-logs");
+        const historyCard = document.getElementById("wiki-history");
+
+        if (!state.galaxy) {
+          galaxyCard.innerHTML = "<h3>Galaxy</h3><p>No galaxy loaded.</p>";
+          locationsCard.innerHTML = "<h3>Locations</h3><p>No data.</p>";
+          corridorsCard.innerHTML = "<h3>Corridors</h3><p>No data.</p>";
+          npcsCard.innerHTML = "<h3>NPCs</h3><p>No data.</p>";
+          logsCard.innerHTML = "<h3>Logs</h3><p>No data.</p>";
+          historyCard.innerHTML = "<h3>History</h3><p>No data.</p>";
+          return;
+        }
+
+        galaxyCard.innerHTML = `
+          <h3>Galaxy Overview</h3>
+          <p><span class="pill">${state.galaxy.name}</span></p>
+          <p>Start Date: <strong>${state.galaxy.start_date}</strong></p>
+          <p>Time Scale: <strong>${state.galaxy.time_scale}x</strong></p>
+          <p class="muted">${state.galaxy.summary}</p>
+        `;
+
+        const searchLocations = document.getElementById("search-locations").value.toLowerCase();
+        const filteredLocations = state.locations.filter((loc) => {
+          return loc.name.toLowerCase().includes(searchLocations) || loc.system.toLowerCase().includes(searchLocations);
+        });
+
+        locationsCard.innerHTML = `
+          <h3>Locations</h3>
+          <p class="muted">${filteredLocations.length} visible of ${state.locations.length}</p>
+          <div class="list">
+            ${filteredLocations.map((loc) => {
+              return `
+                <button data-location="${loc.id}">
+                  ${loc.name} - ${loc.type.replace("_", " ")} - ${loc.system}
+                </button>
+              `;
+            }).join("")}
+          </div>
+        `;
+
+        const searchCorridors = document.getElementById("search-corridors").value.toLowerCase();
+        const filteredCorridors = state.corridors.filter((route) => {
+          return (route.name || "").toLowerCase().includes(searchCorridors);
+        });
+
+        corridorsCard.innerHTML = `
+          <h3>Corridors</h3>
+          <p class="muted">${filteredCorridors.length} visible of ${state.corridors.length}</p>
+          <div class="list">
+            ${filteredCorridors.map((route) => {
+              return `
+                <button data-route="${route.id}">
+                  ${route.name} - ${route.origin_name} to ${route.destination_name}
+                </button>
+              `;
+            }).join("")}
+          </div>
+        `;
+
+        npcsCard.innerHTML = `
+          <h3>NPC Roster</h3>
+          <ul>
+            ${state.npcs.slice(0, 12).map((npc) => {
+              return `<li>${npc.name} (${npc.callsign}) - ${npc.location_name}</li>`;
+            }).join("")}
+          </ul>
+          <p class="muted">${state.npcs.length} active NPCs.</p>
+        `;
+
+        logsCard.innerHTML = `
+          <h3>Recent Logs</h3>
+          ${state.logs.slice(0, 8).map((log) => {
+            return `<p><strong>${log.location_name}</strong>: ${log.message} - ${log.author}</p>`;
+          }).join("")}
+          <p class="muted">${state.logs.length} total log entries.</p>
+        `;
+
+        historyCard.innerHTML = `
+          <h3>History</h3>
+          ${state.history.map((event) => {
+            return `<p><strong>${event.date}</strong> - ${event.event}</p>`;
+          }).join("")}
+        `;
+
+        locationsCard.querySelectorAll("button[data-location]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const locId = Number(btn.dataset.location);
+            showLocationInfo(locId);
+            switchPanel("map");
+          });
+        });
+
+        corridorsCard.querySelectorAll("button[data-route]").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const routeId = Number(btn.dataset.route);
+            showRouteInfo(routeId);
+            switchPanel("map");
+          });
+        });
+      }
+
+      function renderAll() {
+        renderSummary();
+        renderMap();
+        renderWiki();
+      }
+
+      function getMapSettings() {
+        return {
+          showRoutes: document.getElementById("toggle-routes").value === "true",
+          showLabels: document.getElementById("toggle-labels").value === "true",
+          showDormant: document.getElementById("toggle-dormant").value === "true",
+          focusType: document.getElementById("focus-type").value
+        };
+      }
+
+      function setupCanvas() {
+        if (!mapWrap) {
+          return;
+        }
+        const rect = mapWrap.getBoundingClientRect();
+        mapState.pixelRatio = window.devicePixelRatio || 1;
+        mapState.width = rect.width;
+        mapState.height = rect.height;
+        mapCanvas.width = rect.width * mapState.pixelRatio;
+        mapCanvas.height = rect.height * mapState.pixelRatio;
+        mapCanvas.style.width = `${rect.width}px`;
+        mapCanvas.style.height = `${rect.height}px`;
+        mapCanvas.style.cursor = "grab";
+        renderMap();
+      }
+
+      function updateZoomDisplay() {
+        const zoomPercent = Math.round(mapState.scale * 100);
+        mapZoomLabel.textContent = `Zoom ${zoomPercent}%`;
+      }
+
+      function clampScale(value) {
+        return Math.max(mapState.minScale, Math.min(mapState.maxScale, value));
+      }
+
+      function worldToScreen(point) {
+        return {
+          x: point.x * mapState.scale + mapState.offsetX + mapState.width / 2,
+          y: point.y * mapState.scale + mapState.offsetY + mapState.height / 2
+        };
+      }
+
+      function screenToWorld(point) {
+        return {
+          x: (point.x - mapState.width / 2 - mapState.offsetX) / mapState.scale,
+          y: (point.y - mapState.height / 2 - mapState.offsetY) / mapState.scale
+        };
+      }
+
+      function renderGrid() {
+        const gridSize = 100 * mapState.scale;
+        const startX = (mapState.offsetX % gridSize) - gridSize + mapState.width / 2;
+        const startY = (mapState.offsetY % gridSize) - gridSize + mapState.height / 2;
+
+        mapCtx.strokeStyle = "rgba(118, 226, 183, 0.08)";
+        for (let x = startX; x <= mapState.width + gridSize; x += gridSize) {
+          mapCtx.beginPath();
+          mapCtx.moveTo(x, 0);
+          mapCtx.lineTo(x, mapState.height);
+          mapCtx.stroke();
+        }
+        for (let y = startY; y <= mapState.height + gridSize; y += gridSize) {
+          mapCtx.beginPath();
+          mapCtx.moveTo(0, y);
+          mapCtx.lineTo(mapState.width, y);
+          mapCtx.stroke();
+        }
+      }
+
+      function renderMap() {
+        if (!mapState.width || !mapState.height) {
+          return;
+        }
+        mapCtx.setTransform(mapState.pixelRatio, 0, 0, mapState.pixelRatio, 0, 0);
+        mapCtx.clearRect(0, 0, mapState.width, mapState.height);
+
+        mapCtx.fillStyle = "#000408";
+        mapCtx.fillRect(0, 0, mapState.width, mapState.height);
+
+        renderGrid();
+
+        if (!state.galaxy) {
+          mapCtx.fillStyle = "rgba(118, 226, 183, 0.4)";
+          mapCtx.font = "14px Share Tech Mono";
+          mapCtx.fillText("No galaxy loaded.", 30, 40);
+          return;
+        }
+
+        const settings = getMapSettings();
+        const filteredLocations = state.locations.filter((loc) => settings.focusType === "all" || loc.type === settings.focusType);
+
+        if (settings.showRoutes) {
+          state.corridors.forEach((route) => {
+            if (!settings.showDormant && !route.is_active) {
+              return;
+            }
+            const origin = state.locations.find((loc) => loc.id === route.origin);
+            const dest = state.locations.find((loc) => loc.id === route.destination);
+            if (!origin || !dest) {
+              return;
+            }
+            if (settings.focusType !== "all" && origin.type !== settings.focusType && dest.type !== settings.focusType) {
+              return;
+            }
+            let color = "rgba(118, 226, 183, 0.2)";
+            if (route.corridor_type === "ungated") {
+              color = "rgba(210, 169, 90, 0.25)";
+            }
+            if (route.corridor_type === "local_space") {
+              color = "rgba(118, 226, 183, 0.35)";
+            }
+            if (!route.is_active) {
+              color = "rgba(111, 143, 128, 0.18)";
+            }
+            const originScreen = worldToScreen(origin);
+            const destScreen = worldToScreen(dest);
+            mapCtx.strokeStyle = color;
+            mapCtx.lineWidth = route.is_active ? 1.4 : 0.8;
+            mapCtx.beginPath();
+            mapCtx.moveTo(originScreen.x, originScreen.y);
+            mapCtx.lineTo(destScreen.x, destScreen.y);
+            mapCtx.stroke();
+          });
+        }
+
+        filteredLocations.forEach((loc) => {
+          let color = "#9fd6b9";
+          let size = 3.5;
+          if (loc.type === "gate") {
+            color = "#d2a95a";
+            size = 5;
+          } else if (loc.type === "space_station") {
+            color = "#76e2b7";
+            size = 4.2;
+          } else if (loc.type === "outpost") {
+            color = "#6f8f80";
+            size = 3.2;
+          }
+          const screen = worldToScreen(loc);
+          mapCtx.fillStyle = color;
+          mapCtx.beginPath();
+          mapCtx.arc(screen.x, screen.y, size, 0, Math.PI * 2);
+          mapCtx.fill();
+
+          if (settings.showLabels && mapState.scale > 0.45) {
+            mapCtx.fillStyle = "rgba(159, 214, 185, 0.8)";
+            mapCtx.font = "12px Share Tech Mono";
+            mapCtx.fillText(loc.name, screen.x + 8, screen.y - 6);
+          }
+        });
+
+        updateZoomDisplay();
+      }
+
+      function distanceToSegment(point, a, b) {
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        if (dx === 0 && dy === 0) {
+          const distX = point.x - a.x;
+          const distY = point.y - a.y;
+          return Math.sqrt(distX * distX + distY * distY);
+        }
+        const t = ((point.x - a.x) * dx + (point.y - a.y) * dy) / (dx * dx + dy * dy);
+        const clamped = Math.max(0, Math.min(1, t));
+        const projX = a.x + clamped * dx;
+        const projY = a.y + clamped * dy;
+        const distX = point.x - projX;
+        const distY = point.y - projY;
+        return Math.sqrt(distX * distX + distY * distY);
+      }
+
+      function findNearestLocation(screenPoint) {
+        let closest = null;
+        let closestDistance = Infinity;
+        state.locations.forEach((loc) => {
+          const screen = worldToScreen(loc);
+          const dx = screen.x - screenPoint.x;
+          const dy = screen.y - screenPoint.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          if (dist < closestDistance && dist < 12) {
+            closestDistance = dist;
+            closest = loc;
+          }
+        });
+        return closest;
+      }
+
+      function findNearestRoute(screenPoint) {
+        const settings = getMapSettings();
+        if (!settings.showRoutes) {
+          return null;
+        }
+        let closest = null;
+        let closestDistance = Infinity;
+        state.corridors.forEach((route) => {
+          if (!settings.showDormant && !route.is_active) {
+            return;
+          }
+          const origin = state.locations.find((loc) => loc.id === route.origin);
+          const dest = state.locations.find((loc) => loc.id === route.destination);
+          if (!origin || !dest) {
+            return;
+          }
+          if (settings.focusType !== "all" && origin.type !== settings.focusType && dest.type !== settings.focusType) {
+            return;
+          }
+          const originScreen = worldToScreen(origin);
+          const destScreen = worldToScreen(dest);
+          const dist = distanceToSegment(screenPoint, originScreen, destScreen);
+          if (dist < closestDistance && dist < 6) {
+            closestDistance = dist;
+            closest = route;
+          }
+        });
+        return closest;
+      }
+
+      function showLocationInfo(locationId) {
+        const loc = state.locations.find((item) => item.id === locationId);
+        if (!loc) {
+          return;
+        }
+        const connectedRoutes = state.corridors.filter((route) => route.origin === loc.id || route.destination === loc.id);
+        const npcCount = state.npcs.filter((npc) => npc.location === loc.id).length;
+        const activeRoutes = connectedRoutes.filter((route) => route.is_active).length;
+        const serviceList = Object.keys(loc.services || {}).filter((key) => loc.services[key]);
+        mapInfoBody.innerHTML = `
+          <h3>${loc.name}</h3>
+          <p>Type: <strong>${loc.type.replace("_", " ")}</strong></p>
+          <p>System: <strong>${loc.system}</strong></p>
+          <p>Wealth: <strong>${loc.wealth}/10</strong></p>
+          <p>Population: <strong>${loc.population}</strong></p>
+          <p>Faction: <strong>${loc.faction}</strong></p>
+          ${loc.gate_status ? `<p>Gate Status: <strong>${loc.gate_status}</strong></p>` : ""}
+          <p>NPCs Here: <strong>${npcCount}</strong></p>
+          <p>Services: <strong>${serviceList.length ? serviceList.join(", ") : "none"}</strong></p>
+          <p class="muted">${loc.description}</p>
+          <p>Connected Routes: <strong>${connectedRoutes.length}</strong> (${activeRoutes} active)</p>
+        `;
+        mapInfo.classList.add("visible");
+      }
+
+      function showRouteInfo(routeId) {
+        const route = state.corridors.find((item) => item.id === routeId);
+        if (!route) {
+          return;
+        }
+        const origin = state.locations.find((loc) => loc.id === route.origin);
+        const dest = state.locations.find((loc) => loc.id === route.destination);
+        mapInfoBody.innerHTML = `
+          <h3>${route.name}</h3>
+          <p>Route: <strong>${route.origin_name} to ${route.destination_name}</strong></p>
+          <p>Type: <strong>${route.corridor_type}</strong></p>
+          <p>Danger: <strong>${route.danger_level}/10</strong></p>
+          <p>Travel Time: <strong>${route.travel_time} sec</strong></p>
+          <p>Status: <strong>${route.is_active ? "active" : "dormant"}</strong></p>
+          ${origin ? `<p>Origin System: <strong>${origin.system}</strong></p>` : ""}
+          ${dest ? `<p>Destination System: <strong>${dest.system}</strong></p>` : ""}
+        `;
+        mapInfo.classList.add("visible");
+      }
+
+      function showTooltip(x, y, html) {
+        mapTooltip.innerHTML = html;
+        mapTooltip.style.left = `${x}px`;
+        mapTooltip.style.top = `${y}px`;
+        mapTooltip.classList.add("visible");
+      }
+
+      function hideTooltip() {
+        mapTooltip.classList.remove("visible");
+      }
+
+      function handleMouseDown(event) {
+        mapState.isDragging = true;
+        mapState.dragStart = {
+          x: event.clientX - mapState.offsetX,
+          y: event.clientY - mapState.offsetY
+        };
+        mapCanvas.style.cursor = "grabbing";
+      }
+
+      function handleMouseMove(event) {
+        const rect = mapCanvas.getBoundingClientRect();
+        const point = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+
+        if (mapState.isDragging) {
+          mapState.offsetX = event.clientX - mapState.dragStart.x;
+          mapState.offsetY = event.clientY - mapState.dragStart.y;
+          renderMap();
+          return;
+        }
+
+        const hoveredLocation = findNearestLocation(point);
+        if (hoveredLocation) {
+          showTooltip(event.clientX, event.clientY, `<strong>${hoveredLocation.name}</strong><br>${hoveredLocation.type}`);
+          mapCanvas.style.cursor = "pointer";
+          return;
+        }
+
+        const hoveredRoute = findNearestRoute(point);
+        if (hoveredRoute) {
+          showTooltip(event.clientX, event.clientY, `<strong>${hoveredRoute.name}</strong><br>${hoveredRoute.origin_name} -> ${hoveredRoute.destination_name}`);
+          mapCanvas.style.cursor = "pointer";
+          return;
+        }
+
+        hideTooltip();
+        mapCanvas.style.cursor = "grab";
+      }
+
+      function handleMouseUp() {
+        mapState.isDragging = false;
+        mapCanvas.style.cursor = "grab";
+      }
+
+      function handleWheel(event) {
+        event.preventDefault();
+        const rect = mapCanvas.getBoundingClientRect();
+        const pointer = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+        const worldPoint = screenToWorld(pointer);
+        const zoomFactor = event.deltaY < 0 ? 1.1 : 0.9;
+        mapState.scale = clampScale(mapState.scale * zoomFactor);
+        const newScreenPoint = worldToScreen(worldPoint);
+        mapState.offsetX += pointer.x - newScreenPoint.x;
+        mapState.offsetY += pointer.y - newScreenPoint.y;
+        renderMap();
+      }
+
+      function handleClick(event) {
+        if (!state.galaxy) {
+          return;
+        }
+        const rect = mapCanvas.getBoundingClientRect();
+        const point = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+        const location = findNearestLocation(point);
+        if (location) {
+          showLocationInfo(location.id);
+          return;
+        }
+        const route = findNearestRoute(point);
+        if (route) {
+          showRouteInfo(route.id);
+        }
+      }
+
+      function fitToGalaxy() {
+        if (!state.locations.length) {
+          return;
+        }
+        const padding = 100;
+        const xs = state.locations.map((loc) => loc.x);
+        const ys = state.locations.map((loc) => loc.y);
+        const minX = Math.min(...xs);
+        const maxX = Math.max(...xs);
+        const minY = Math.min(...ys);
+        const maxY = Math.max(...ys);
+        const width = maxX - minX + padding;
+        const height = maxY - minY + padding;
+        const scaleX = mapState.width / width;
+        const scaleY = mapState.height / height;
+        mapState.scale = clampScale(Math.min(scaleX, scaleY));
+        mapState.offsetX = 0;
+        mapState.offsetY = 0;
+        const centerX = (minX + maxX) / 2;
+        const centerY = (minY + maxY) / 2;
+        const centerScreen = worldToScreen({ x: centerX, y: centerY });
+        mapState.offsetX += mapState.width / 2 - centerScreen.x;
+        mapState.offsetY += mapState.height / 2 - centerScreen.y;
+        renderMap();
+      }
+
+      function resetView() {
+        mapState.scale = 0.85;
+        mapState.offsetX = 0;
+        mapState.offsetY = 0;
+        renderMap();
+      }
+
+      document.getElementById("map-info-close").addEventListener("click", () => {
+        mapInfo.classList.remove("visible");
+      });
+
+      document.getElementById("map-locate").addEventListener("click", () => {
+        const query = document.getElementById("map-search").value.trim().toLowerCase();
+        if (!query) {
+          return;
+        }
+        const match = state.locations.find((loc) => {
+          return loc.name.toLowerCase().includes(query) || loc.system.toLowerCase().includes(query);
+        });
+        if (!match) {
+          return;
+        }
+        const screen = worldToScreen(match);
+        mapState.offsetX += mapState.width / 2 - screen.x;
+        mapState.offsetY += mapState.height / 2 - screen.y;
+        showLocationInfo(match.id);
+        renderMap();
+      });
+
+      document.getElementById("map-search").addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          document.getElementById("map-locate").click();
+        }
+      });
+
+      document.getElementById("map-fit").addEventListener("click", fitToGalaxy);
+      document.getElementById("map-reset").addEventListener("click", resetView);
+
+      mapCanvas.addEventListener("mousedown", handleMouseDown);
+      mapCanvas.addEventListener("mousemove", handleMouseMove);
+      mapCanvas.addEventListener("mouseup", handleMouseUp);
+      mapCanvas.addEventListener("mouseleave", () => {
+        mapState.isDragging = false;
+        hideTooltip();
+      });
+      mapCanvas.addEventListener("wheel", handleWheel, { passive: false });
+      mapCanvas.addEventListener("click", handleClick);
+
+      mapCanvas.addEventListener("touchstart", (event) => {
+        if (event.touches.length === 1) {
+          const touch = event.touches[0];
+          mapState.isDragging = true;
+          mapState.dragStart = {
+            x: touch.clientX - mapState.offsetX,
+            y: touch.clientY - mapState.offsetY
+          };
+        }
+      }, { passive: true });
+
+      mapCanvas.addEventListener("touchmove", (event) => {
+        if (event.touches.length === 1 && mapState.isDragging) {
+          const touch = event.touches[0];
+          mapState.offsetX = touch.clientX - mapState.dragStart.x;
+          mapState.offsetY = touch.clientY - mapState.dragStart.y;
+          renderMap();
+        }
+      }, { passive: true });
+
+      mapCanvas.addEventListener("touchend", () => {
+        mapState.isDragging = false;
+      });
+
+      document.getElementById("toggle-routes").addEventListener("change", renderMap);
+      document.getElementById("toggle-labels").addEventListener("change", renderMap);
+      document.getElementById("toggle-dormant").addEventListener("change", renderMap);
+      document.getElementById("focus-type").addEventListener("change", renderMap);
+
+      document.getElementById("search-locations").addEventListener("input", renderWiki);
+      document.getElementById("search-corridors").addEventListener("input", renderWiki);
+      document.getElementById("generate-btn").addEventListener("click", () => {
+        const galaxyName = document.getElementById("galaxy-name").value.trim();
+        const startDate = document.getElementById("start-date").value.trim();
+        let numLocations = Number(document.getElementById("num-locations").value);
+
+        if (!numLocations || Number.isNaN(numLocations)) {
+          numLocations = Math.floor(30 + Math.random() * 90);
+        }
+
+        numLocations = Math.max(10, Math.min(500, numLocations));
+
+        const data = buildGalaxy({
+          galaxyName,
+          startDate,
+          numLocations
+        });
+
+        summaryStatus.textContent = "Generated";
+        applyGalaxyData(data);
+      });
+
+      document.getElementById("reset-btn").addEventListener("click", () => {
+        clearState();
+      });
+
+      document.getElementById("export-btn").addEventListener("click", () => {
+        if (!state.galaxy) {
+          summaryStatus.textContent = "No data to export";
+          return;
+        }
+        const payload = JSON.stringify(state, null, 2);
+        const blob = new Blob([payload], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `${state.galaxy.name.replace(/\s+/g, "_")}_galaxy.json`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      });
+
+      document.getElementById("import-file").addEventListener("change", (event) => {
+        const file = event.target.files[0];
+        if (!file) {
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = (loadEvent) => {
+          try {
+            const parsed = JSON.parse(loadEvent.target.result);
+            if (!parsed.galaxy) {
+              summaryStatus.textContent = "Invalid import";
+              return;
+            }
+            applyGalaxyData(parsed);
+            summaryStatus.textContent = "Imported";
+            event.target.value = "";
+          } catch (err) {
+            summaryStatus.textContent = "Import failed";
+          }
+        };
+        reader.readAsText(file);
+      });
+
+      window.addEventListener("resize", () => {
+        setupCanvas();
+      });
+
+      loadState();
+      renderAll();
+      setupCanvas();
+    </script>
+  </body>
+</html>

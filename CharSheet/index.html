@@ -1,0 +1,507 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Quiet End - Character Sheet</title>
+    <link rel="stylesheet" href="app.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="bg-layer"></div>
+    <header class="app-header">
+      <div class="title-block">
+        <p class="eyebrow"><a href="../index.html">Homepage</a> // Character Sheet</p>
+        <h1>Character Sheet</h1>
+        <p class="subtitle">Fill, save, export, and reload your character anywhere.</p>
+      </div>
+      <div class="actions">
+        <button type="button" class="btn primary" id="export-btn">Export JSON</button>
+        <label class="btn ghost" for="import-input">
+          Import JSON
+          <input id="import-input" type="file" accept="application/json" />
+        </label>
+        <button type="button" class="btn ghost" id="reset-btn">New Sheet</button>
+      </div>
+    </header>
+
+    <main class="sheet">
+      <form id="sheet-form" autocomplete="off">
+        <section class="card identity">
+          <h2>Identity</h2>
+          <div class="field">
+            <label for="name">Name</label>
+            <input id="name" type="text" data-field="identity.name" placeholder="Character name" />
+          </div>
+          <div class="field">
+            <label for="callsign">Callsign</label>
+            <input id="callsign" type="text" data-field="identity.callsign" placeholder="Handle or codename" />
+          </div>
+          <div class="field">
+            <label for="role">Role</label>
+            <select id="role" data-field="identity.role">
+              <option value="" selected>Select a role</option>
+              <option value="Navigator">Navigator</option>
+              <option value="Engineer">Engineer</option>
+              <option value="Medic">Medic</option>
+              <option value="Quartermaster">Quartermaster</option>
+              <option value="Captain">Captain</option>
+              <option value="Security Officer">Security Officer</option>
+              <option value="Broker">Broker</option>
+              <option value="Reclaimer">Reclaimer</option>
+              <option value="Cipher">Cipher</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="background">Background</label>
+            <input id="background" type="text" data-field="identity.background" placeholder="Origin or past" />
+          </div>
+          <div class="field">
+            <label for="pronouns">Pronouns</label>
+            <input id="pronouns" type="text" data-field="identity.pronouns" placeholder="they/she/he" />
+          </div>
+        </section>
+
+        <section class="card stats">
+          <h2>Stats</h2>
+          <div class="stat-grid">
+            <label class="stat">
+              <span>GRIT</span>
+              <div class="stat-controls">
+                <select data-field="stats.grit">
+                  <option value="-1">-1</option>
+                  <option value="0" selected>0</option>
+                  <option value="+1">+1</option>
+                  <option value="+2">+2</option>
+                </select>
+                <button type="button" class="stat-mod-toggle" aria-label="Edit modifier">M</button>
+                <div class="stat-mod-field">
+                  <input
+                    class="stat-mod-input"
+                    type="text"
+                    data-field="stats.gritModifier"
+                    inputmode="numeric"
+                    pattern="[+-]?\\d+"
+                    placeholder=" "
+                    aria-label="Modifier"
+                  />
+                </div>
+              </div>
+            </label>
+            <label class="stat">
+              <span>WITS</span>
+              <div class="stat-controls">
+                <select data-field="stats.wits">
+                  <option value="-1">-1</option>
+                  <option value="0" selected>0</option>
+                  <option value="+1">+1</option>
+                  <option value="+2">+2</option>
+                </select>
+                <button type="button" class="stat-mod-toggle" aria-label="Edit modifier">M</button>
+                <div class="stat-mod-field">
+                  <input
+                    class="stat-mod-input"
+                    type="text"
+                    data-field="stats.witsModifier"
+                    inputmode="numeric"
+                    pattern="[+-]?\\d+"
+                    placeholder=" "
+                    aria-label="Modifier"
+                  />
+                </div>
+              </div>
+            </label>
+            <label class="stat">
+              <span>TECH</span>
+              <div class="stat-controls">
+                <select data-field="stats.tech">
+                  <option value="-1">-1</option>
+                  <option value="0" selected>0</option>
+                  <option value="+1">+1</option>
+                  <option value="+2">+2</option>
+                </select>
+                <button type="button" class="stat-mod-toggle" aria-label="Edit modifier">M</button>
+                <div class="stat-mod-field">
+                  <input
+                    class="stat-mod-input"
+                    type="text"
+                    data-field="stats.techModifier"
+                    inputmode="numeric"
+                    pattern="[+-]?\\d+"
+                    placeholder=" "
+                    aria-label="Modifier"
+                  />
+                </div>
+              </div>
+            </label>
+            <label class="stat">
+              <span>TACT</span>
+              <div class="stat-controls">
+                <select data-field="stats.tact">
+                  <option value="-1">-1</option>
+                  <option value="0" selected>0</option>
+                  <option value="+1">+1</option>
+                  <option value="+2">+2</option>
+                </select>
+                <button type="button" class="stat-mod-toggle" aria-label="Edit modifier">M</button>
+                <div class="stat-mod-field">
+                  <input
+                    class="stat-mod-input"
+                    type="text"
+                    data-field="stats.tactModifier"
+                    inputmode="numeric"
+                    pattern="[+-]?\\d+"
+                    placeholder=" "
+                    aria-label="Modifier"
+                  />
+                </div>
+              </div>
+            </label>
+            <label class="stat">
+              <span>FACE</span>
+              <div class="stat-controls">
+                <select data-field="stats.face">
+                  <option value="-1">-1</option>
+                  <option value="0" selected>0</option>
+                  <option value="+1">+1</option>
+                  <option value="+2">+2</option>
+                </select>
+                <button type="button" class="stat-mod-toggle" aria-label="Edit modifier">M</button>
+                <div class="stat-mod-field">
+                  <input
+                    class="stat-mod-input"
+                    type="text"
+                    data-field="stats.faceModifier"
+                    inputmode="numeric"
+                    pattern="[+-]?\\d+"
+                    placeholder=" "
+                    aria-label="Modifier"
+                  />
+                </div>
+              </div>
+            </label>
+          </div>
+        </section>
+
+        <section class="card tracks">
+          <h2>Conditions and Tracks</h2>
+          <div class="field">
+            <p class="label">Conditions</p>
+            <div class="chip-grid">
+              <label><input type="checkbox" data-field="conditions.injured" /> Injured</label>
+              <label><input type="checkbox" data-field="conditions.exposed" /> Exposed</label>
+              <label><input type="checkbox" data-field="conditions.shaken" /> Shaken</label>
+              <label><input type="checkbox" data-field="conditions.exhausted" /> Exhausted</label>
+              <label><input type="checkbox" data-field="conditions.contaminated" /> Contaminated</label>
+              <label><input type="checkbox" data-field="conditions.compromised" /> Compromised</label>
+            </div>
+          </div>
+          <div class="field">
+            <p class="label">Wounds</p>
+            <div class="chip-grid">
+              <label><input type="checkbox" data-field="wounds.wound1" /> Wound 1</label>
+              <label><input type="checkbox" data-field="wounds.wound2" /> Wound 2</label>
+              <label><input type="checkbox" data-field="wounds.wound3" /> Wound 3</label>
+            </div>
+          </div>
+          <div class="field">
+            <p class="label">Health Clock</p>
+            <div class="chip-grid">
+              <label><input type="checkbox" data-field="health.clock1" /> Box 1</label>
+              <label><input type="checkbox" data-field="health.clock2" /> Box 2</label>
+              <label><input type="checkbox" data-field="health.clock3" /> Box 3</label>
+              <label><input type="checkbox" data-field="health.clock4" /> Box 4</label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="rads">RADS <span class="inline-value" id="rads-value">0</span></label>
+            <input id="rads" type="range" min="0" max="6" step="1" value="0" data-field="tracks.rads" />
+          </div>
+        </section>
+
+        <section class="card mods">
+          <h2>Mods &amp; Augments</h2>
+          <div class="section-header">
+            <p class="label">Installations</p>
+            <button type="button" class="btn ghost small" id="add-mod-btn">Add Mod/Augment</button>
+          </div>
+          <div id="mods-list" class="entry-list"></div>
+        </section>
+
+        <section class="card gear span-2">
+          <h2>Loadout and Gear</h2>
+          <div class="section-header">
+            <p class="label">Gear</p>
+            <button type="button" class="btn ghost small" id="add-gear-btn">Add Gear</button>
+          </div>
+          <div id="gear-list" class="entry-list"></div>
+          <p class="hint">Track weapons, armor, items, and augments.</p>
+        </section>
+
+        <section class="card abilities">
+          <h2>Moves and Abilities</h2>
+          <div class="entry-section">
+            <div class="section-header">
+              <p class="label">Moves</p>
+              <button type="button" class="btn ghost small" id="add-move-btn">Add Move</button>
+            </div>
+            <div id="moves-list" class="entry-list"></div>
+          </div>
+          <div class="entry-section">
+            <div class="section-header">
+              <p class="label">Stress and Triggers</p>
+              <button type="button" class="btn ghost small" id="add-stress-btn">Add Stress</button>
+            </div>
+            <div id="stress-list" class="entry-list"></div>
+          </div>
+        </section>
+
+        <section class="card notes span-2">
+          <h2>Contacts and Notes</h2>
+          <div class="split">
+            <div class="entry-section">
+              <div class="section-header">
+                <p class="label">Contacts</p>
+                <button type="button" class="btn ghost small" id="add-contact-btn">Add Contact</button>
+              </div>
+              <div id="contacts-list" class="entry-list"></div>
+            </div>
+            <div class="entry-section">
+              <div class="section-header">
+                <p class="label">Notes</p>
+                <button type="button" class="btn ghost small" id="add-note-btn">Add Note</button>
+              </div>
+              <div id="notes-list" class="entry-list"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="card debts">
+          <h2>Debts and Obligations</h2>
+          <div class="section-header">
+            <p class="label">Debts</p>
+            <button type="button" class="btn ghost small" id="add-debt-btn">Add Debt</button>
+          </div>
+          <div id="debts-list" class="entry-list"></div>
+        </section>
+
+        <section class="card clocks span-2">
+          <h2>Clocks</h2>
+          <div class="clock-controls">
+            <button type="button" class="btn ghost" id="add-clock-btn">Add Clock</button>
+            <p class="hint">Create 4, 6, or 8 segment clocks and tick them as they advance.</p>
+          </div>
+          <div id="clocks-list" class="clock-list"></div>
+        </section>
+      </form>
+    </main>
+
+    <div class="modal" id="clock-modal" aria-hidden="true">
+      <div class="modal-backdrop" data-modal-close></div>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="clock-modal-title">
+        <h3 id="clock-modal-title">Add Clock</h3>
+        <form id="clock-form">
+          <div class="field">
+            <label for="clock-name">Clock name</label>
+            <input id="clock-name" type="text" placeholder="Boarding Imminent" required />
+          </div>
+          <div class="field">
+            <p class="label">Segments</p>
+            <div class="chip-grid segments-grid">
+              <label><input type="radio" name="clock-segments" value="4" checked /> 4</label>
+              <label><input type="radio" name="clock-segments" value="6" /> 6</label>
+              <label><input type="radio" name="clock-segments" value="8" /> 8</label>
+            </div>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn ghost" id="clock-cancel">Cancel</button>
+            <button type="submit" class="btn primary">Create Clock</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="remove-modal" aria-hidden="true">
+      <div class="modal-backdrop" data-modal-close></div>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="remove-modal-title">
+        <h3 id="remove-modal-title">Remove Clock</h3>
+        <p class="modal-text" id="remove-modal-text"></p>
+        <div class="modal-actions">
+          <button type="button" class="btn ghost" id="remove-cancel">Cancel</button>
+          <button type="button" class="btn primary" id="remove-confirm">Remove</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal" id="gear-modal" aria-hidden="true">
+      <div class="modal-backdrop" data-modal-close></div>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="gear-modal-title">
+        <h3 id="gear-modal-title">Add Gear</h3>
+        <form id="gear-form">
+          <div class="field">
+            <label for="gear-name">Name</label>
+            <input id="gear-name" type="text" placeholder="Pulse rifle" required />
+          </div>
+          <div class="field">
+            <label for="gear-type">Type</label>
+            <select id="gear-type">
+              <option value="weapon">Weapon</option>
+              <option value="armor">Armor</option>
+              <option value="item" selected>Item</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="gear-tags">Tags</label>
+            <input id="gear-tags" type="text" placeholder="close, loud, bulky" />
+          </div>
+          <div class="field">
+            <label for="gear-description">Description</label>
+            <textarea id="gear-description" rows="4" placeholder="What it does, special notes"></textarea>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn ghost" id="gear-cancel">Cancel</button>
+            <button type="submit" class="btn primary">Add Gear</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="move-modal" aria-hidden="true">
+      <div class="modal-backdrop" data-modal-close></div>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="move-modal-title">
+        <h3 id="move-modal-title">Add Move</h3>
+        <form id="move-form">
+          <div class="field">
+            <label for="move-select">Move</label>
+            <select id="move-select"></select>
+          </div>
+          <div class="field">
+            <label for="move-name">Name</label>
+            <input id="move-name" type="text" placeholder="Custom move name" />
+          </div>
+          <div class="field">
+            <label for="move-description">Description</label>
+            <textarea id="move-description" rows="4" placeholder="What triggers it, effect, and cost"></textarea>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn ghost" id="move-cancel">Cancel</button>
+            <button type="submit" class="btn primary">Add Move</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="stress-modal" aria-hidden="true">
+      <div class="modal-backdrop" data-modal-close></div>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="stress-modal-title">
+        <h3 id="stress-modal-title">Add Stress Trigger</h3>
+        <form id="stress-form">
+          <div class="field">
+            <label for="stress-name">Name</label>
+            <input id="stress-name" type="text" placeholder="Alarms blaring" required />
+          </div>
+          <div class="field">
+            <label for="stress-description">Description</label>
+            <textarea id="stress-description" rows="4" placeholder="What it means, how it affects you"></textarea>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn ghost" id="stress-cancel">Cancel</button>
+            <button type="submit" class="btn primary">Add Trigger</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="contact-modal" aria-hidden="true">
+      <div class="modal-backdrop" data-modal-close></div>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="contact-modal-title">
+        <h3 id="contact-modal-title">Add Contact</h3>
+        <form id="contact-form">
+          <div class="field">
+            <label for="contact-name">Name</label>
+            <input id="contact-name" type="text" placeholder="Dockmaster Yara" required />
+          </div>
+          <div class="field">
+            <label for="contact-description">Notes</label>
+            <textarea id="contact-description" rows="4" placeholder="What they want, what you owe"></textarea>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn ghost" id="contact-cancel">Cancel</button>
+            <button type="submit" class="btn primary">Add Contact</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="note-modal" aria-hidden="true">
+      <div class="modal-backdrop" data-modal-close></div>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="note-modal-title">
+        <h3 id="note-modal-title">Add Note</h3>
+        <form id="note-form">
+          <div class="field">
+            <label for="note-name">Title</label>
+            <input id="note-name" type="text" placeholder="Reactor rumors" required />
+          </div>
+          <div class="field">
+            <label for="note-description">Notes</label>
+            <textarea id="note-description" rows="4" placeholder="Clues, leads, open threads"></textarea>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn ghost" id="note-cancel">Cancel</button>
+            <button type="submit" class="btn primary">Add Note</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="mod-modal" aria-hidden="true">
+      <div class="modal-backdrop" data-modal-close></div>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="mod-modal-title">
+        <h3 id="mod-modal-title">Add Mod/Augment</h3>
+        <form id="mod-form">
+          <div class="field">
+            <label for="mod-name">Name</label>
+            <input id="mod-name" type="text" placeholder="Reflex Enhancer" required />
+          </div>
+          <div class="field">
+            <label for="mod-benefit">Benefit</label>
+            <input id="mod-benefit" type="text" placeholder="Boosts reaction time" />
+          </div>
+          <div class="field">
+            <label for="mod-drawback">Drawback</label>
+            <input id="mod-drawback" type="text" placeholder="Causes you excrutiating pain when used" />
+          </div>
+          <div class="field">
+            <label for="mod-description">Description</label>
+            <textarea id="mod-description" rows="4" placeholder="How it works, any quirks"></textarea>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn ghost" id="mod-cancel">Cancel</button>
+            <button type="submit" class="btn primary">Add Mod</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="debt-modal" aria-hidden="true">
+      <div class="modal-backdrop" data-modal-close></div>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="debt-modal-title">
+        <h3 id="debt-modal-title">Add Debt</h3>
+        <form id="debt-form">
+          <div class="field">
+            <label for="debt-what">What do you owe?</label>
+            <input id="debt-what" type="text" placeholder="Two crates of med supplies" required />
+          </div>
+          <div class="field">
+            <label for="debt-who">Who do you owe it to?</label>
+            <input id="debt-who" type="text" placeholder="Port Authority" required />
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn ghost" id="debt-cancel">Cancel</button>
+            <button type="submit" class="btn primary">Add Debt</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

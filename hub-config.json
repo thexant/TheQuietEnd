@@ -1,0 +1,92 @@
+{
+  "activePreset": "critical",
+  "presets": {
+    "low": {
+      "signalStability": "Signal stability: Low.",
+      "currentStatus": [
+        "Gate network reporting instability; expect delayed corridor updates.",
+        "Supplies being restored from surplus stations.",
+        "Decontamination crews ready for ship arrival."
+      ],
+      "footer": "The Quiet End - © 2025 by 'Vetaso'",
+      "waveform": {
+        "erraticity": 0.6
+      },
+      "auxDiagnostics": [
+        { "key": "gate", "label": "Gate lock", "value": 64, "min": 50, "max": 78, "step": 0.9, "unit": "%", "digits": 0 },
+        { "key": "drift", "label": "Corridor drift", "value": 0.6, "min": -2.2, "max": 2.2, "step": 0.09, "unit": " deg", "digits": 1 },
+        { "key": "rad", "label": "Radiation load", "value": 0.56, "min": 0.3, "max": 0.88, "step": 0.03, "unit": " sv", "digits": 2 },
+        { "key": "delay", "label": "Comms delay", "value": 18.2, "min": 10.0, "max": 24.0, "step": 0.35, "unit": " hr", "digits": 1 },
+        { "key": "hull", "label": "Hull integrity", "value": 89, "min": 82, "max": 96, "step": 0.6, "unit": "%", "digits": 0 },
+        {
+          "key": "fog",
+          "label": "Fog risk",
+          "value": 1,
+          "min": 0,
+          "max": 3,
+          "step": 1,
+          "type": "state",
+          "states": ["low", "trace", "moderate", "severe"]
+        }
+      ]
+    },
+    "stable": {
+      "signalStability": "Signal stability: Stable.",
+      "currentStatus": [
+        "Corridor monitoring stable across network.",
+        "Supply shipments tracking on time.",
+        "New archive vault verified; access opening soon."
+      ],
+      "footer": "The Quiet End - © 2025 by 'Vetaso'",
+      "waveform": {
+        "erraticity": 0.28
+      },
+      "auxDiagnostics": [
+        { "key": "gate", "label": "Gate lock", "value": 74, "min": 66, "max": 82, "step": 0.5, "unit": "%", "digits": 0 },
+        { "key": "drift", "label": "Corridor drift", "value": 0.2, "min": -1.2, "max": 1.2, "step": 0.04, "unit": " deg", "digits": 1 },
+        { "key": "rad", "label": "Radiation load", "value": 0.34, "min": 0.22, "max": 0.54, "step": 0.015, "unit": " sv", "digits": 2 },
+        { "key": "delay", "label": "Comms delay", "value": 12.4, "min": 7.8, "max": 16.5, "step": 0.18, "unit": " hr", "digits": 1 },
+        { "key": "hull", "label": "Hull integrity", "value": 96, "min": 91, "max": 99, "step": 0.3, "unit": "%", "digits": 0 },
+        {
+          "key": "fog",
+          "label": "Fog risk",
+          "value": 0,
+          "min": 0,
+          "max": 2,
+          "step": 1,
+          "type": "state",
+          "states": ["low", "trace", "moderate"]
+        }
+      ]
+    },
+    "critical": {
+      "signalStability": "Signal stability: Critical.",
+      "currentStatus": [
+        "Corridor stability monitoring failing; multiple Gates report outages.",
+        "Station relays in emergency failover mode.",
+        "Emergency supply hubs open."
+      ],
+      "footer": "The Quiet End - © 2025 by 'Vetaso'",
+      "waveform": {
+        "erraticity": 0.9
+      },
+      "auxDiagnostics": [
+        { "key": "gate", "label": "Gate lock", "value": 55, "min": 35, "max": 72, "step": 1.2, "unit": "%", "digits": 0 },
+        { "key": "drift", "label": "Corridor drift", "value": 1.4, "min": -3.5, "max": 3.5, "step": 0.18, "unit": " deg", "digits": 1 },
+        { "key": "rad", "label": "Radiation load", "value": 0.76, "min": 0.5, "max": 1.2, "step": 0.05, "unit": " sv", "digits": 2 },
+        { "key": "delay", "label": "Comms delay", "value": 22.8, "min": 12.0, "max": 36.0, "step": 0.55, "unit": " hr", "digits": 1 },
+        { "key": "hull", "label": "Hull integrity", "value": 81, "min": 65, "max": 92, "step": 0.9, "unit": "%", "digits": 0 },
+        {
+          "key": "fog",
+          "label": "Fog risk",
+          "value": 2,
+          "min": 0,
+          "max": 3,
+          "step": 1,
+          "type": "state",
+          "states": ["low", "trace", "moderate", "severe"]
+        }
+      ]
+    }
+  }
+}
