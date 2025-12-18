@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lore &amp; Fiction - The Quiet End</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=B612+Mono:wght@400;700&family=Share+Tech+Mono&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script defer>
+      const entries = [
+        { path: "Lore/Colonies.md" },
+      ];
+
+      const cleanText = (text) =>
+        text
+          .replace(/`([^`]+)`/g, "$1")
+          .replace(/\*\*([^*]+)\*\*/g, "$1")
+          .replace(/\*([^*]+)\*/g, "$1")
+          .replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1")
+          .replace(/[_#>]/g, "")
+          .trim();
+
+      const extractTitle = (text, fallback) => {
+        const lines = text.split(/\r?\n/);
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed) {
+            continue;
+          }
+          const match = trimmed.match(/^#{1,6}\s+(.*)$/);
+          if (match) {
+            return cleanText(match[1]);
+          }
+        }
+        return fallback;
+      };
+
+      const extractExcerpt = (text) => {
+        let cleaned = text
+          .replace(/```[\s\S]*?```/g, "")
+          .replace(/^#{1,6}.*$/gm, "")
+          .replace(/^>\s?/gm, "");
+        cleaned = cleanText(cleaned).replace(/\s+/g, " ");
+        if (cleaned.length > 180) {
+          return `${cleaned.slice(0, 177)}...`;
+        }
+        return cleaned;
+      };
+
+      const formatDate = (value) => {
+        if (!value) {
+          return "";
+        }
+        const parsed = new Date(value);
+        if (Number.isNaN(parsed.getTime())) {
+          return "";
+        }
+        return parsed.toISOString().slice(0, 16).replace("T", " ");
+      };
+
+      const toFolder = (path) => {
+        const normalized = path.replace(/\\/g, "/");
+        const parts = normalized.split("/");
+        parts.pop();
+        return parts.length ? parts.join("/") : "Root";
+      };
+
+      const toRelativeWithin = (path) => {
+        const normalized = path.replace(/\\/g, "/");
+        const parts = normalized.split("/");
+        return parts[parts.length - 1] || normalized;
+      };
+
+      const fallbackTitle = (path) => {
+        const filename = toRelativeWithin(path);
+        const base = filename.replace(/\.[^.]+$/, "");
+        return base.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+      };
+
+      const buildIndex = async () => {
+        const recordCount = document.getElementById("record-count");
+        const indexRoot = document.getElementById("lore-index");
+        const emptyState = document.getElementById("empty-state");
+
+        recordCount.textContent = entries.length;
+
+        if (entries.length === 0) {
+          emptyState.style.display = "block";
+          return;
+        }
+
+        emptyState.style.display = "none";
+
+        const hydrated = await Promise.all(
+          entries.map(async (entry) => {
+            const fallback = fallbackTitle(entry.path);
+            try {
+              const response = await fetch(entry.path);
+              if (!response.ok) {
+                throw new Error("Missing");
+              }
+              const text = await response.text();
+              return {
+                ...entry,
+                title: extractTitle(text, fallback),
+                excerpt: extractExcerpt(text),
+                updated: formatDate(response.headers.get("last-modified")),
+              };
+            } catch (error) {
+              return {
+                ...entry,
+                title: fallback,
+                excerpt: "Record unavailable. Awaiting archive sync.",
+                updated: "",
+              };
+            }
+          })
+        );
+
+        const sections = new Map();
+        for (const entry of hydrated) {
+          const folder = toFolder(entry.path);
+          const list = sections.get(folder) || [];
+          list.push(entry);
+          sections.set(folder, list);
+        }
+
+        const sectionKeys = Array.from(sections.keys()).sort((a, b) =>
+          a.localeCompare(b, undefined, { sensitivity: "base" })
+        );
+        if (sectionKeys.includes("Root")) {
+          sectionKeys.splice(sectionKeys.indexOf("Root"), 1);
+          sectionKeys.unshift("Root");
+        }
+
+        for (const sectionName of sectionKeys) {
+          const detail = document.createElement("details");
+          detail.className = "folder-group";
+          detail.open = true;
+
+          const summary = document.createElement("summary");
+          const title = document.createElement("span");
+          title.className = "folder-title";
+          title.textContent = sectionName;
+          summary.appendChild(title);
+          detail.appendChild(summary);
+
+          const grid = document.createElement("div");
+          grid.className = "index-grid";
+
+          for (const entry of sections.get(sectionName)) {
+            const link = document.createElement("a");
+            link.className = "entry";
+            link.href = `view.html?doc=${encodeURIComponent(entry.path)}`;
+
+            const meta = document.createElement("div");
+            meta.className = "entry-meta";
+            const path = document.createElement("span");
+            path.className = "path";
+            path.textContent = toRelativeWithin(entry.path);
+            meta.appendChild(path);
+
+            const heading = document.createElement("h3");
+            heading.textContent = entry.title;
+
+            const excerpt = document.createElement("p");
+            excerpt.textContent = entry.excerpt;
+
+            const footer = document.createElement("div");
+            footer.className = "entry-footer";
+            const updated = document.createElement("span");
+            updated.textContent = entry.updated
+              ? `Last updated: ${entry.updated}`
+              : "Status: archived";
+            footer.appendChild(updated);
+
+            link.appendChild(meta);
+            link.appendChild(heading);
+            link.appendChild(excerpt);
+            link.appendChild(footer);
+            grid.appendChild(link);
+          }
+
+          detail.appendChild(grid);
+          indexRoot.appendChild(detail);
+        }
+      };
+
+      window.addEventListener("DOMContentLoaded", buildIndex);
+    </script>
+  </head>
+  <body>
+    <header>
+      <div class="signal"><a href="../index.html">Homepage</a> // Lore &amp; Fiction</div>
+      <h1>Lore &amp; Fiction</h1>
+      <p>
+        Field logs, recovered transmissions, and corridor myths assembled for quick reference.
+      </p>
+    </header>
+
+    <main>
+      <section class="panel">
+        <h2>Registry status</h2>
+        <p>
+          Total records detected: <span id="record-count">0</span>. Monitor the archive for updates.
+        </p>
+      </section>
+
+      <section class="index-grid" id="lore-index">
+        <div class="panel empty" id="empty-state">
+          No records detected. Awaiting archive intake.
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
