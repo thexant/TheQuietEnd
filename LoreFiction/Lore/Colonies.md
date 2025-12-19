@@ -1,4 +1,4 @@
-Human colonies are scattered across dozens of star systems, founded during the peak of interstellar expansion when [[Corridors]] were stable and [[Gates]] were plentiful. Their survival now depends heavily on whether their Corridor routes remain active. They generally sustain a population of anywhere between 50-250, but rarely more due to resource strain. Unfortunately; this means that almost no colony has the population size to sustainably reproduce on its own if left isolated.
+Human colonies are scattered across dozens of star systems, founded during the peak of interstellar expansion when Corridors were considered stable and Gates were plentiful. Their survival now depends heavily on whether their Corridor routes remain active. They generally sustain a population of anywhere between 50-250, but rarely more due to resource strain. Unfortunately; this means that almost no colony has the population size to sustainably reproduce on its own if left isolated.
 
 **Structure and Environment**
 
