@@ -75,7 +75,7 @@ GM Moves (examples)
 ________________
 
 
-5) Clocks (the engine of decay) — Expanded
+5) Clocks (the engine of decay) - Expanded
 5.0 What a Clock Is
 A Clock is a simple countdown/progress tracker drawn as 4, 6, or 8 segments.
       * When you fill segments, the situation changes.
@@ -142,7 +142,7 @@ ________________
 
 
 5.4 What Happens When a Clock Fills
-When a clock is filled, something changes immediately. Don’t just say “it fills”—make it bite.
+When a clock is filled, something changes immediately. Don’t just say “it fills”; make it bite.
                         * Threat clock fills: the threat arrives or triggers
                         * Decay clock fills: the system fails / breaks / becomes unavailable
                         * Heat clock fills: enforcement/pirates/corps take action
@@ -496,7 +496,7 @@ Bond prompts (choose 2):
 ________________
 
 
-The Cipher (Data Officer / Intel Tech)
+The Cipher
 You don’t chart stars — you validate truth, crack systems, scrub trails, and turn raw signals into decisions.
 Recommended Stat Build:
 WITS +2, TECH +1, FACE +1, GRIT 0, TACT −1
@@ -548,7 +548,7 @@ ________________
 
 
 6.3 Base Item List (choose from)
-All items have tags (same tag language you already established
+All items have tags, these are not defined as stats but rather aid in roleplay and quick reference
 Survival / Personal
                                                                                                                                                    * Work suit (Rugged)
                                                                                                                                                    * Vac-suit shell (Sealed, Bulky)
@@ -595,9 +595,10 @@ Defense (keep it abstract + tag-based)
 ________________
 
 
-6.4 Mods & Augments (pick 0–1 at start)
-A Mod gives a benefit tag + a drawback tag (same style you already started
-Pick one:
+6.4 Mods & Augments
+A Mod gives a benefit tag + a drawback tag.
+
+Below are some examples, though GMs and players can create their own using the following as a guideline.
                                                                                                                                                                   * Subdermal Plating: Armored (reduce physical harm by 1), drawback: Magnetic Signature (easier to track)
                                                                                                                                                                   * Optic Stack: Zoom/Low-Light, drawback: Fragile (fog surges can blind you)
                                                                                                                                                                   * Filter-Lungs: Sealed (ignore first airborne toxin/spore exposure each session), drawback: Maintenance (costs a decon charge or +1 RADS later)
@@ -859,7 +860,7 @@ Local Tags (examples):
 ________________
 
 
-11.2 Location Actions (pick 1–2 each)
+11.2 Location Actions (examples)
 These are the “social / exploration / recreation” menu.
                                                                                                                                                                                                                         * Work the Crowd (gather rumors, find jobs, locate people)
                                                                                                                                                                                                                         * Call in a Favor (use an existing contact/debt)
@@ -983,3 +984,4 @@ Start with:
                                                                                                                                                                                                                                                          * Ship stats: one 2, one 0, rest 1
                                                                                                                                                                                                                                                          * Resources: SUPPLY 3, FUEL 3, PARTS 2, DATA 1, HEAT 1
                                                                                                                                                                                                                                                          * 1 module + 1 ship flaw (so the ship already has character)
+Alternatively, the GM may let you “design” your crew's ship or may present you with a premade ship sheet.
