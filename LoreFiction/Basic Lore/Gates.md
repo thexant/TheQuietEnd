@@ -1,12 +1,12 @@
-Gates are colossal human-made megastructures designed to stabilize and hold open Corridors for reliable interstellar travel. Without them, Corridor entry and exit is either impossible or catastrophically unsafe.
+Gates are colossal human-made megastructures designed to stabilize and hold open Corridors for reliable interstellar travel. Without them, Corridor entry and exit is nearly impossible or catastrophically unsafe.
 
 **Purpose and Function**
 
-• Gates create a **stable entry or exit point** into a Corridor by anchoring it in place and supplying vast amounts of power to maintain the connection.
+Gates create a **stable entry or exit point** into a Corridor by anchoring it in place and supplying vast amounts of power to maintain the connection. Gates also emit a radio frequency known as a "Gate Beacon", which by design can only travel relatively short distances and is broadcast directly into its connected Corridor. Ships are equipped with sensors for picking up and tracking Gate Beacons to aid in Corridor navigation.
 
 • Without a gate, Corridors remain **unusable** for most vessels. Entry leads to uncontrolled, often fatal results.
 
-• Gates are located near colonies, stations, or key sectors and are crucial for maintaining **transport, communication, and supply lines**.
+• Gates are generally located near colonies, stations, or key sectors and are crucial for maintaining **transport, communication, and supply lines**. In some rare cases, Gates can be found in otherwise empty systems, existing for the sole purpose of linking two or more Corridor routes together to further connect the Corridor network. 
 
 **Construction and Limitations**
 
@@ -19,24 +19,28 @@ Gates are colossal human-made megastructures designed to stabilize and hold open
 • Gates may be **repaired and reactivated** if a Corridor shifts back into a reachable area, but alignment is never exact and always requires re-positioning.
 
 **Failure and Risk**
+Gates have several risks associated with them, from destabilization or failure of their attached Corridor to technical malfunction and breakdown.
 
 • If a gate’s power fails or control systems destabilize, the Corridor may **collapse** or **shift prematurely**, posing catastrophic risk to ships in transit.
 
-• Older gates, especially those built during humanity’s rapid expansion period, are more prone to **malfunctions and radiation leakage**.
+• Older gates, especially those built during humanity’s rapid expansion period, are more prone to **malfunctions and radiation leakage** into their local systems.
 
-• Gates at dead routes (where Corridors have collapsed or shifted irreversibly) are often left to **float abandoned**, unusable but too expensive to dismantle.
+• Gates at dead routes, where Corridors have collapsed or shifted irreversibly are often left to **float abandoned**, unusable but too expensive to dismantle.
 
-**Decontamination**
+**Decontamination and Medical**
 
-• Operational gates include **decontamination infrastructure** for handling Corridor Radiation exposure:
+Operational Gates include **decontamination infrastructure** for handling Corridor Radiation exposure and basic medical care aboard their Concourse:
 
-    ◦ Hull cleansing systems
+- Hull Cleaning system
+- Crew medical screening and quarantine
+- Basic medical treatment
+- Radiation scrubbing
 
-    ◦ Crew medical screening and quarantine zones
+Only ships passing through a **gated exit** receive full decontamination. Those using natural or emergency exits risk spreading contamination or dying from exposure. More advanced medical ailments or injuries often require treatment or specialized care not available at Gates.
 
-    ◦ Radiation scrubbing for key components
+**Rest and Recreation**
 
-• Only ships passing through a **gated exit** receive full decontamination; those using natural or emergency exits risk spreading contamination or dying from exposure.
+The majority of gates have a (tiny in comparison to the rest of the Gate structure) facility attached to the main Gate "ring" with docking capabilities for Ships. These facilities, referred to as the 'Gate Concourse' is generally where the Gate Technicians live and work, though Gate Concourses often also include things like shops, restaurants, lounges, bars; with some more 'prominent' Gates even being home to things like Hotels or recreational areas such as movie theaters, arcades, and so on.
 
 **Strategic Value**
 

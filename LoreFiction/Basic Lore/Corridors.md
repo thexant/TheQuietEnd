@@ -1,4 +1,4 @@
-Corridors are naturally occurring interstellar pathways that allow faster-than-light travel between distant regions of the galaxy. Humanity did not create them, only discovered and exploited them. Though the mechanics are not fully understood, ships entering a Corridor are able to traverse immense distances in a fraction of the time; usually days or weeks, compared to centuries by conventional means.
+Corridors are naturally occurring interstellar pathways that allow faster-than-light travel between distant regions of the galaxy. Humanity did not create them, only discovered and exploited them. Though the mechanics are not fully understood, ships entering a Corridor are able to traverse immense distances in a fraction of the time; usually days or weeks, compared to centuries by conventional means. While poorly understood, it is believed that Corridors are an effect of the universe itself and are therefore just as old and naturally occurring. 
 
 **Structure and Function**
 
@@ -6,7 +6,7 @@ Corridors are naturally occurring interstellar pathways that allow faster-than-l
 
 • Travel through a Corridor is one of the **only methods** of practical interstellar transit.
 
-• Their interior is **hostile**, a voidlike medium saturated with Corridor Radiation, requiring hardened ships and constant maintenance.
+• Their interior is **hostile**, a void like medium saturated with Corridor Radiation, requiring hardened ships and constant maintenance.
 
 • Ships **must exit through a gate**; entry and exit without one is nearly suicidal, often resulting in catastrophic loss
 
@@ -34,10 +34,10 @@ Corridors are naturally occurring interstellar pathways that allow faster-than-l
 
     ◦ Collapsed Corridors **no longer emit Corridor Radiation** and cannot be reaccessed.
 
-**Implications**
+**Other Notes**
 
 • Human expansion depended heavily on stable Corridors. As their reliability degraded, so did interstellar infrastructure.
 
 • Colonies stranded by shifting or collapsing Corridors often suffer **total isolation**, leading to slow decline or death.
 
-• Some Corridors still offer partial stability, allowing travel with heavy risk but remain the only option for keeping distant colonies alive.
+• Some Corridors still offer partial stability, allowing travel with heavy risk; but remain the only option for keeping distant colonies alive.
