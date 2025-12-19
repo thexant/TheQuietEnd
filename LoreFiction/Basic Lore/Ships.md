@@ -14,7 +14,7 @@ Interstellar ships form the backbone of humanity’s crumbling infrastructure, f
 
 • While in transit, ships are exposed to Corridor Radiation, requiring robust hull shielding and **post-travel decontamination** procedures.
 
-• Internal systems often suffer malfunctions during transit—**crew intervention is mandatory** for repairs, calibration, and maintaining life support.
+• Internal systems often suffer malfunctions during transit, **crew intervention is mandatory** for repairs, calibration, and maintaining life support.
 
 **Crew Roles**
 
@@ -36,7 +36,7 @@ Smaller ships may consolidate roles; larger ones may have redundancy or entire t
 
 • Life aboard ship is **tense, exhausting, and dangerous**. Crew members live in close quarters, share limited amenities, and face **constant equipment degradation**.
 
-• Crews often operate under **tight contracts** from colonial governments, Earth authorities, or corporate sponsors—but many run independent.
+• Crews often operate under **tight contracts** from colonial governments, Earth authorities, or corporate sponsors; but many run independent.
 
 • **Salvage**, courier runs, emergency resupply, or medical retrievals are common assignments. Not all of them are above-board.
 
@@ -46,7 +46,7 @@ Smaller ships may consolidate roles; larger ones may have redundancy or entire t
 
 • They’re often **superstitious**, especially about routes that have gone “dark” before, gates with a history of failure, or ships that returned… altered.
 
-• Crews trade stories, warnings, and unofficial maps wherever they dock—**information is often more valuable than money**.
+• Crews trade stories, warnings, and unofficial maps wherever they dock. **Information is often more valuable than money**.
 
 **Risk and Reward**
 

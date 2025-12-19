@@ -2,13 +2,13 @@ Human colonies are scattered across dozens of star systems, founded during the p
 
 **Structure and Environment**
 
-• Colonies are almost always **enclosed**, industrial, and highly functional—prioritizing longevity and utility over comfort.
+• Colonies are almost always **enclosed**, industrial, and highly functional-prioritizing longevity and utility over comfort.
 
 • Most are built into **hardened structures** on planetary surfaces, inside asteroids, or within artificial stations. Windows are rare, aesthetics rarer.
 
 • Life is **cramped and resource-regulated**. Colonies rely on strict maintenance cycles, rationed supplies, and relentless work routines to stay viable.
 
-• Atmospheric and gravity systems vary—some use planetary conditions, others rely on artificial life support.
+• Atmospheric and gravity systems vary; some use planetary conditions, others rely on artificial life support.
 
 **Population and Culture**
 
@@ -26,9 +26,9 @@ Human colonies are scattered across dozens of star systems, founded during the p
 
 • If a Corridor **shifts or collapses**, a colony can be **cut off indefinitely**, losing all contact with the wider network.
 
-    ◦ If the Corridor returns, it often does so too late—many such colonies are found **dead or nearly so**.
+    ◦ If the Corridor returns, it often does so too late. Many such colonies are found **dead or nearly so**.
 
-    ◦ **Reclaimed colonies** are sometimes resettled or salvaged, with remnants of the previous population still present—sometimes alive, usually not.
+    ◦ **Reclaimed colonies** are sometimes resettled or salvaged, with remnants of the previous population still present-sometimes alive, usually not.
 
 **Quarantine and Hazards**
 
@@ -36,7 +36,7 @@ Human colonies are scattered across dozens of star systems, founded during the p
 
 • Some colonies enact **quarantine procedures** during incidents, though enforcement varies.
 
-• Rumors of **"ghost colonies"** persist—places that went dark and were later found abandoned, their interiors intact, but with no sign of where the inhabitants went.
+• Rumors of **"ghost colonies"** persist; places that went dark and were later found abandoned, their interiors intact, but with no sign of where the inhabitants went.
 
 **Strategic Role**
 

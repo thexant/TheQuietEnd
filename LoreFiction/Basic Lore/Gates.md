@@ -24,7 +24,7 @@ Gates are colossal human-made megastructures designed to stabilize and hold open
 
 • Older gates, especially those built during humanity’s rapid expansion period, are more prone to **malfunctions and radiation leakage**.
 
-• Gates at dead routes—where Corridors have collapsed or shifted irreversibly—are often left to **float abandoned**, unusable but too expensive to dismantle.
+• Gates at dead routes (where Corridors have collapsed or shifted irreversibly) are often left to **float abandoned**, unusable but too expensive to dismantle.
 
 **Decontamination**
 
@@ -36,7 +36,7 @@ Gates are colossal human-made megastructures designed to stabilize and hold open
 
     ◦ Radiation scrubbing for key components
 
-• Only ships passing through a **gated exit** receive full decontamination—those using natural or emergency exits risk spreading contamination or dying from exposure.
+• Only ships passing through a **gated exit** receive full decontamination; those using natural or emergency exits risk spreading contamination or dying from exposure.
 
 **Strategic Value**
 

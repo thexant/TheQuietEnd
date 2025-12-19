@@ -40,4 +40,4 @@ Corridors are naturally occurring interstellar pathways that allow faster-than-l
 
 • Colonies stranded by shifting or collapsing Corridors often suffer **total isolation**, leading to slow decline or death.
 
-• Some Corridors still offer partial stability, allowing travel with heavy risk—but remain the only option for keeping distant colonies alive.
+• Some Corridors still offer partial stability, allowing travel with heavy risk but remain the only option for keeping distant colonies alive.
