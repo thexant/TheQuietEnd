@@ -190,7 +190,7 @@ function displayPath($relative) {
     </script>
     <script src="lore-index.js" defer></script>
   </head>
-  <body data-view="view.php">
+  <body data-view="view.php" data-index="lore-index.json">
     <header>
       <div class="signal"><a href="../index.html">Homepage</a> // Lore &amp; Fiction</div>
       <h1>Lore &amp; Fiction</h1>

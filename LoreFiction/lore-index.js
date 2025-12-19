@@ -6,6 +6,8 @@
   const searchClear = document.getElementById("search-clear");
   const searchStatus = document.getElementById("search-status");
   const viewBase = document.body?.getAttribute("data-view") || "view.php";
+  const indexSource =
+    document.body?.getAttribute("data-index") || "lore-index.json";
 
   if (!indexRoot) {
     return;
@@ -217,22 +219,32 @@
     updateStatus(normalized, scored.length, entries.length);
   };
 
+  const fetchEntries = async (url) => {
+    const response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) {
+      throw new Error(`Failed to load ${url}`);
+    }
+    return await response.json();
+  };
+
   const loadEntries = async () => {
     if (payload && Array.isArray(payload.entries)) {
       return payload;
     }
 
-    try {
-      const response = await fetch("index.php?format=json", {
-        cache: "no-store",
-      });
-      if (!response.ok) {
-        throw new Error("Failed");
+    const sources = ["index.php?format=json", indexSource].filter(
+      (value, index, self) => self.indexOf(value) === index
+    );
+
+    for (const source of sources) {
+      try {
+        return await fetchEntries(source);
+      } catch (error) {
+        continue;
       }
-      return await response.json();
-    } catch (error) {
-      return { count: 0, entries: [] };
     }
+
+    return { count: 0, entries: [] };
   };
 
   const init = async () => {

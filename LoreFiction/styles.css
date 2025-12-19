@@ -151,6 +151,21 @@ main {
   color: var(--ink);
   font-family: var(--font-body);
   font-size: 0.95rem;
+  appearance: none;
+  -webkit-appearance: none;
+  caret-color: var(--signal);
+}
+
+.search-row input::placeholder {
+  color: var(--muted);
+  opacity: 0.75;
+}
+
+.search-row input::-webkit-search-decoration,
+.search-row input::-webkit-search-cancel-button,
+.search-row input::-webkit-search-results-button,
+.search-row input::-webkit-search-results-decoration {
+  display: none;
 }
 
 .search-row input:focus {
