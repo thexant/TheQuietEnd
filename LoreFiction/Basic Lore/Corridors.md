@@ -6,7 +6,7 @@ Corridors are naturally occurring interstellar pathways that allow faster-than-l
 
 • Travel through a Corridor is one of the **only methods** of practical interstellar transit.
 
-• Their interior is **hostile**, a voidlike medium saturated with **[[Corridor Radiation]]**, requiring hardened ships and constant maintenance.
+• Their interior is **hostile**, a voidlike medium saturated with Corridor Radiation, requiring hardened ships and constant maintenance.
 
 • Ships **must exit through a gate**; entry and exit without one is nearly suicidal, often resulting in catastrophic loss
 
