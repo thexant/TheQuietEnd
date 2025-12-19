@@ -682,11 +682,7 @@
 
             // 1. Update Timer
             state.currentTime -= delta;
-            if (state.currentTime <= 0) {
-                state.currentTime = 0;
-                gameOver();
-                return;
-            }
+            state.currentTime = Math.max(0, state.currentTime);
 
             // 2. Handle Inputs
             if (state.keys.ArrowLeft) state.playerRot -= CONFIG.rotSpeed * delta;
@@ -710,7 +706,11 @@
 
             // 4. Update Lock Logic
             if (isRotAligned && isHeightAligned) {
-                state.lockValue += CONFIG.lockSpeed * delta;
+                const remainingLock = Math.max(0, 100 - state.lockValue);
+                const remainingTime = Math.max(1, state.currentTime);
+                const minSpeedToFinish = remainingLock / remainingTime;
+                const effectiveLockSpeed = Math.max(CONFIG.lockSpeed, minSpeedToFinish);
+                state.lockValue += effectiveLockSpeed * delta;
                 ui.container.classList.add('match-active');
                 ui.status.innerText = "ACQUIRING SIGNAL...";
                 ui.status.style.color = "#fff";
@@ -729,7 +729,7 @@
             // Clamp lock value
             state.lockValue = Math.max(0, Math.min(100, state.lockValue));
 
-            // 5. Check Success
+            // 5. Check Success / Failure
             if (state.lockValue >= 100) {
                 // Stage Clear
                 state.score++;
@@ -740,6 +740,9 @@
                 state.maxTime = Math.max(3000, state.maxTime * CONFIG.timeReduction);
                 
                 startStage();
+            } else if (state.currentTime <= 0) {
+                gameOver();
+                return;
             }
 
             updateVisuals();
