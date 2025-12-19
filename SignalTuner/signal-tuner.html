@@ -431,6 +431,91 @@
             color: var(--ink);
         }
 
+        /* Mobile layout: keep all HUD elements visible */
+        @media (max-width: 720px), (max-height: 700px) {
+            #game-container {
+                height: 100dvh;
+                width: 100vw;
+                padding: 10px;
+                gap: 10px;
+            }
+
+            header {
+                padding-bottom: 8px;
+            }
+
+            h1 {
+                font-size: 1.1rem;
+            }
+
+            .breadcrumbs {
+                font-size: 0.62rem;
+                letter-spacing: 0.15em;
+                padding: 4px 8px;
+            }
+
+            .interface {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: auto auto;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .center-hud {
+                grid-column: 1 / -1;
+                margin-top: 0;
+                gap: 6px;
+            }
+
+            .control-group,
+            .slider-wrapper {
+                gap: 6px;
+            }
+
+            .circle-container {
+                width: 140px;
+                height: 140px;
+                margin-bottom: 4px;
+            }
+
+            .slider-container {
+                width: 52px;
+                height: 140px;
+                margin-bottom: 4px;
+            }
+
+            .touch-controls-row,
+            .touch-controls-col {
+                gap: 8px;
+            }
+
+            .btn-ctrl {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+
+            .lock-bar-bg {
+                height: 20px;
+            }
+
+            .timer-section {
+                gap: 4px;
+            }
+
+            .label {
+                font-size: 0.7rem;
+            }
+
+            .stats {
+                font-size: 0.8rem;
+            }
+
+            .stat-value {
+                font-size: 1rem;
+            }
+        }
+
     </style>
 </head>
 <body>
