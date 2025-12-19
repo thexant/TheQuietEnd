@@ -316,51 +316,6 @@
         margin-right: 10px;
       }
 
-      .verified-signals {
-        align-self: start;
-        border: 1px solid rgba(118, 226, 183, 0.18);
-        border-radius: var(--radius);
-        padding: 14px 18px;
-        background: rgba(4, 6, 6, 0.65);
-        display: grid;
-        gap: 8px;
-        max-width: 320px;
-        opacity: 0.8;
-        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.45);
-      }
-
-      .verified-signals-header {
-        display: flex;
-        align-items: baseline;
-        justify-content: space-between;
-        gap: 16px;
-      }
-
-      .verified-signals h3 {
-        margin: 0;
-        font-family: var(--font-title);
-        font-size: 0.88rem;
-        font-weight: 700;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        color: var(--signal);
-      }
-
-      .verified-signals-count {
-        font-family: var(--font-title);
-        font-size: 1.5rem;
-        letter-spacing: 0.1em;
-        color: var(--signal);
-        text-shadow: 0 0 12px rgba(118, 226, 183, 0.35);
-      }
-
-      .verified-signals p {
-        margin: 0;
-        color: var(--muted);
-        font-size: 0.85rem;
-        line-height: 1.5;
-      }
-
       .telemetry {
         position: absolute;
         top: 120px;
@@ -536,14 +491,6 @@
           <li>Supply archives being restored from outer stations.</li>
           <li>Next node online: tools, maps, and lore repositories.</li>
         </ul>
-      </section>
-
-      <section class="verified-signals" aria-live="polite">
-        <div class="verified-signals-header">
-          <h3>Verified Signals</h3>
-          <span class="verified-signals-count" id="verified-signals-count">0</span>
-        </div>
-        <p>Unique access signatures confirmed in the last 24 hours.</p>
       </section>
     </main>
 

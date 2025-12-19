@@ -87,6 +87,15 @@
         padding: 24px 7vw 64px;
       }
 
+      .sidebar {
+        position: sticky;
+        top: 20px;
+        align-self: start;
+        display: grid;
+        gap: 18px;
+        height: fit-content;
+      }
+
       .panel {
         border: 1px solid var(--line);
         border-radius: var(--radius);
@@ -102,6 +111,42 @@
         letter-spacing: 0.16em;
         text-transform: uppercase;
         color: var(--amber-bright);
+      }
+
+      .panel details {
+        width: 100%;
+      }
+
+      .panel summary {
+        list-style: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        font-family: var(--font-title);
+        font-size: 0.9rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--amber-bright);
+      }
+
+      .panel summary::-webkit-details-marker {
+        display: none;
+      }
+
+      .panel summary::after {
+        content: "+";
+        color: var(--amber);
+        font-size: 1rem;
+      }
+
+      .panel details[open] summary::after {
+        content: "-";
+      }
+
+      .panel details > *:not(summary) {
+        margin-top: 12px;
       }
 
       .panel label {
@@ -180,6 +225,10 @@
         font-size: 0.72rem;
         color: var(--amber-bright);
         background: rgba(12, 9, 6, 0.9);
+      }
+
+      .table-wrap {
+        overflow-x: auto;
       }
 
       .rules-content {
@@ -280,6 +329,10 @@
         .layout {
           grid-template-columns: 1fr;
         }
+
+        .sidebar {
+          position: static;
+        }
       }
     </style>
   </head>
@@ -300,120 +353,129 @@
 
     <main class="layout">
       <aside class="sidebar">
-        <section class="panel">
+        <details class="panel" open>
+          <summary>Search</summary>
           <label for="search-input">Search sections</label>
           <input id="search-input" type="search" placeholder="Search rules..." />
           <div class="search-count" id="search-count">Loading rules...</div>
-        </section>
+        </details>
 
-        <section class="panel" id="jump-to">
-          <h3>Jump to</h3>
+        <details class="panel" id="jump-to" open>
+          <summary>Jump to</summary>
           <nav class="toc" id="toc"></nav>
-        </section>
+        </details>
 
-        <section class="panel" id="quick-reference">
-          <h3>Quick Reference</h3>
-          <table class="quick-table">
-            <thead>
-              <tr>
-                <th>Roll</th>
-                <th>Outcome</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>10+</td>
-                <td>Clean success, take a bonus or avoid a cost.</td>
-              </tr>
-              <tr>
-                <td>7-9</td>
-                <td>Success with a cost or complication.</td>
-              </tr>
-              <tr>
-                <td>6-</td>
-                <td>Mark XP, GM makes a move.</td>
-              </tr>
-            </tbody>
-          </table>
-          <table class="quick-table" style="margin-top: 16px;">
-            <thead>
-              <tr>
-                <th>Stats</th>
-                <th>Use</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>GRIT</td>
-                <td>Endure, resist, push through.</td>
-              </tr>
-              <tr>
-                <td>WITS</td>
-                <td>Notice, plan, diagnose.</td>
-              </tr>
-              <tr>
-                <td>TECH</td>
-                <td>Repair, hack, operate systems.</td>
-              </tr>
-              <tr>
-                <td>TACT</td>
-                <td>Fight, command, pressure.</td>
-              </tr>
-              <tr>
-                <td>FACE</td>
-                <td>Negotiate, lie, read people.</td>
-              </tr>
-            </tbody>
-          </table>
-          <table class="quick-table" style="margin-top: 16px;">
-            <thead>
-              <tr>
-                <th>Phase Loop</th>
-                <th>Focus</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Job</td>
-                <td>Contract, intel, prep, first consequences.</td>
-              </tr>
-              <tr>
-                <td>Travel</td>
-                <td>Corridor runs, hazards, instability.</td>
-              </tr>
-              <tr>
-                <td>Location</td>
-                <td>NPCs, rumors, local politics.</td>
-              </tr>
-              <tr>
-                <td>Docks</td>
-                <td>Repair, refit, recovery, reduce heat.</td>
-              </tr>
-            </tbody>
-          </table>
-          <table class="quick-table" style="margin-top: 16px;">
-            <thead>
-              <tr>
-                <th>Clock Size</th>
-                <th>Use</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>4 segments</td>
-                <td>Fast, immediate problems.</td>
-              </tr>
-              <tr>
-                <td>6 segments</td>
-                <td>Medium pressure, job scale.</td>
-              </tr>
-              <tr>
-                <td>8 segments</td>
-                <td>Slow burn, multi-session arcs.</td>
-              </tr>
-            </tbody>
-          </table>
-        </section>
+        <details class="panel" id="quick-reference" open>
+          <summary>Quick Reference</summary>
+          <div class="table-wrap">
+            <table class="quick-table">
+              <thead>
+                <tr>
+                  <th>Roll</th>
+                  <th>Outcome</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>10+</td>
+                  <td>Clean success, take a bonus or avoid a cost.</td>
+                </tr>
+                <tr>
+                  <td>7-9</td>
+                  <td>Success with a cost or complication.</td>
+                </tr>
+                <tr>
+                  <td>6-</td>
+                  <td>Mark XP, GM makes a move.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-wrap" style="margin-top: 16px;">
+            <table class="quick-table">
+              <thead>
+                <tr>
+                  <th>Stats</th>
+                  <th>Use</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>GRIT</td>
+                  <td>Endure, resist, push through.</td>
+                </tr>
+                <tr>
+                  <td>WITS</td>
+                  <td>Notice, plan, diagnose.</td>
+                </tr>
+                <tr>
+                  <td>TECH</td>
+                  <td>Repair, hack, operate systems.</td>
+                </tr>
+                <tr>
+                  <td>TACT</td>
+                  <td>Fight, command, pressure.</td>
+                </tr>
+                <tr>
+                  <td>FACE</td>
+                  <td>Negotiate, lie, read people.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-wrap" style="margin-top: 16px;">
+            <table class="quick-table">
+              <thead>
+                <tr>
+                  <th>Phase Loop</th>
+                  <th>Focus</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Job</td>
+                  <td>Contract, intel, prep, first consequences.</td>
+                </tr>
+                <tr>
+                  <td>Travel</td>
+                  <td>Corridor runs, hazards, instability.</td>
+                </tr>
+                <tr>
+                  <td>Location</td>
+                  <td>NPCs, rumors, local politics.</td>
+                </tr>
+                <tr>
+                  <td>Docks</td>
+                  <td>Repair, refit, recovery, reduce heat.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-wrap" style="margin-top: 16px;">
+            <table class="quick-table">
+              <thead>
+                <tr>
+                  <th>Clock Size</th>
+                  <th>Use</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>4 segments</td>
+                  <td>Fast, immediate problems.</td>
+                </tr>
+                <tr>
+                  <td>6 segments</td>
+                  <td>Medium pressure, job scale.</td>
+                </tr>
+                <tr>
+                  <td>8 segments</td>
+                  <td>Slow burn, multi-session arcs.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </details>
       </aside>
 
       <section class="rules-content" id="rules">
