@@ -146,6 +146,7 @@
         .interface {
             display: grid;
             grid-template-columns: 1fr 120px 1fr;
+            grid-template-areas: "azimuth hud freq";
             gap: var(--interface-gap);
             align-items: start;
             justify-items: center;
@@ -170,6 +171,7 @@
             flex-direction: column;
             align-items: center;
             height: 100%;
+            grid-area: azimuth;
         }
 
         .circle-container {
@@ -240,6 +242,7 @@
             align-items: center;
             height: 100%;
             justify-content: flex-start;
+            grid-area: freq;
         }
 
         .slider-container {
@@ -328,6 +331,7 @@
             gap: var(--hud-gap);
             width: 100%;
             margin-top: clamp(0px, 6vmin, 40px);
+            grid-area: hud;
         }
 
         .lock-text {
@@ -448,25 +452,19 @@
             #game-container {
                 height: 100dvh;
                 width: 100vw;
+                padding-bottom: calc(var(--frame-pad) + env(safe-area-inset-bottom));
             }
 
             header {
                 padding-bottom: 8px;
             }
 
-            h1 {
-                font-size: 1.1rem;
-            }
-
-            .breadcrumbs {
-                font-size: 0.62rem;
-                letter-spacing: 0.15em;
-                padding: 4px 8px;
-            }
-
             .interface {
                 grid-template-columns: 1fr 1fr;
                 grid-template-rows: auto auto;
+                grid-template-areas:
+                    "azimuth freq"
+                    "hud hud";
                 align-items: center;
             }
 
@@ -478,6 +476,17 @@
             .control-group,
             .slider-wrapper {
                 height: auto;
+            }
+
+            :root {
+                --dial-size: clamp(90px, 22vmin, 160px);
+                --slider-height: clamp(90px, 22vmin, 160px);
+                --slider-width: clamp(40px, 9vmin, 56px);
+                --btn-size: clamp(30px, 7.5vmin, 44px);
+                --hud-gap: clamp(4px, 1.2vmin, 8px);
+                --lock-height: clamp(14px, 2.4vmin, 22px);
+                --interface-gap: clamp(6px, 1.6vmin, 12px);
+                --frame-pad: clamp(6px, 1.8vmin, 12px);
             }
         }
 
