@@ -6,6 +6,7 @@
   const auxListEl = document.getElementById("aux-diagnostics-list");
   const heroEl = document.querySelector(".hero");
   const signalCanvas = document.querySelector(".signal-canvas");
+  const verifiedSignalsEl = document.getElementById("verified-signals-count");
 
   const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
 
@@ -48,6 +49,11 @@
   let auxElements = {};
   let auxIntervalId = null;
   let auxIntervalMs = 1200;
+  let verifiedSignalsTimeoutId = null;
+  const verifiedSignalsWindowMs = 24 * 60 * 60 * 1000;
+  const verifiedSignalsKey = "tqe_verified_signals_log";
+  const verifiedVisitorKey = "tqe_verified_visitor_id";
+  let memorySignalsLog = [];
 
   const applyTextPreset = (preset) => {
     if (!preset) return;
@@ -316,7 +322,119 @@
     }
   };
 
+  const storageAvailable = (() => {
+    try {
+      const testKey = "__tqe_storage_test__";
+      localStorage.setItem(testKey, "1");
+      localStorage.removeItem(testKey);
+      return true;
+    } catch (error) {
+      return false;
+    }
+  })();
+
+  const readSignalsLog = () => {
+    if (!storageAvailable) {
+      return memorySignalsLog;
+    }
+    try {
+      const stored = localStorage.getItem(verifiedSignalsKey);
+      if (!stored) return [];
+      const parsed = JSON.parse(stored);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      return [];
+    }
+  };
+
+  const writeSignalsLog = (log) => {
+    if (!storageAvailable) {
+      memorySignalsLog = log;
+      return;
+    }
+    try {
+      localStorage.setItem(verifiedSignalsKey, JSON.stringify(log));
+    } catch (error) {
+      // Ignore storage write errors.
+    }
+  };
+
+  const getVisitorId = () => {
+    if (!storageAvailable) {
+      return "session";
+    }
+    try {
+      const existing = localStorage.getItem(verifiedVisitorKey);
+      if (existing) return existing;
+      const id = typeof crypto !== "undefined" && crypto.randomUUID
+        ? crypto.randomUUID()
+        : `visitor-${Date.now()}-${Math.floor(Math.random() * 100000)}`;
+      localStorage.setItem(verifiedVisitorKey, id);
+      return id;
+    } catch (error) {
+      return "session";
+    }
+  };
+
+  const pruneSignalsLog = (log, now) =>
+    log.filter((entry) =>
+      entry && Number.isFinite(entry.lastSeen) && now - entry.lastSeen < verifiedSignalsWindowMs);
+
+  const touchSignalsLog = (log, now) => {
+    const visitorId = getVisitorId();
+    const existing = log.find((entry) => entry.id === visitorId);
+    if (existing) {
+      existing.lastSeen = now;
+      return log;
+    }
+    return [...log, { id: visitorId, lastSeen: now }];
+  };
+
+  const renderSignalsCount = (log) => {
+    if (!verifiedSignalsEl) return;
+    verifiedSignalsEl.textContent = String(log.length);
+  };
+
+  const scheduleSignalsSweep = (log, now) => {
+    if (!verifiedSignalsEl) return;
+    if (verifiedSignalsTimeoutId) {
+      clearTimeout(verifiedSignalsTimeoutId);
+    }
+    if (!log.length) return;
+    const nextExpiry = Math.min(...log.map((entry) => entry.lastSeen + verifiedSignalsWindowMs));
+    const delay = Math.max(1000, nextExpiry - now + 50);
+    verifiedSignalsTimeoutId = setTimeout(() => refreshSignals(false), delay);
+  };
+
+  const refreshSignals = (touch) => {
+    if (!verifiedSignalsEl) return;
+    const now = Date.now();
+    let log = pruneSignalsLog(readSignalsLog(), now);
+    if (touch) {
+      log = touchSignalsLog(log, now);
+    }
+    writeSignalsLog(log);
+    renderSignalsCount(log);
+    scheduleSignalsSweep(log, now);
+  };
+
+  const initSignals = () => {
+    if (!verifiedSignalsEl) return;
+    refreshSignals(true);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        refreshSignals(true);
+      }
+    });
+    window.addEventListener("storage", (event) => {
+      if (event.key === verifiedSignalsKey) {
+        refreshSignals(false);
+      }
+    });
+  };
+
   initWaveform();
   applyAuxDiagnostics({});
   loadConfig();
+  initSignals();
 })();

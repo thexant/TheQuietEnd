@@ -1,0 +1,993 @@
+﻿The Quiet End
+A PbtA-based tabletop framework for roleplaying in “The Quiet End” universe
+0) Design Goals
+* Play stays fast: 2d6 + Stat, fiction-first, minimal math.
+* The crew manages two sheets: Character + Ship (shared).
+* Scarcity matters: Supply, Parts, Fuel, Data, Heat.
+* Travel is drama: Corridor Runs are structured and dangerous.
+* Truth is local: no FTL comms, delayed consequences, rumor economies.
+________________
+
+
+1) Core Resolution
+When you do something risky, roll 2d6 + Stat.
+* 10+: You do it, cleanly. Take a bonus / avoid a cost.
+* 7–9: You do it, but choose 1 cost / complication (or GM chooses).
+* 6-: Mark XP; GM makes a move (hard as needed).
+Stats:
+* GRIT (endure, resist, push through)
+* WITS (notice, plan, diagnose)
+* TECH (repair, hack, operate systems)
+* TACT (fight, command, pressure)
+* FACE (negotiate, lie, read people)
+________________
+
+
+2) Harm, Stress, and Conditions
+Keep it simple: two tracks.
+2.1 Conditions
+Each time you take damage or experience a situation where you may end up injured or otherwise hurt, physically or psychologically; add one of the following “Injury Tags”.
+Pick from: Injured, Exposed, Shaken, Exhausted, Contaminated, Compromised
+* If you’d take a Condition you already have, upgrade it to a Wound.
+2.2 Wounds (serious)
+* 2 Wounds = you’re out of the scene (Condition + Wound + Wound)
+* 3 Wounds = Fill in 1 box on your Health Clock
+The Health Clock is a box divided into 4. When all four boxes are filled, your character dies.
+If you sustain 3 wounds and fill in a box on your health clock; each new wound of the same type immediately fills another box until you receive medical treatment/healing.
+2.3 Radiation Track (setting-defining)
+Each character has RADS 0–6.
+* Gain RADS from Corridor exposure, bad shielding, contaminated salvage.
+* At 4+ RADS, you’re unstable: you take -1 ongoing to resist exposure and healing is harder.
+* At 6 RADS, you’re critical: immediate medical intervention or you’re done.
+________________
+
+
+3) The Crew Loop
+Play cycles between four phases:
+3.1 JOB PHASE (contract / objective play)
+* Take a job (or self-declare a goal), gather intel, prep loadout, commit to a route.
+* Play focuses on negotiation, planning, pressure, and the first consequences.
+3.2 TRAVEL/CORRIDOR PHASE (structured travel)
+* The ship makes a Corridor Run using Corridor Moves, events, and clocks.
+* This is where instability, radiation, and route drift hit hardest.
+3.3 LOCATION PHASE (on-station / on-world play)
+* The crew is physically present somewhere: station, colony, outpost, freeport, derelict hub.
+* Play focuses on: NPC interaction, side problems, favors, rumors, local politics, and recreation.
+* This is where “truth is regional” shows up most: you hear things that are wrong, outdated, or dangerously true.
+
+3.4 DOCKS PHASE (refit / recovery / projects)
+   * Spend resources, run decon, repair, upgrade, and reduce Heat.
+   * This phase is more “ship and character maintenance,” less “local drama.”
+
+Important: Location Phase and Dock Phase often happen back-to-back, but they don’t have to. A place can be socially rich but mechanically hostile (no parts, no safe refit), or mechanically helpful but socially empty (a dead outpost with supplies but no people).
+________________
+
+
+4) GM Agenda & Principles
+Agenda
+      * Make the Corridors feel real, costly, and unreliable.
+      * Keep the crew desperate but not helpless.
+      * Make consequences delayed, regional, and political.
+Principles
+      * Ask questions; build on answers.
+      * Put scarcity on-screen.
+      * Show systems failing at the worst time.
+      * Let rumors be true sometimes.
+GM Moves (examples)
+      * Advance an Instability / Radiation / Heat clock
+      * Separate the crew (airlocks, comm failure, fog)
+      * Offer a deal that solves one problem and creates another
+      * Reveal the price of survival (people, ethics, time)
+________________
+
+
+5) Clocks (the engine of decay) — Expanded
+5.0 What a Clock Is
+A Clock is a simple countdown/progress tracker drawn as 4, 6, or 8 segments.
+      * When you fill segments, the situation changes.
+      * Clocks let you show pressure, decay, pursuit, scarcity, and long-term consequences without spreadsheets.
+      * Clocks are public by default. If something is hidden, tell the table what the clock represents in vague terms (“Someone Is Coming”), but don’t reveal the details until it matters.
+
+Clock sizes
+         * 4 segments: fast, immediate problems (this scene / this phase)
+         * 6 segments: medium pressure (this job / this travel leg)
+         * 8 segments: slow burn (multi-session arcs, faction fallout, long projects)
+
+________________
+
+
+5.1 Types of Clocks You’ll Use
+Use whichever fits the moment:
+            1. Threat Clocks (bad things approaching)
+Examples: Boarding Imminent, Quarantine Lockdown, Vacuum Bloom Spread, Gate uthority Sweep
+
+            2. Decay Clocks (systems or situations wearing down)
+Examples: Ship System Strain, Corridor Instability, Supply Famine
+            3. Heat/Attention Clocks (people noticing you)
+Examples: HEAT, Bounty Posted, Corp Audit, Pirate Interest
+            4. Progress/Project Clocks (crew builds/earns something)
+Examples: Install Decon Bay, Secure Fake Papers Network, Map a Stable Route
+            5. Social Clocks (relationships shifting)
+Examples: Contact Loyalty, Union Trust, Captain’s Reputation
+
+________________
+
+
+5.2 When to Start a Clock
+Start a clock when a situation is not solved by a single roll and needs pressure over time.
+Good prompts:
+               * “This is going to take a while…”
+               * “Even if you succeed, it’ll cost time or wear something down…”
+               * “Someone will react to this, but not immediately…”
+               * “You’re safe for now…”
+
+Rule of thumb: If you expect 2+ scenes of consequences, make a clock.
+________________
+
+
+5.3 How Clocks Advance
+Clocks tick in three main ways:
+A) GM Moves
+ Whenever you make a GM move that escalates the situation, tick a relevant clock.
+B) Player Costs (7–9 results)
+ When players accept complications (lose time, draw attention, strain systems), that’s usually +1 segment somewhere.
+C) Phase Triggers
+ Use the game’s phase loop to drive ticking:
+                  * Job Phase: clocks start (contracts, rivals, deadlines); Heat often rises
+                  * Travel/Corridor Phase: Instability + Strain spikes; hazards tick clocks fast
+                  * Location Phase: social clocks shift; rumors mutate; local threats activate
+                  * Docks Phase: clocks can be reduced/cleared via repairs, decon, bribes, restock
+
+How many segments to add
+                     * +1 for minor complication / time cost / small attention
+
+                     * +2 for major failure / serious damage / loud exposure / hard escalation
+                     * +3 only for catastrophic events (collapse, breach, mass panic)
+
+________________
+
+
+5.4 What Happens When a Clock Fills
+When a clock is filled, something changes immediately. Don’t just say “it fills”—make it bite.
+                        * Threat clock fills: the threat arrives or triggers
+                        * Decay clock fills: the system fails / breaks / becomes unavailable
+                        * Heat clock fills: enforcement/pirates/corps take action
+                        * Project clock fills: the upgrade/service/network is complete
+                        * Social clock fills: trust is secured OR the relationship snaps
+
+After a clock fills, either:
+                           * Reset it (new cycle, higher stakes), or
+                           * Replace it (the situation has changed form)
+
+________________
+
+
+5.5 Core Clocks (Recommended Defaults)
+These are the five you listed
+, but with clear “what it means / what ticks it / what happens at thresholds.”
+A) CORRIDOR INSTABILITY (per route or per region)
+Type: Decay / Threat (6 segments recommended)
+Represents: How close a Corridor is to a Shift or Collapse event.
+Tick it when:
+                              * A Corridor Run gets complications (fog, radiation surge, route drift)
+                              * You “lose time” during travel or miss the alignment window
+                              * You use an ungated exit / emergency maneuver
+                              * You push a gate window beyond safe tolerances
+
+Threshold effects (example):
+                                 * 2/6: Warning signs (odd readings, “sour” alignment, contradictory nav data)
+                                 * 4/6: Shift event likely soon (route options narrow; gate realignment pressure)
+                                 * 6/6: Trigger a major event: Shift or Collapse (GM choice, or roll if you want uncertainty)
+
+Optional rule (adds nice texture):
+ When it hits 6/6, roll 1d6:
+                                    * 1–3: Shift
+                                    * 4–5: Violent Shift (misexit + system strain)
+                                    * 6: Collapse
+
+(If you prefer pure narrative control, skip the roll.)
+________________
+
+
+B) SHIP SYSTEM STRAIN (ship-wide wear)
+Type: Decay (6 segments recommended)
+Represents: The ship accumulating hidden problems: microfractures, fouled filters, EMI scars, jury-rigs nearing failure.
+Tick it when:
+                                       * You take a “works but costs” repair result
+                                       * You run the corridor under stress (fog, radiation, partial shielding)
+                                       * You go too long without proper Docks maintenance
+                                       * You patch instead of properly fixing
+
+Threshold effects (example):
+                                          * 2/6: A system becomes Strained (GM picks, or tie it to the fiction)
+                                          * 4/6: Another system becomes Strained or one becomes Damaged
+                                          * 6/6: A system goes Offline at the worst moment, or HULL takes a hit
+
+Clearing it:
+                                             * Docks Phase ship actions (proper refit, spending PARTS, decon, calibration)
+                                             * Some modules reduce how often it ticks (Fog-Hardened Controls, Decon Bay, etc.)
+
+________________
+
+
+C) HEAT (attention and consequences)
+Type: Attention (4 or 6 segments depending on tone)
+Represents: How “known” and “wanted” the crew/ship is in the current region.
+Tick it when:
+                                                * You act loud, violent, or illegal in public
+                                                * You double-cross someone important
+                                                * You fail social moves that create suspicion
+                                                * You arrive during lockdown/quarantine and don’t comply
+
+Threshold effects (example):
+                                                   * 2/6: You get tagged (ID checks, tailing, denied docking, price hikes)
+                                                   * 4/6: Active pursuit (raids, warrants, pirate ambush setup, corp bounty)
+                                                   * 6/6: A major response (ship impounded, contact flips, gate authority hunt)
+
+Clearing it:
+                                                      * “Keep It Quiet” results, bribes, favors, forged papers, laying low
+                                                      * Leaving the region can reduce Heat, but it may convert into a long-term bounty clock
+
+________________
+
+
+D) SUPPLY FAMINE (life support scarcity)
+Type: Decay (6 segments recommended)
+Represents: Food/meds/filters/air reserves becoming the crew’s real enemy.
+Tick it when:
+                                                         * Time passes without resupply
+                                                         * You take “lose supplies” complications
+                                                         * Systems strain causes inefficiency (leaks, fouled filters, decon failures)
+                                                         * You take on extra passengers / refugees / “temporary crew”
+
+Threshold effects (example):
+                                                            * 2/6: Rationing (minor penalties, morale strain, Conditions appear easier)
+                                                            * 4/6: Hard choices (trade gear for food, deny aid, risk contamination)
+                                                            * 6/6: Crisis (someone gets sick, life support fails, mutiny pressure, desperate job)
+
+Clearing it:
+                                                               * Restock at docks, trade cargo, favors with stations/colonies, “good” salvage
+
+________________
+
+
+E) RUMOR WARP (truth decays as it travels)
+Type: Social/Information Decay (4 or 6 segments)
+Represents: The setting’s no-FTL reality: your info gets stale, distorted, weaponized.
+Tick it when:
+                                                                  * You rely on old DATA to make plans
+                                                                  * You spend long time in transit
+                                                                  * You spread a story publicly (especially if it benefits you)
+                                                                  * A faction deliberately muddies the waters
+
+Threshold effects (example):
+                                                                     * 2/6: Minor distortions (prices differ, names wrong, dates off)
+                                                                     * 4/6: Dangerous misinformation (wrong gate window, fake quarantine, “safe route” trap)
+                                                                     * 6/6: Local myth hardens into policy (someone acts on the false truth; you pay)
+
+Clearing it:
+                                                                        * Fresh intel (Work the Crowd), verified nav data, trusted contacts, physical records
+(Or embrace it: weaponize rumor as a tactic.)
+
+________________
+
+
+5.6 Quick Table Rule (How to Use Clocks Without Slowing Play)
+If you want a fast default:
+                                                                           * On any 7–9 where the cost is time/strain/attention → +1 segment somewhere.
+                                                                           * On any 6- → +2 segments to the most relevant clock, or +1 to two clocks.
+                                                                           * At end of each Phase → tick any clock that logically worsens if nothing was done.
+________________
+
+
+
+
+6) Playbooks and Gear (character-facing rules)
+6.0 Character Creation (quick)
+                                                                           1. Pick a Playbook (below).
+                                                                           2. Choose a Stats Array from your playbook.
+                                                                           3. Pick 2 Playbook Moves (you start with those).
+                                                                           4. Pick a Load (Light / Standard / Heavy) and choose your items.
+                                                                           5. Choose 1 Mod (optional at start; set to 0–1 depending on tone).
+                                                                           6. Create 2 Bonds (history questions) with other PCs.
+
+________________
+
+
+6.1 Playbooks
+The Navigator
+You keep the crew alive between stars. You read the Corridors like the weather.
+Recommended Stat Build: 
+
+WITS +2, TECH +1, FACE +1, GRIT 0, TACT −1
+
+You start with: Nav-slate (Precise), dosimeter (Precise), route charm or ritual token (Quiet)
+Choose 2 Moves:
+                                                                              * Sense the Sour: When you Read the Situation about a route, gate, or Corridor, on a hit ask +1 extra question. On a 10+, also gain +1 DATA.
+
+                                                                              * Stitch the Window: Once per Corridor Run, you may turn a 7–9 on RUN A GATED CORRIDOR into a 10+. If you do, mark Exhausted or tick SHIP SYSTEM STRAIN +1.
+
+                                                                              * Dead Reckoning: When you REALIGN THE GATE WINDOW, on a 10+ you may also reduce CORRIDOR INSTABILITY by 1 segment (if it makes sense).
+
+                                                                              * Starblind: When sensors fail (fog/EMI), you can still navigate. When the crew would lose time from blindness, reduce that cost (GM turns “lose time” into a different cost).
+
+                                                                              * Misexit Expert: When you exit “wrong side” of a system, you can declare you know a shortcut. Roll +WITS: 10+ you save a day; 7–9 you save hours but spend 1 FUEL or take 1 Heat.
+
+Bond prompts (choose 2):
+                                                                                 * I’ve seen ___ keep it together when space tried to kill us.
+                                                                                 * ___ doesn’t respect the Corridor. That will get them hurt.
+                                                                                 * I owe ___ for dragging me back from a bad run.
+
+________________
+
+
+The Engineer
+You keep the ship running with spit, wire, and stubbornness.
+Recommended Stat Build:
+TECH +2, GRIT +1, WITS +1, TACT 0, FACE −1
+
+You start with: Tool harness (Rugged), patch-foam canister (Rugged, Limited), insulated gloves (Insulated)
+Choose 2 Moves:
+                                                                                    * Jury-Rig Miracle: When you DO THE FIX without Parts, you can still make it work. On a hit, it works—but the system gains a hidden flaw (GM clocks it) and SHIP SYSTEM STRAIN ticks +1.
+
+                                                                                    * Hard Reset: When you take a quiet moment to rebuild a failing subsystem, spend 1 PARTS to clear Strained on one ship system without a roll.
+
+                                                                                    * Overbuild: When you PATCH THE HULL, on a 10+ also choose one: regain +1 PARTS (from salvage/scrap) or reduce future Hull-related complications on this job.
+
+                                                                                    * EM-Hardened Instinct: When Static Fog hits, you and your gear ignore the first “systems go blind” consequence (you still feel it—just not as badly).
+
+                                                                                    * Spare the Good Stuff: When a result would cost Parts, you may instead cost time. Tick CORRIDOR INSTABILITY +1 (window tightens) or take +1 Heat—your choice.
+
+Bond prompts (choose 2):
+                                                                                       * I’ve patched ___ up more times than they know.
+                                                                                       * ___ is the only one I trust near the reactor.
+                                                                                       * I don’t forgive ___ for what they did to my ship.
+
+________________
+
+
+The Medic
+You keep bodies functional in places bodies were never meant to go.
+Recommended Stat Build:
+TECH +2, WITS +1, FACE +1, GRIT 0, TACT −1
+
+
+
+You start with: Medkit (Medical, Limited), sealant bandages (Medical, Limited), respirator (Sealed)
+Choose 2 Moves:
+                                                                                          * Stitch & Stabilize: When you treat someone in the field, roll +TECH. 10+: clear a Condition or downgrade a Wound to a Condition. 7–9: you do it, but spend a charge (Limited) or take time.
+
+                                                                                          * Rad Protocols: When you run decon or enforce shielding discipline, you can reduce RADS gain: the first time each session someone would gain RADS from travel/exposure, reduce it by 1 (min 0).
+
+                                                                                          * Quarantine Voice: When you PUT PRESSURE ON to make people follow safety procedure, roll +FACE instead of +TACT.
+
+                                                                                          * Know What’s Wrong: When you Read the Situation about illness/contamination, on a hit ask +1 extra question and the GM must answer truthfully.
+
+                                                                                          * Pain Management: When someone would be taken out of a scene by Wounds, you can keep them in for a little longer. They stay, but take Exhausted and you start a 4-clock: Crash.
+
+Bond prompts (choose 2):
+                                                                                             * I’ve seen what ___ will become if they keep taking RADS like that.
+                                                                                             * ___ saved my life. I won’t forget it.
+                                                                                             * I don’t trust ___ with medical decisions.
+
+________________
+
+
+The Quartermaster
+You keep the ship fed, fueled, and profitable—and you know what to hide.
+Recommended Stat Build:
+FACE +2, WITS +1, TECH +1, GRIT 0, TACT −1
+
+You start with: manifest slate (Precise), lockbox (Rugged), utility drone (Bulky) or drone-control band (Precise)
+Choose 2 Moves:
+                                                                                                * Balance the Books: Once per phase, you may convert one ship resource into another (1-for-1) if it makes sense in the fiction (trade/salvage/favors). The GM adds a string: +1 Heat, a debt, or a rumor complication.
+
+                                                                                                * Drone Wrangler: When you use drones to scout/salvage/repair, roll +TECH. 10+: gain +1 PARTS or +1 DATA and avoid danger. 7–9: gain it, but the drone is damaged, lost, or brings trouble back.
+
+                                                                                                * Ghost Manifest: When you try to move restricted cargo or fake paperwork, roll +FACE. 10+: it passes. 7–9: it passes but costs (Heat, a bribe, or you owe someone). 6-: it passes… and gets noticed later (start a clock).
+
+                                                                                                * Stockpiler: When you SCAVENGE THE DEAD, on a hit gain +1 extra resource (your pick) but it’s tagged: Contaminated or Illegal (GM chooses).
+
+                                                                                                * Knows Everyone: When you MAKE A CONTACT, on a 7–9 you may take the “solid” result anyway—but the contact also has a personal demand.
+
+Bond prompts (choose 2):
+                                                                                                   * ___ doesn’t understand what scarcity means. I do.
+                                                                                                   * I’ve covered for ___—and they owe me for it.
+                                                                                                   * ___ makes my deals harder than they need to be.
+
+________________
+
+
+The Captain
+You make the calls people hate—and you carry the consequences.
+Recommended Stat Build:
+FACE +2, GRIT +1, TACT +1, WITS 0, TECH −1
+
+You start with: command token/authority papers (Precise), sidearm (Rugged), comms earpiece (Quiet)
+Choose 2 Moves:
+                                                                                                      * Call the Shot: When you give an order that’s actually actionable, roll +FACE. 10+: an ally takes +1 forward and avoids a cost. 7–9: +1 forward, but you take Heat or the ship takes Strain.
+                                                                                                      * Hold the Line: When panic, mutiny, or despair hits, roll +GRIT. 10+: everyone steadies; clear Shaken on one person. 7–9: it holds, but you owe someone or sacrifice a resource.
+                                                                                                      * The Offer: When you MAKE THE DEAL, on a 10+ you also choose one: reduce Heat by 1, gain +1 DATA, or secure a future favor.
+                                                                                                      * We Don’t Leave People: When you choose to rescue instead of profit, mark XP and take +1 ongoing to related rolls for the rest of the job. The GM will absolutely make it cost you.
+                                                                                                      * Bad Reputation: When you enter a place where your name matters, declare what they’ve heard about you. Take +1 forward when acting in line with that reputation, but the GM gets a free complication.
+
+Bond prompts (choose 2):
+                                                                                                         * ___ thinks I’m wrong about what we did. They’re not wrong to think that.
+                                                                                                         * ___ is the reason this crew hasn’t fallen apart.
+                                                                                                         * I’ve promised ___ I’ll get them home. Somehow.
+________________
+
+
+
+
+The Security Officer
+You keep people in line, keep boards from happening, and make sure the ship isn’t “easy prey.”
+Recommended Stat Build:
+
+TACT +2, GRIT +1, WITS +1, TECH 0, FACE −1
+
+You start with: armor vest (Rugged, Bulky), stun baton (Rugged, Quiet), restraint zipcuffs (Rugged, Limited)
+Choose 2 Moves:
+                                                                                                         * Boarding Protocol: When you Put Pressure On during a boarding/raid/inspection, on a hit you also choose 1: hold them at range, protect a system from damage, or prevent a hostage situation.
+
+                                                                                                         * Clear the Passage: When you force a route through danger (crowd, riot, tight corridor, zero-G), roll +TACT. 10+: you get through cleanly. 7–9: you get through but someone takes a Condition or you leave something behind.
+
+                                                                                                         * Rules of Engagement: Once per scene you can reduce physical harm to you or an ally by 1. If you do, either mark Exhausted or tick HEAT +1 (it was loud or visible).
+
+                                                                                                         * Security Sweep: When you arrive somewhere, you may immediately Read the Situation about threats here without rolling. The GM still answers, but also introduces a “security complication” you’ve noticed.
+
+                                                                                                         * Intimidation Is a Tool: When you Make the Deal by threat instead of charm, roll +TACT instead of +FACE.
+
+Bond prompts (choose 2):
+                                                                                                            * ___ is the one person I won’t put hands on, no matter what.
+
+                                                                                                            * ___ treats violence like a game. That’s a problem.
+
+                                                                                                            * I owe ___ for stopping me from going too far.
+________________
+
+
+The Broker
+You don’t fix engines, you fix problems. Contacts, papers, favors, black-market logistics.
+
+Recommended Stat Build:
+FACE +2, WITS +1, GRIT +1, TECH 0, TACT −1
+
+You start with: forged papers packet (Illegal, Precise), encrypted slate (Precise), bribe chits (Quiet, Limited)
+Choose 2 Moves:
+                                                                                                               * I Know a Person: Once per Location Phase, declare a plausible contact here. Roll +FACE. On a 10+: they’re available and helpful. 7–9: helpful, but they want payment now or they’re trouble-adjacent.
+
+                                                                                                               * Cutouts: When you would gain Heat from a deal, you can route it through someone else. Reduce Heat by 1, but start a 4-clock: Loose End. When the clock fills, the next heat level gained is directed to you/the party and +1 if from the same source.
+
+                                                                                                               * Dirty Luxury: When you Indulge, on a hit you may also reduce HEAT by 1 or gain +1 DATA (your choice). On a 7–9, you also pick up a small debt.
+
+                                                                                                               * Paper Shield: When authorities inspect you, roll +FACE. On a 10+: they pass you through. 7–9: they pass you through, but take a resource (SUPPLY/PARTS/DATA) or give you a condition: Compromised.
+
+                                                                                                               * Side Deal: Once per Job, when someone else makes a deal, you can “improve the terms.” Roll +FACE. On a hit, add a benefit. On a 7–9, also add a hidden complication (GM starts a clock).
+
+Bond prompts (choose 2):
+                                                                                                                  * ___ thinks I’m immoral. They’re not wrong, they’re just inexperienced.
+
+                                                                                                                  * I’ve promised ___ I’d never sell them out.
+
+                                                                                                                  * ___ is useful — which makes them a target.
+
+
+________________
+
+
+The Reclaimer
+Derelicts, ghost colonies, dead stations — you go where the profit still has teeth.
+Recommended Stat Build:
+WITS +2, TECH +1, GRIT +1, TACT 0, FACE −1
+
+You start with: cutting torch (Cutting, Bulky), vac-suit shell (Sealed, Bulky), dosimeter (Precise)
+Choose 2 Moves:
+                                                                                                                     * Salvage Instinct: When you Scavenge the Dead, on a hit gain +1 extra resource. If you take the bonus, the GM tags it Contaminated or Illegal.
+
+                                                                                                                     * Bloom Sense: When Vacuum Bloom is present, you always get a warning sign before it becomes lethal. The first Bloom consequence each session is reduced in severity.
+
+                                                                                                                     * Zero-G Ghost: When moving through derelicts/void, roll +WITS instead of +GRIT to Get Through It.
+
+                                                                                                                     * Strip It Clean: During Docks, you may convert 1 cargo/derelict access into +2 PARTS. If you do, tick SHIP SYSTEM STRAIN +1 (you pushed tools/crew too hard) or HEAT +1 (someone noticed).
+
+                                                                                                                     * Black Box Recovery: When you recover logs/records from a wreck, gain +1 DATA and ask the GM one direct question about what happened here. On a 7–9, the answer is true but incomplete.
+
+Bond prompts (choose 2):
+                                                                                                                        * ___ is too soft for salvage work. I keep them alive anyway.
+
+                                                                                                                        * ___ once left something behind in a wreck. I remember.
+
+                                                                                                                        * I trust ___ to watch my back in the dark.
+
+
+________________
+
+
+The Cipher (Data Officer / Intel Tech)
+You don’t chart stars — you validate truth, crack systems, scrub trails, and turn raw signals into decisions.
+Recommended Stat Build:
+WITS +2, TECH +1, FACE +1, GRIT 0, TACT −1
+
+You start with: encrypted slate (Precise), signal tracer (Precise), intrusion spikes (Precise, Limited)
+Choose 2 Moves:
+                                                                                                                           * Chain of Custody: When you gain DATA from salvage, rumors, or a contact, you may immediately roll +WITS to verify it.
+
+                                                                                                                              * 10+: it’s clean—also reduce RUMOR WARP by 1 segment (if relevant).
+
+                                                                                                                              * 7–9: it’s mostly true, but pick 1: late, partial, or planted.
+
+                                                                                                                              * 6-: it’s compromised—GM starts a clock tied to who wants you misled.
+
+                                                                                                                                 * Black Box Forensics: When you recover logs from a wreck/site, gain +1 DATA and ask the GM one direct question about what happened here. On a 7–9, the answer is true but creates a new problem (quarantine flag, Heat, contamination risk, or a pursuer clock).
+
+                                                                                                                                 * Spoof & Scrub: When you try to avoid being tracked (IDs, transponders, docking logs), roll +TECH.
+
+                                                                                                                                    * 10+: reduce HEAT by 2 or prevent it from increasing this scene.
+
+                                                                                                                                    * 7–9: reduce HEAT by 1, but spend 1 DATA or 1 PARTS (your choice).
+
+                                                                                                                                    * 6-: it “works”… and leaves a signature (start a 4-clock: Trace).
+
+                                                                                                                                       * Signal Ghost: When systems go blind (Static Fog / EMI / sensor crash), you can keep one channel alive. Choose one: Comms, Sensors, or Nav telemetry. The crew avoids the first complication tied to that channel this session.
+
+                                                                                                                                       * Information Warfare: When you deliberately spread or suppress a story to shape a situation, roll +WITS (planning) or +FACE (performance)—your choice.
+
+                                                                                                                                          * 10+: pick 2. 7–9: pick 1.
+Options: create a distraction, sour a rival’s deal, draw someone out, reduce Heat by 1, gain +1 DATA.
+
+Bond prompts (choose 2):
+                                                                                                                                             * ___ keeps acting on gut feelings; I keep catching the hidden costs.
+
+                                                                                                                                             * I know something about ___ that I haven’t said out loud.
+
+                                                                                                                                             * ___ saved me from a bad trace once; I still owe them.
+
+
+6.2 Load and Starting Items
+Load
+Pick one at the start of each Job Phase:
+                                                                                                                                                * Light (3 items): quick, quiet, mobile
+                                                                                                                                                * Standard (5 items): prepared
+                                                                                                                                                * Heavy (7 items + Bulky): armored / tool-heavy; GM can lean harder on “lose time / draw attention”
+
+Rule: If you carry something Bulky, it counts as 2 items unless you’re Heavy load.
+________________
+
+
+6.3 Base Item List (choose from)
+All items have tags (same tag language you already established
+Survival / Personal
+                                                                                                                                                   * Work suit (Rugged)
+                                                                                                                                                   * Vac-suit shell (Sealed, Bulky)
+                                                                                                                                                   * Respirator (Sealed)
+                                                                                                                                                   * Mag boots (Rugged)
+                                                                                                                                                   * Tether line (Rugged)
+                                                                                                                                                   * Glow strip pack (Quiet, Limited)
+                                                                                                                                                   * Ration bricks (Rugged, Limited)
+                                                                                                                                                   * Water recycler pouch (Rugged, Limited)
+                                                                                                                                                   * Thermal blanket (Insulated)
+
+Tools / Tech
+                                                                                                                                                      * Tool kit (Rugged)
+                                                                                                                                                      * Cutting torch (Cutting, Bulky)
+                                                                                                                                                      * Patch foam (Rugged, Limited)
+                                                                                                                                                      * Sealant tape spool (Rugged, Limited)
+                                                                                                                                                      * Hacking spike (Illegal, Precise)
+                                                                                                                                                      * Signal tracer (Precise)
+                                                                                                                                                      * Portable scanner (Precise)
+                                                                                                                                                      * Drone (utility) (Bulky)
+                                                                                                                                                      * Battery brick (Rugged, Limited)
+
+Medical / Decon
+                                                                                                                                                         * Medkit (Medical, Limited)
+                                                                                                                                                         * Trauma patches (Medical, Limited)
+                                                                                                                                                         * Burn gel (Medical, Limited)\
+                                                                                                                                                         * Decon wipes (Medical, Limited)
+                                                                                                                                                         * Dosimeter (Precise)
+                                                                                                                                                         * Filter canister (Sealed, Limited)
+
+Social / Trade / Crime
+                                                                                                                                                            * Forgery pack (Illegal, Precise)
+                                                                                                                                                            * Lockbox (Rugged)
+                                                                                                                                                            * Bribe chits / scrip (Quiet, Limited)
+                                                                                                                                                            * Authority papers (Precise)
+                                                                                                                                                            * Encrypted slate (Precise)
+
+Defense (keep it abstract + tag-based)
+                                                                                                                                                               * Stun baton (Rugged, Quiet)
+                                                                                                                                                               * Sidearm (Rugged)
+                                                                                                                                                               * Compact longarm (Rugged, Bulky)
+                                                                                                                                                               * Armor vest (Rugged, Bulky)
+
+________________
+
+
+6.4 Mods & Augments (pick 0–1 at start)
+A Mod gives a benefit tag + a drawback tag (same style you already started
+Pick one:
+                                                                                                                                                                  * Subdermal Plating: Armored (reduce physical harm by 1), drawback: Magnetic Signature (easier to track)
+                                                                                                                                                                  * Optic Stack: Zoom/Low-Light, drawback: Fragile (fog surges can blind you)
+                                                                                                                                                                  * Filter-Lungs: Sealed (ignore first airborne toxin/spore exposure each session), drawback: Maintenance (costs a decon charge or +1 RADS later)
+                                                                                                                                                                  * Neural Jack: Precise (take +1 forward when interfacing with ship systems), drawback: Feedback (on a 6-, take Shaken or +1 RADS—your call)
+                                                                                                                                                                  * Muscle Weave: Rugged (ignore first “Exhausted” you’d take), drawback: Metabolic Drain (tick SUPPLY FAMINE +1 when you push it)
+________________
+
+
+7) The Ship Sheet (shared)
+This is the “party character.”
+7.1 Ship Stats
+                                                                                                                                                                  * HULL (physical integrity)
+                                                                                                                                                                  * DRIVE (maneuver, last-mile speed)
+                                                                                                                                                                  * SHIELDS (Corridor shielding / radiation handling)
+                                                                                                                                                                  * SENSORS (scan, map, fog detection)
+                                                                                                                                                                  * WEAPONS (combat, hardpoints, projectile shields)
+Rate each (-1, 0, 1, 1, 2).
+7.2 Ship Tracks (resources)
+                                                                                                                                                                  * SUPPLY (food/air/filters/medicine)
+                                                                                                                                                                  * FUEL (last-mile travel + emergency burns)
+                                                                                                                                                                  * PARTS (repairs, upgrades, jury rigs, etc)
+                                                                                                                                                                  * HEAT (attention)
+All start at 1-4 depending on tone.
+7.3 Ship Systems (can be damaged)
+                                                                                                                                                                  * Life Support
+                                                                                                                                                                  * Reactor
+                                                                                                                                                                  * Shielding
+                                                                                                                                                                  * Nav Systems
+                                                                                                                                                                  * Comms (in-system)
+                                                                                                                                                                  * Docking / Cargo
+Each can be OK / Strained / Damaged / Offline.
+7.4 Modules (upgrades)
+Each module gives a move, a tag, or a stat bump.
+Examples:
+                                                                                                                                                                     * Decon Bay (reduces RADS gain; faster cleanup)
+                                                                                                                                                                     * Tug Hardpoints (move Gates short distance; haul derelicts)
+                                                                                                                                                                     * Drone Rack (salvage, repair, scouting)
+                                                                                                                                                                     * Cold Storage Vault (genetic bank / high-value cargo)
+                                                                                                                                                                     * Signal Sponge (reduce Heat, hide in fog)
+                                                                                                                                                                     * Fog-Hardened Controls (manual fallback becomes reliable)
+________________
+
+
+8) Basic Moves (everyone has these)
+GET THROUGH IT (endure danger) - roll +GRIT
+10+: hold steady; choose 2.
+7–9: choose 1 and GM chooses 1.
+Choices: avoid harm, keep gear intact, don’t lose time, don’t gain RADS.
+READ THE SITUATION - roll +WITS
+Ask 2 (10+) or 1 (7–9):
+                                                                                                                                                                     * What’s the real threat here?
+                                                                                                                                                                     * What’s about to fail?
+                                                                                                                                                                     * Who has leverage?
+                                                                                                                                                                     * What’s being hidden / missing?
+                                                                                                                                                                     * What’s my best way in/out?
+DO THE FIX - roll +TECH
+On a hit, stabilize a system or repair something.
+                                                                                                                                                                     * 10+: also clear “Strained” or regain +1 PARTS (your call).
+                                                                                                                                                                     * 7–9: it works but costs: time, Parts, or creates a new flaw.
+PUT PRESSURE ON - roll +TACT
+On a hit, you gain advantage in a standoff/fight.
+                                                                                                                                                                     * 10+: pick 2. 7–9: pick 1.
+Options: disarm, take position, force retreat, protect someone, capture.
+MAKE THE DEAL - roll +FACE
+                                                                                                                                                                        * 10+: favorable terms + useful info
+                                                                                                                                                                        * 7–9: fair terms or good info (pick one)
+                                                                                                                                                                        * 6-: you still get something, but you owe, get tagged, or Heat spikes
+________________
+
+
+9) Ship Moves (Ship Stat + Operator)
+9.1 How Ship Rolls Work (the “Operator” rule)
+Whenever you trigger a Ship Move:
+                                                                                                                                                                        1. Pick an Operator (the PC actually doing it at the console / in the suit / calling the play).
+                                                                                                                                                                        2. Roll 2d6 + Ship Stat (the stat named by the move).
+                                                                                                                                                                        3. Apply Operator Edge (based on the Operator’s relevant character stat):
+
+Operator Edge
+                                                                                                                                                                           * If the Operator’s relevant stat is +2 → +1 to the roll
+                                                                                                                                                                           * If it’s +1 or 0 → +0
+                                                                                                                                                                           * If it’s −1 → −1 to the roll
+
+This keeps Ship Moves ship-forward, but still rewards having the right person doing the job.
+Help / Crew Assist (optional but clean):
+ One PC can assist if they’re meaningfully involved. They either:
+                                                                                                                                                                              * Spend 1 SUPPLY or take Exhausted, and the Operator takes +1 forward on the roll; or
+                                                                                                                                                                              * If they have a relevant tool/module/tag in the fiction, they can give +1 forward with no cost (GM may still tick a clock on a 7–9 result).
+
+System State Penalties (fast + brutal):
+ If the ship system tied to the move is:
+                                                                                                                                                                                 * Strained: take −1
+                                                                                                                                                                                 * Damaged: take −2
+                                                                                                                                                                                 * Offline: you can’t roll it normally—you must first restore a workaround (GM says what that looks like), or you’re making a desperate move with a nasty cost.
+
+________________
+
+
+RUN A GATED CORRIDOR — roll +SHIELDS
+Trigger: You enter a Corridor that’s stabilized/held open by active Gates
+
+
+Operator stat: WITS (nav/reads) or TECH (systems handling)
+                                                                                                                                                                                    * 10+ Choose 2 Benefits.
+                                                                                                                                                                                    * 7–9 Choose 1 Benefit; GM adds 1 Complication.
+                                                                                                                                                                                    * 6− GM adds 2 Complications, and advance CORRIDOR INSTABILITY.
+Benefits (choose):
+                                                                                                                                                                                    * Clean Window: No one gains RADS from transit, and Shielding does not become Strained.
+                                                                                                                                                                                    * On-Target Exit: No route drift / you arrive where you meant to (no “wrong side” arrival).
+                                                                                                                                                                                    * Fast Passage: Save time or save 1 FUEL (your choice).
+                                                                                                                                                                                    * Quiet Through the Gate: Prevent HEAT from increasing due to traffic/authority this leg.
+
+Complications (GM picks or roll Gated Events):
+                                                                                                                                                                                       * Use the Gated Corridor Events list (below). Gate authority complications are valid here.
+________________
+
+
+RUN AN UNGATED CORRIDOR — roll +SHIELDS
+Trigger: You commit to an Ungated Corridor segment (no Gate window holding it stable).
+Operator stat: WITS or TECH
+
+
+On a hit (7+), you make it through—but Ungated corridors always exact a price.
+                                                                                                                                                                                       * 10+ Choose 2 Benefits and 1 Cost.
+                                                                                                                                                                                       *  7–9 Choose 1 Benefit and 2 Costs; GM adds 1 Complication.
+                                                                                                                                                                                       *  6− GM adds 2 Complications, choose 3 Costs, and advance CORRIDOR INSTABILITY +2.
+
+
+REALIGN THE GATE WINDOW — roll +SENSORS
+Trigger: A Corridor Shift hits and you’re chasing the new coordinates / alignment.
+Operator stat: WITS (pattern-reading) or TECH (calibration).
+                                                                                                                                                                                       * 10+ You lock it in quickly; gain +1 DATA (“Found the Thread”) or reduce CORRIDOR INSTABILITY by 1 segment (if it makes sense).
+                                                                                                                                                                                       * 7–9 You lock it in, but spend 1 PARTS or take +1 HEAT.
+                                                                                                                                                                                       * 6− You misread it: the exit point is worse than expected (GM makes it bite: misexit, time loss, strain, exposure, pursuit, etc.).
+Benefits (choose):
+                                                                                                                                                                                       * Found the Thread: Gain +1 DATA (usable nav truth, hard readings, verified drift pattern).
+                                                                                                                                                                                       * Tight Enough: You avoid route drift (arrive close/on-target).
+                                                                                                                                                                                       * Shield Bubble: No one gains RADS from transit (still pay Costs as normal).
+                                                                                                                                                                                       * Slip the Dark: Reduce HEAT by 1 or avoid being followed/marked this leg (your choice).
+
+Costs (pick the required number):
+                                                                                                                                                                                          * Spend 1 FUEL (course correction / holding the thread).
+                                                                                                                                                                                          * Tick SHIP SYSTEM STRAIN +1 (shield cycling, fouled filters, EMI scarring).
+                                                                                                                                                                                          * Someone takes Exposed or gains +1 RADS (your choice, fiction decides who).
+                                                                                                                                                                                          * Lose time (miss a clean alignment / tight schedule): tick CORRIDOR INSTABILITY +1.
+
+Complications (GM picks or roll Ungated Events):
+                                                                                                                                                                                             * Use the Ungated Corridor Events list (below). Gate authority complications generally do not apply here.
+
+
+________________
+
+
+PATCH THE HULL — roll +HULL (spend 1 PARTS)
+Trigger: The ship takes damage, breaches, microfractures, or emergency structural failure.
+Operator stat: TECH (repair) or GRIT (brute survival patching).
+                                                                                                                                                                                             * 10+ Patch holds: repair damage and clear Strained on the relevant ship system/section (if appropriate).
+                                                                                                                                                                                             * 7–9 Patch holds, but choose 1:
+                                                                                                                                                                                             * It’s temporary (will fail at the worst time; GM starts/advances a clock)
+                                                                                                                                                                                             * It takes hours (lose time / miss windows)
+                                                                                                                                                                                             * It reduces HULL max until proper refit
+                                                                                                                                                                                             * 6− You stop the worst of it… but the ship pays: lose extra PARTS, take system damage, depressurization, or someone gets tagged (Exposed/Contaminated/etc.).
+________________
+
+
+SCAVENGE THE DEAD — roll +SENSORS (or +DRIVE if you’re doing a risky approach)
+Trigger: You salvage a wreck/derelict while it’s still dangerous (radiation, fog, vacuum bloom, pirates, time pressure).
+Operator stat: WITS (spot value / read risk) or TECH (drones / cutting / access).
+                                                                                                                                                                                             * 10+ Gain 2: (SUPPLY / PARTS / FUEL / DATA).
+                                                                                                                                                                                             *  7–9 Gain 1, but choose 1 cost:
+                                                                                                                                                                                             * It’s Contaminated (GM tags it; RADS risk, decon required)
+                                                                                                                                                                                             * It’s Illegal (mark/advance HEAT, or start a “Loose End” clock)
+                                                                                                                                                                                             * It takes too long (lose time / advance a travel/pressure clock)
+                                                                                                                                                                                             * You drew attention (advance HEAT / pursuer clock)
+                                                                                                                                                                                             * 6− You find something—and it finds you (hazard triggers, boarders, bloom, quarantine ping, drone loss, etc.). Gain 1 anyway, but the GM hits hard.
+(Your playbooks already hook into this move; this version just anchors it to ship capability first.)
+________________
+
+
+KEEP IT QUIET — roll +SENSORS or +DRIVE (choose an approach)
+Trigger: You try to avoid attention: spoof logs, kill signatures, slide through inspection windows, or vanish into noise.
+Pick one approach:
+                                                                                                                                                                                             * Ghost the signal (spoof transponder, scrub docking records, jam traces): roll +SENSORS
+                                                                                                                                                                                             * Run dark (maneuver, hide in traffic/fog, silent drift burns): roll +DRIVE
+
+Operator stat: FACE (cover story / handling authority), TECH (spoofing), or WITS (timing/reads)—pick what matches the approach.
+                                                                                                                                                                                                * 10+ Choose 2:
+                                                                                                                                                                                                * Reduce HEAT by 2 (or prevent it from increasing this scene)
+                                                                                                                                                                                                * You avoid inspection / tracking entirely
+                                                                                                                                                                                                * You create a false trail (GM starts a clock on someone else)
+                                                                                                                                                                                                * You keep cargo/people hidden (no extra complications)
+                                                                                                                                                                                                * 7–9 Choose 1, but the GM adds 1:
+                                                                                                                                                                                                * You had to pay: spend 1 (SUPPLY or DATA or PARTS)
+Someone clocks something: start/advance a Trace / Audit / Loose End clock
+It works… but only until the next major stop (a delayed consequence)
+                                                                                                                                                                                                   * 6− It “works,” but leaves a signature: start a 4-clock: TRACE, and the GM picks the first tick immediately.
+                                                                                                                                                                                                   * No one gains RADS
+                                                                                                                                                                                                   * You learn a rumor-map (gain +1 DATA)
+                                                                                                                                                                                                   * Shielding strains (system becomes Strained/Damaged)
+                                                                                                                                                                                                   * Someone takes Exposed or +RADS
+                                                                                                                                                                                                   * Route drift: exit far from intended point (lose time / Fuel)
+                                                                                                                                                                                                   * Unwelcome arrival: pirates, gate authority, quarantine
+________________
+
+
+10) Corridor Events Table (quick-play spice)
+Gated Corridor Events (when a Gated Run gets complications)
+
+
+                                                                                                                                                                                                   1. Static Fog (systems go blind)
+                                                                                                                                                                                                   2. Radiation surge (RADS + strain)
+                                                                                                                                                                                                   3. False exit geometry (arrive “wrong side” of system)
+                                                                                                                                                                                                   4. Vacuum Bloom contact (containment race)
+                                                                                                                                                                                                   5. Transit collision (derelict, debris, trapped ship)
+                                                                                                                                                                                                   6. Gate authority lockdown / quarantine
+                                                                                                                                                                                                   7. Pirate shadowing
+                                                                                                                                                                                                   8. “Ghost signal” (tempting Data bait)
+Ungated Corridor Events (when an Ungated Run gets complications)
+                                                                                                                                                                                                   1. Static Fog pocket (dead sensors, phantom returns)
+                                                                                                                                                                                                   2. Radiation seam (hot band; someone gets tagged Contaminated/Exposed)
+                                                                                                                                                                                                   3. Drift spike (you must spend 1 extra FUEL or accept a misexit)
+                                                                                                                                                                                                   4. Vacuum Bloom trace (early-stage contact; containment clock starts)
+                                                                                                                                                                                                   5. Shear turbulence (Hull microfractures; Shielding or Nav becomes Strained)
+                                                                                                                                                                                                   6. Debris wake (collision risk; drones/antennae get chewed)
+                                                                                                                                                                                                   7. Predator echo (something shadows you in the noise; maybe just pirates, maybe worse)
+                                                                                                                                                                                                   8. Ghost signal (but it’s ungated-dirty: true data wrapped in a trap)
+
+
+________________
+
+
+11) Location Phase and Dock Phase
+11.1 Location Phase Structure
+When you arrive somewhere with people (or meaningful traces of them), do the following:
+                                                                                                                                                                                                   1. Establish the Local Truth
+
+                                                                                                                                                                                                      * GM states what everyone believes here about the region (may be wrong).
+                                                                                                                                                                                                      * Add 1–2 Local Tags to the location (examples below).
+
+                                                                                                                                                                                                         2. Set the Pressure
+ Pick (or roll) one:
+
+                                                                                                                                                                                                            * Someone wants something from you right now
+                                                                                                                                                                                                            * Your arrival creates attention (Heat or suspicion)
+                                                                                                                                                                                                            * A local problem is about to become your problem
+                                                                                                                                                                                                            * You have a narrow window before the Corridor shifts again
+
+                                                                                                                                                                                                               3. Each PC takes 1–2 Location Actions
+ These are short scenes. Not everything needs a roll—roll when it’s risky or consequential.
+
+                                                                                                                                                                                                               4. Resolve Fallout
+
+                                                                                                                                                                                                                  * Advance or clear clocks.
+                                                                                                                                                                                                                  * Record new debts/favors.
+                                                                                                                                                                                                                  * Update Heat, Data, Supplies.
+
+Local Tags (examples):
+                                                                                                                                                                                                                     * Company-Tight, Union-Run, Quarantine, Hungry, Flush-With-Parts, Cultish, Pirate-Leaning, No-Questions-Asked, Truth-Blackout, Gate-Authority, Radiation-Sick, Refugee-Swollen
+
+________________
+
+
+11.2 Location Actions (pick 1–2 each)
+These are the “social / exploration / recreation” menu.
+                                                                                                                                                                                                                        * Work the Crowd (gather rumors, find jobs, locate people)
+                                                                                                                                                                                                                        * Call in a Favor (use an existing contact/debt)
+                                                                                                                                                                                                                        * Make a New Contact (turn a face into a name you can return to)
+                                                                                                                                                                                                                        * Handle Local Business (sell cargo, buy gear, hire help, forge papers)
+                                                                                                                                                                                                                        * Stir Trouble (intimidate, provoke, leverage, start a conflict on purpose)
+                                                                                                                                                                                                                        * Lay Low (reduce Heat locally, hide the ship/crew, lose pursuers)
+                                                                                                                                                                                                                        * Indulge (recreation: drink, fight pits, VR dens, temples, clubs, shoreline, etc.)
+                                                                                                                                                                                                                        * Recover (medical care, detox, radiation treatment—if available)
+                                                                                                                                                                                                                        * Go Looking (explore the station/colony, find what’s really going on)
+                                                                                                                                                                                                                        * Do a Side Job (short task for cash/parts/data; often comes with strings)
+
+________________
+
+
+11.3 Recreation and Indulgence
+When you Indulge, say what you do and what you’re trying to get out of it:
+                                                                                                                                                                                                                           * escape
+                                                                                                                                                                                                                           * connection
+                                                                                                                                                                                                                           * pleasure
+                                                                                                                                                                                                                           * status
+                                                                                                                                                                                                                           * forgetting
+                                                                                                                                                                                                                           * information-by-osmosis
+
+Then roll 2d6 +FACE (or +GRIT if it’s about pushing your limits).
+                                                                                                                                                                                                                              * 10+: Choose 2.
+                                                                                                                                                                                                                              * 7–9: Choose 1, and the GM chooses 1 consequence.
+                                                                                                                                                                                                                              * 6-: You still get what you wanted in the moment—then the bill comes due.
+
+Choose:
+                                                                                                                                                                                                                                 * Clear a Condition (or reduce RADS by 1 if treatment exists here)
+                                                                                                                                                                                                                                 * Gain +1 DATA (you overhear something useful)
+                                                                                                                                                                                                                                 * Reduce HEAT by 1 (you disappear into the crowd)
+                                                                                                                                                                                                                                 * Strengthen a relationship (create or upgrade a Contact)
+
+Possible consequences:
+                                                                                                                                                                                                                                    * You owe someone (a debt, a favor, a promise)
+                                                                                                                                                                                                                                    * Heat rises (you’re noticed, recorded, followed)
+                                                                                                                                                                                                                                    * You lose time (Corridor window tightens; advance Instability)
+                                                                                                                                                                                                                                    * You wake up Compromised (missing gear, blackmail, contamination scare)
+
+________________
+
+
+11.4 Core Location Moves
+Use these when Location Actions become risky.
+WORK THE CROWD — roll +FACE
+                                                                                                                                                                                                                                       * 10+: Ask 2. Gain +1 DATA.
+                                                                                                                                                                                                                                       * 7–9: Ask 1. Choose 1: pay a cost, owe a favor, or take +1 HEAT.
+Questions:
+                                                                                                                                                                                                                                       * Who’s really in control here?
+                                                                                                                                                                                                                                       * What’s scarce right now?
+                                                                                                                                                                                                                                       * What changed recently (that outsiders don’t know)?
+                                                                                                                                                                                                                                       * What’s the safest route / worst route?
+                                                                                                                                                                                                                                       * Who’s desperate enough to deal?
+
+MAKE A CONTACT — roll +FACE
+                                                                                                                                                                                                                                          * 10+: They’re solid; pick 2 perks.
+                                                                                                                                                                                                                                          * 7–9: Pick 1 perk; they come with a complication.
+Perks:
+                                                                                                                                                                                                                                          * They can get Parts
+                                                                                                                                                                                                                                          * They can get Papers
+                                                                                                                                                                                                                                          * They can get Work
+                                                                                                                                                                                                                                          * They can hide you / reduce Heat
+                                                                                                                                                                                                                                          * They know Corridor gossip (Data)
+Complications:
+                                                                                                                                                                                                                                          * They’re hunted, bought, or lying
+                                                                                                                                                                                                                                          * They want exclusivity
+                                                                                                                                                                                                                                          * They’ll sell you out under pressure
+
+GO LOOKING — roll +WITS
+                                                                                                                                                                                                                                             * 10+: Find what you need and it’s usable.
+                                                                                                                                                                                                                                             * 7–9: Find it, but it’s dangerous / incomplete / costs time.
+                                                                                                                                                                                                                                             * 6-: You find something else—something that finds you.
+
+________________
+
+
+11.5 Dock Phase (refit / recovery / projects)
+Dock Phase is the “maintenance layer.” It may happen at the same location, but it’s a different focus.
+In Dock Phase:
+                                                                                                                                                                                                                                                * Each PC gets 1 Dock Action
+                                                                                                                                                                                                                                                * The crew collectively gets 2 Ship Actions
+
+Dock Actions (PC)
+                                                                                                                                                                                                                                                   * Treat & Detox (clear Conditions / reduce RADS if possible)
+                                                                                                                                                                                                                                                   * Acquire Gear (get tagged gear; on a miss it’s illegal/damaged/owed)
+                                                                                                                                                                                                                                                   * Work a Project (advance a personal project clock)
+                                                                                                                                                                                                                                                   * Reduce Heat (paperwork, bribes, disappearing, false IDs)
+
+Ship Actions (Crew)
+                                                                                                                                                                                                                                                      * Repair a system (spend PARTS)
+                                                                                                                                                                                                                                                      * Refit / install a Module (project clock or cost)
+                                                                                                                                                                                                                                                      * Restock (convert cargo/credits into SUPPLY/FUEL/PARTS)
+                                                                                                                                                                                                                                                      * Decontaminate (remove contamination risks, reduce future RADS on runs)
+                                                                                                                                                                                                                                                      * Scrub the Record (reduce Heat, if you have access or leverage)
+
+Note: Dock Phase is where the ship sheet changes. Location Phase is where your relationships and problems change.
+
+
+________________
+
+
+12) Advancement
+                                                                                                                                                                                                                                                         * Mark XP on misses and on playbook triggers (your call).
+                                                                                                                                                                                                                                                         * Every 5 XP: take an Advance:
+                                                                                                                                                                                                                                                         * +1 to a stat (max +2)
+                                                                                                                                                                                                                                                         * new playbook move
+                                                                                                                                                                                                                                                         * new ship module (group choice)
+                                                                                                                                                                                                                                                         * clear a persistent ship flaw / improve a system
+________________
+
+
+13) Starting Setup
+Pick one:
+                                                                                                                                                                                                                                                         * Courier (fast, fragile, low cargo)
+                                                                                                                                                                                                                                                         * Salvager (tools, drones, contamination risk)
+                                                                                                                                                                                                                                                         * Lifeline Freighter (cargo, slow, high Heat)
+                                                                                                                                                                                                                                                         * Escort Cutter (weapons, authority problems)
+Start with:
+                                                                                                                                                                                                                                                         * Ship stats: one 2, one 0, rest 1
+                                                                                                                                                                                                                                                         * Resources: SUPPLY 3, FUEL 3, PARTS 2, DATA 1, HEAT 1
+                                                                                                                                                                                                                                                         * 1 module + 1 ship flaw (so the ship already has character)
