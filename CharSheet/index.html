@@ -11,11 +11,12 @@
     <div class="bg-layer"></div>
     <header class="app-header">
       <div class="title-block">
-        <p class="eyebrow"><a href="../">Homepage</a> // Character Sheet</p>
-        <h1>Character Sheet</h1>
-        <p class="subtitle">Fill, save, export, and reload your character anywhere.</p>
+        <p class="eyebrow"><a href="../">Homepage</a> // <span id="sheet-eyebrow">Character Sheet</span></p>
+        <h1 id="sheet-title">Character Sheet</h1>
+        <p class="subtitle" id="sheet-subtitle">Fill, save, export, and reload your character anywhere.</p>
       </div>
       <div class="actions">
+        <button type="button" class="btn ghost" id="sheet-toggle-btn">Ship</button>
         <button type="button" class="btn primary" id="export-btn">Export JSON</button>
         <label class="btn ghost" for="import-input">
           Import JSON
@@ -27,40 +28,41 @@
 
     <main class="sheet">
       <form id="sheet-form" autocomplete="off">
-        <section class="card identity">
-          <h2>Identity</h2>
-          <div class="field">
-            <label for="name">Name</label>
-            <input id="name" type="text" data-field="identity.name" placeholder="Character name" />
-          </div>
-          <div class="field">
-            <label for="callsign">Callsign</label>
-            <input id="callsign" type="text" data-field="identity.callsign" placeholder="Handle or codename" />
-          </div>
-          <div class="field">
-            <label for="role">Role</label>
-            <select id="role" data-field="identity.role">
-              <option value="" selected>Select a role</option>
-              <option value="Navigator">Navigator</option>
-              <option value="Engineer">Engineer</option>
-              <option value="Medic">Medic</option>
-              <option value="Quartermaster">Quartermaster</option>
-              <option value="Captain">Captain</option>
-              <option value="Security Officer">Security Officer</option>
-              <option value="Broker">Broker</option>
-              <option value="Reclaimer">Reclaimer</option>
-              <option value="Cipher">Cipher</option>
-            </select>
-          </div>
-          <div class="field">
-            <label for="background">Background</label>
-            <input id="background" type="text" data-field="identity.background" placeholder="Origin or past" />
-          </div>
-          <div class="field">
-            <label for="pronouns">Pronouns</label>
-            <input id="pronouns" type="text" data-field="identity.pronouns" placeholder="they/she/he" />
-          </div>
-        </section>
+        <div class="sheet-view" data-sheet="character">
+          <section class="card identity">
+            <h2>Identity</h2>
+            <div class="field">
+              <label for="name">Name</label>
+              <input id="name" type="text" data-field="identity.name" placeholder="Character name" />
+            </div>
+            <div class="field">
+              <label for="callsign">Callsign</label>
+              <input id="callsign" type="text" data-field="identity.callsign" placeholder="Handle or codename" />
+            </div>
+            <div class="field">
+              <label for="role">Role</label>
+              <select id="role" data-field="identity.role">
+                <option value="" selected>Select a role</option>
+                <option value="Navigator">Navigator</option>
+                <option value="Engineer">Engineer</option>
+                <option value="Medic">Medic</option>
+                <option value="Quartermaster">Quartermaster</option>
+                <option value="Captain">Captain</option>
+                <option value="Security Officer">Security Officer</option>
+                <option value="Broker">Broker</option>
+                <option value="Reclaimer">Reclaimer</option>
+                <option value="Cipher">Cipher</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="background">Background</label>
+              <input id="background" type="text" data-field="identity.background" placeholder="Origin or past" />
+            </div>
+            <div class="field">
+              <label for="pronouns">Pronouns</label>
+              <input id="pronouns" type="text" data-field="identity.pronouns" placeholder="they/she/he" />
+            </div>
+          </section>
 
         <section class="card stats">
           <h2>Stats</h2>
@@ -285,14 +287,227 @@
           <div id="debts-list" class="entry-list"></div>
         </section>
 
-        <section class="card clocks span-2">
-          <h2>Clocks</h2>
-          <div class="clock-controls">
-            <button type="button" class="btn ghost" id="add-clock-btn">Add Clock</button>
-            <p class="hint">Create 4, 6, or 8 segment clocks and tick them as they advance.</p>
-          </div>
-          <div id="clocks-list" class="clock-list"></div>
-        </section>
+          <section class="card clocks span-2">
+            <h2>Clocks</h2>
+            <div class="clock-controls">
+              <button type="button" class="btn ghost" id="add-clock-btn">Add Clock</button>
+              <p class="hint">Create 4, 6, or 8 segment clocks and tick them as they advance.</p>
+            </div>
+            <div id="clocks-list" class="clock-list"></div>
+          </section>
+        </div>
+
+        <div class="sheet-view is-hidden" data-sheet="ship">
+          <section class="card ship-info">
+            <h2>Ship Info</h2>
+            <div class="field">
+              <label for="ship-name">Ship Name</label>
+              <input id="ship-name" type="text" data-field="ship.info.name" placeholder="Ship name" />
+            </div>
+            <div class="field">
+              <label for="ship-model">Model</label>
+              <input id="ship-model" type="text" data-field="ship.info.model" placeholder="Class or hull model" />
+            </div>
+            <div class="field">
+              <label for="ship-description">Description</label>
+              <textarea
+                id="ship-description"
+                rows="4"
+                data-field="ship.info.description"
+                placeholder="Notable traits, history, or quirks"
+              ></textarea>
+            </div>
+          </section>
+
+          <section class="card ship-stats">
+            <h2>Ship Stats</h2>
+            <div class="stat-grid">
+              <label class="stat">
+                <span>HULL</span>
+                <div class="stat-controls">
+                  <select data-field="ship.stats.hull">
+                    <option value="-1">-1</option>
+                    <option value="0" selected>0</option>
+                    <option value="+1">+1</option>
+                    <option value="+2">+2</option>
+                  </select>
+                </div>
+              </label>
+              <label class="stat">
+                <span>DRIVE</span>
+                <div class="stat-controls">
+                  <select data-field="ship.stats.drive">
+                    <option value="-1">-1</option>
+                    <option value="0" selected>0</option>
+                    <option value="+1">+1</option>
+                    <option value="+2">+2</option>
+                  </select>
+                </div>
+              </label>
+              <label class="stat">
+                <span>SHIELDS</span>
+                <div class="stat-controls">
+                  <select data-field="ship.stats.shields">
+                    <option value="-1">-1</option>
+                    <option value="0" selected>0</option>
+                    <option value="+1">+1</option>
+                    <option value="+2">+2</option>
+                  </select>
+                </div>
+              </label>
+              <label class="stat">
+                <span>SENSORS</span>
+                <div class="stat-controls">
+                  <select data-field="ship.stats.sensors">
+                    <option value="-1">-1</option>
+                    <option value="0" selected>0</option>
+                    <option value="+1">+1</option>
+                    <option value="+2">+2</option>
+                  </select>
+                </div>
+              </label>
+              <label class="stat">
+                <span>WEAPONS</span>
+                <div class="stat-controls">
+                  <select data-field="ship.stats.weapons">
+                    <option value="-1">-1</option>
+                    <option value="0" selected>0</option>
+                    <option value="+1">+1</option>
+                    <option value="+2">+2</option>
+                  </select>
+                </div>
+              </label>
+            </div>
+          </section>
+
+          <section class="card ship-tracks">
+            <h2>Ship Tracks</h2>
+            <div class="resource-grid">
+              <div class="field">
+                <label for="ship-supply">Supply <span class="inline-value" data-track-value-for="ship-supply">0</span></label>
+                <input
+                  id="ship-supply"
+                  type="range"
+                  min="0"
+                  max="6"
+                  step="1"
+                  value="0"
+                  data-field="ship.tracks.supply"
+                  data-ship-track
+                />
+              </div>
+              <div class="field">
+                <label for="ship-fuel">Fuel <span class="inline-value" data-track-value-for="ship-fuel">0</span></label>
+                <input
+                  id="ship-fuel"
+                  type="range"
+                  min="0"
+                  max="6"
+                  step="1"
+                  value="0"
+                  data-field="ship.tracks.fuel"
+                  data-ship-track
+                />
+              </div>
+              <div class="field">
+                <label for="ship-parts">Parts <span class="inline-value" data-track-value-for="ship-parts">0</span></label>
+                <input
+                  id="ship-parts"
+                  type="range"
+                  min="0"
+                  max="6"
+                  step="1"
+                  value="0"
+                  data-field="ship.tracks.parts"
+                  data-ship-track
+                />
+              </div>
+              <div class="field">
+                <label for="ship-heat">Heat <span class="inline-value" data-track-value-for="ship-heat">0</span></label>
+                <input
+                  id="ship-heat"
+                  type="range"
+                  min="0"
+                  max="6"
+                  step="1"
+                  value="0"
+                  data-field="ship.tracks.heat"
+                  data-ship-track
+                />
+              </div>
+            </div>
+          </section>
+
+          <section class="card ship-systems span-2">
+            <h2>Ship Systems</h2>
+            <div class="split">
+              <div class="field">
+                <label for="ship-life-support">Life Support</label>
+                <select id="ship-life-support" data-field="ship.systems.lifeSupport">
+                  <option value="ok" selected>OK</option>
+                  <option value="strained">Strained</option>
+                  <option value="damaged">Damaged</option>
+                  <option value="offline">Offline</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="ship-reactor">Reactor</label>
+                <select id="ship-reactor" data-field="ship.systems.reactor">
+                  <option value="ok" selected>OK</option>
+                  <option value="strained">Strained</option>
+                  <option value="damaged">Damaged</option>
+                  <option value="offline">Offline</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="ship-shielding">Shielding</label>
+                <select id="ship-shielding" data-field="ship.systems.shielding">
+                  <option value="ok" selected>OK</option>
+                  <option value="strained">Strained</option>
+                  <option value="damaged">Damaged</option>
+                  <option value="offline">Offline</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="ship-nav">Nav Systems</label>
+                <select id="ship-nav" data-field="ship.systems.nav">
+                  <option value="ok" selected>OK</option>
+                  <option value="strained">Strained</option>
+                  <option value="damaged">Damaged</option>
+                  <option value="offline">Offline</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="ship-comms">Comms</label>
+                <select id="ship-comms" data-field="ship.systems.comms">
+                  <option value="ok" selected>OK</option>
+                  <option value="strained">Strained</option>
+                  <option value="damaged">Damaged</option>
+                  <option value="offline">Offline</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="ship-cargo">Docking / Cargo</label>
+                <select id="ship-cargo" data-field="ship.systems.cargo">
+                  <option value="ok" selected>OK</option>
+                  <option value="strained">Strained</option>
+                  <option value="damaged">Damaged</option>
+                  <option value="offline">Offline</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <section class="card ship-modules span-2">
+            <h2>Modules</h2>
+            <div class="section-header">
+              <p class="label">Upgrades</p>
+              <button type="button" class="btn ghost small" id="add-ship-module-btn">Add Module</button>
+            </div>
+            <div id="ship-modules-list" class="entry-list"></div>
+            <p class="hint">Track ship upgrades, tags, and special systems.</p>
+          </section>
+        </div>
       </form>
     </main>
 
@@ -499,6 +714,27 @@
           <div class="modal-actions">
             <button type="button" class="btn ghost" id="debt-cancel">Cancel</button>
             <button type="submit" class="btn primary">Add Debt</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="modal" id="ship-module-modal" aria-hidden="true">
+      <div class="modal-backdrop" data-modal-close></div>
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="ship-module-modal-title">
+        <h3 id="ship-module-modal-title">Add Module</h3>
+        <form id="ship-module-form">
+          <div class="field">
+            <label for="ship-module-name">Module name</label>
+            <input id="ship-module-name" type="text" placeholder="Decon Bay" required />
+          </div>
+          <div class="field">
+            <label for="ship-module-description">Description</label>
+            <textarea id="ship-module-description" rows="4" placeholder="What it does, any special effects"></textarea>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn ghost" id="ship-module-cancel">Cancel</button>
+            <button type="submit" class="btn primary">Add Module</button>
           </div>
         </form>
       </div>

@@ -157,6 +157,14 @@ form {
   gap: 20px;
 }
 
+.sheet-view {
+  display: contents;
+}
+
+.sheet-view.is-hidden {
+  display: none;
+}
+
 .card {
   background: var(--card);
   border: 1px solid var(--card-border);

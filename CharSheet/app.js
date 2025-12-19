@@ -1,10 +1,22 @@
-const STORAGE_KEY = "tqe-character-sheet";
+const CHARACTER_STORAGE_KEY = "tqe-character-sheet";
+const SHIP_STORAGE_KEY = "tqe-ship-sheet";
 
 const form = document.getElementById("sheet-form");
-const fields = Array.from(document.querySelectorAll("[data-field]"));
+const characterFields = Array.from(
+  document.querySelectorAll('[data-sheet="character"] [data-field]')
+);
+const shipFields = Array.from(
+  document.querySelectorAll('[data-sheet="ship"] [data-field]')
+);
 const exportButton = document.getElementById("export-btn");
 const importInput = document.getElementById("import-input");
 const resetButton = document.getElementById("reset-btn");
+const sheetToggleButton = document.getElementById("sheet-toggle-btn");
+const sheetTitle = document.getElementById("sheet-title");
+const sheetEyebrow = document.getElementById("sheet-eyebrow");
+const sheetSubtitle = document.getElementById("sheet-subtitle");
+const characterSheetView = document.querySelector('[data-sheet="character"]');
+const shipSheetView = document.querySelector('[data-sheet="ship"]');
 const radsInput = document.getElementById("rads");
 const radsValue = document.getElementById("rads-value");
 const clocksList = document.getElementById("clocks-list");
@@ -23,6 +35,9 @@ const modsList = document.getElementById("mods-list");
 const addModButton = document.getElementById("add-mod-btn");
 const debtsList = document.getElementById("debts-list");
 const addDebtButton = document.getElementById("add-debt-btn");
+const shipModulesList = document.getElementById("ship-modules-list");
+const addShipModuleButton = document.getElementById("add-ship-module-btn");
+const shipTrackInputs = Array.from(document.querySelectorAll("[data-ship-track]"));
 
 const clockModal = document.getElementById("clock-modal");
 const clockForm = document.getElementById("clock-form");
@@ -68,6 +83,13 @@ const debtForm = document.getElementById("debt-form");
 const debtWhatInput = document.getElementById("debt-what");
 const debtWhoInput = document.getElementById("debt-who");
 const debtCancelButton = document.getElementById("debt-cancel");
+const shipModuleModal = document.getElementById("ship-module-modal");
+const shipModuleForm = document.getElementById("ship-module-form");
+const shipModuleNameInput = document.getElementById("ship-module-name");
+const shipModuleDescriptionInput = document.getElementById(
+  "ship-module-description"
+);
+const shipModuleCancelButton = document.getElementById("ship-module-cancel");
 const removeModal = document.getElementById("remove-modal");
 const removeCancelButton = document.getElementById("remove-cancel");
 const removeConfirmButton = document.getElementById("remove-confirm");
@@ -81,6 +103,14 @@ const STAT_SELECT_FIELDS = new Set([
   "stats.tech",
   "stats.tact",
   "stats.face",
+]);
+
+const SHIP_STAT_SELECT_FIELDS = new Set([
+  "ship.stats.hull",
+  "ship.stats.drive",
+  "ship.stats.shields",
+  "ship.stats.sensors",
+  "ship.stats.weapons",
 ]);
 
 const CUSTOM_MOVE_VALUE = "custom";
@@ -365,24 +395,90 @@ let contacts = [];
 let notes = [];
 let mods = [];
 let debts = [];
+let shipModules = [];
 let pendingRemoveId = null;
 let lastFocusedElement = null;
+let activeSheet = "character";
+
+const SHEET_COPY = {
+  character: {
+    title: "Character Sheet",
+    eyebrow: "Character Sheet",
+    subtitle: "Fill, save, export, and reload your character anywhere.",
+  },
+  ship: {
+    title: "Ship Sheet",
+    eyebrow: "Ship Sheet",
+    subtitle: "Track ship stats, resources, systems, and modules.",
+  },
+};
 
 const updateRadsDisplay = () => {
   if (!radsInput || !radsValue) return;
   radsValue.textContent = radsInput.value;
 };
 
-let saveTimer = null;
-const SAVE_DEBOUNCE_MS = 700;
-const scheduleSave = () => {
-  if (saveTimer) {
-    clearTimeout(saveTimer);
+const updateShipTrackDisplay = (input) => {
+  if (!input) return;
+  const valueEl = document.querySelector(
+    `[data-track-value-for="${input.id}"]`
+  );
+  if (valueEl) {
+    valueEl.textContent = input.value;
   }
-  saveTimer = setTimeout(() => {
-    saveTimer = null;
+};
+
+const updateShipTracksDisplay = () => {
+  shipTrackInputs.forEach((input) => updateShipTrackDisplay(input));
+};
+
+const updateSheetView = () => {
+  const copy = SHEET_COPY[activeSheet] || SHEET_COPY.character;
+  if (characterSheetView) {
+    characterSheetView.classList.toggle("is-hidden", activeSheet !== "character");
+  }
+  if (shipSheetView) {
+    shipSheetView.classList.toggle("is-hidden", activeSheet !== "ship");
+  }
+  if (sheetToggleButton) {
+    sheetToggleButton.textContent = activeSheet === "ship" ? "Character" : "Ship";
+  }
+  if (sheetTitle) sheetTitle.textContent = copy.title;
+  if (sheetEyebrow) sheetEyebrow.textContent = copy.eyebrow;
+  if (sheetSubtitle) sheetSubtitle.textContent = copy.subtitle;
+  document.title = `The Quiet End - ${copy.title}`;
+};
+
+const setActiveSheet = (sheet) => {
+  if (!sheet || sheet === activeSheet) return;
+  activeSheet = sheet;
+  updateSheetView();
+};
+
+const resetFields = (list) => {
+  list.forEach((field) => {
+    if (field.type === "checkbox" || field.type === "radio") {
+      field.checked = field.defaultChecked;
+      return;
+    }
+    field.value = field.defaultValue;
+  });
+};
+
+const saveTimers = {
+  character: null,
+  ship: null,
+};
+const SAVE_DEBOUNCE_MS = 700;
+const scheduleSave = (sheetType = activeSheet) => {
+  const targetSheet = sheetType === "ship" ? "ship" : "character";
+  if (saveTimers[targetSheet]) {
+    clearTimeout(saveTimers[targetSheet]);
+  }
+  saveTimers[targetSheet] = setTimeout(() => {
+    saveTimers[targetSheet] = null;
     const run = () => {
-      saveToStorage();
+      saveToStorage(targetSheet);
     };
     if (typeof window !== "undefined" && "requestIdleCallback" in window) {
       window.requestIdleCallback(run, { timeout: 700 });
@@ -610,6 +706,16 @@ const normalizeDebtEntry = (item) => {
   };
 };
 
+const normalizeShipModuleEntry = (item) => {
+  const name = normalizeText(item && item.name);
+  const description = normalizeText(item && item.description);
+  return {
+    id: typeof item.id === "string" && item.id ? item.id : createEntryId(),
+    name,
+    description,
+  };
+};
+
 const normalizeClock = (clock) => {
   const segments = [4, 6, 8].includes(Number(clock.segments))
     ? Number(clock.segments)
@@ -667,6 +773,13 @@ const setDebts = (list) => {
   renderDebts();
 };
 
+const setShipModules = (list) => {
+  shipModules = Array.isArray(list)
+    ? list.map(normalizeShipModuleEntry)
+    : [];
+  renderShipModules();
+};
+
 const createField = (labelText, input) => {
   const field = document.createElement("div");
   field.className = "field";
@@ -689,7 +802,7 @@ const createEmptyState = (message) => {
 
 const serialize = () => {
   const data = {};
-  fields.forEach((field) => {
+  characterFields.forEach((field) => {
     const key = field.dataset.field;
     if (!key) return;
 
@@ -751,8 +864,31 @@ const serialize = () => {
   return data;
 };
 
+const serializeShip = () => {
+  const data = {};
+  shipFields.forEach((field) => {
+    const key = field.dataset.field;
+    if (!key) return;
+
+    if (field.type === "checkbox") {
+      data[key] = field.checked;
+      return;
+    }
+
+    data[key] = field.value;
+  });
+
+  data["ship.modules"] = shipModules.map((module) => ({
+    id: module.id,
+    name: module.name,
+    description: module.description,
+  }));
+
+  return data;
+};
+
 const applyData = (data) => {
-  fields.forEach((field) => {
+  characterFields.forEach((field) => {
     const key = field.dataset.field;
     if (!key || !(key in data)) return;
 
@@ -761,7 +897,7 @@ const applyData = (data) => {
       return;
     }
 
-    if (STAT_SELECT_FIELDS.has(key)) {
+    if (SHIP_STAT_SELECT_FIELDS.has(key)) {
       field.value = normalizeStatSelectValue(data[key]);
       return;
     }
@@ -880,28 +1016,75 @@ const applyData = (data) => {
   updateRadsDisplay();
 };
 
-const saveToStorage = () => {
+const applyShipData = (data) => {
+  shipFields.forEach((field) => {
+    const key = field.dataset.field;
+    if (!key || !(key in data)) return;
+
+    if (field.type === "checkbox") {
+      field.checked = Boolean(data[key]);
+      return;
+    }
+
+    if (STAT_SELECT_FIELDS.has(key)) {
+      field.value = normalizeStatSelectValue(data[key]);
+      return;
+    }
+
+    field.value = data[key];
+  });
+
+  if (Array.isArray(data["ship.modules"])) {
+    setShipModules(data["ship.modules"]);
+  } else {
+    setShipModules([]);
+  }
+  updateShipTracksDisplay();
+};
+
+const saveToStorage = (sheetType = activeSheet) => {
+  const targetSheet = sheetType === "ship" ? "ship" : "character";
+  const key =
+    targetSheet === "ship" ? SHIP_STORAGE_KEY : CHARACTER_STORAGE_KEY;
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(serialize()));
+    const data = targetSheet === "ship" ? serializeShip() : serialize();
+    localStorage.setItem(key, JSON.stringify(data));
   } catch (error) {
     console.error("Unable to save sheet", error);
   }
 };
 
-const loadFromStorage = () => {
+const loadFromStorage = (sheetType) => {
+  const targetSheet = sheetType === "ship" ? "ship" : "character";
+  const key =
+    targetSheet === "ship" ? SHIP_STORAGE_KEY : CHARACTER_STORAGE_KEY;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(key);
     if (!raw) return;
     const data = JSON.parse(raw);
-    applyData(data);
+    if (targetSheet === "ship") {
+      applyShipData(data);
+    } else {
+      applyData(data);
+    }
   } catch (error) {
     console.error("Unable to load sheet", error);
   }
 };
 
-const resetSheet = () => {
+const resetSheet = (sheetType = activeSheet) => {
   if (!confirm("Start a new sheet? This clears the current one.")) return;
-  form.reset();
+  const targetSheet = sheetType === "ship" ? "ship" : "character";
+
+  if (targetSheet === "ship") {
+    resetFields(shipFields);
+    setShipModules([]);
+    updateShipTracksDisplay();
+    localStorage.removeItem(SHIP_STORAGE_KEY);
+    return;
+  }
+
+  resetFields(characterFields);
   setClocks([]);
   setGearItems([]);
   setMoves([]);
@@ -913,17 +1096,20 @@ const resetSheet = () => {
   ensureBaseMovesApplied();
   updateMoveOptions();
   updateRadsDisplay();
-  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(CHARACTER_STORAGE_KEY);
 };
 
-const exportSheet = () => {
-  const data = serialize();
-  const name = (data["identity.name"] || "character")
-    .toString()
-    .trim()
-    .replace(/[^a-z0-9-_]+/gi, "-")
-    .toLowerCase();
-  const filename = `tqe-${name || "character"}.json`;
+const exportSheet = (sheetType = activeSheet) => {
+  const targetSheet = sheetType === "ship" ? "ship" : "character";
+  const data = targetSheet === "ship" ? serializeShip() : serialize();
+  const filename =
+    targetSheet === "ship"
+      ? "tqe-ship.json"
+      : `tqe-${(data["identity.name"] || "character")
+          .toString()
+          .trim()
+          .replace(/[^a-z0-9-_]+/gi, "-")
+          .toLowerCase()}.json`;
   const blob = new Blob([JSON.stringify(data, null, 2)], {
     type: "application/json",
   });
@@ -937,13 +1123,18 @@ const exportSheet = () => {
   URL.revokeObjectURL(url);
 };
 
-const importSheet = (file) => {
+const importSheet = (file, sheetType = activeSheet) => {
+  const targetSheet = sheetType === "ship" ? "ship" : "character";
   const reader = new FileReader();
   reader.onload = () => {
     try {
       const data = JSON.parse(reader.result);
-      applyData(data);
-      saveToStorage();
+      if (targetSheet === "ship") {
+        applyShipData(data);
+      } else {
+        applyData(data);
+      }
+      saveToStorage(targetSheet);
     } catch (error) {
       alert("Could not read that JSON file.");
       console.error("Invalid JSON", error);
@@ -1013,6 +1204,9 @@ const openAddModModal = () =>
 
 const openAddDebtModal = () =>
   openFormModal(debtModal, debtForm, debtWhatInput);
+
+const openAddShipModuleModal = () =>
+  openFormModal(shipModuleModal, shipModuleForm, shipModuleNameInput);
 
 const openRemoveModal = (clock) => {
   if (!removeModal || !removeModalText) return;
@@ -1452,6 +1646,57 @@ const renderDebts = () => {
   });
 };
 
+const renderShipModules = () => {
+  if (!shipModulesList) return;
+  shipModulesList.innerHTML = "";
+
+  if (!shipModules.length) {
+    shipModulesList.appendChild(createEmptyState("No modules added yet."));
+    return;
+  }
+
+  shipModules.forEach((entry) => {
+    const card = document.createElement("div");
+    card.className = "entry-card";
+
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.id = `${entry.id}-ship-module-name`;
+    nameInput.value = entry.name;
+    nameInput.addEventListener("input", () => {
+      entry.name = nameInput.value;
+      scheduleSave("ship");
+    });
+
+    const descriptionInput = document.createElement("textarea");
+    descriptionInput.rows = 3;
+    descriptionInput.id = `${entry.id}-ship-module-description`;
+    descriptionInput.value = entry.description;
+    descriptionInput.addEventListener("input", () => {
+      entry.description = descriptionInput.value;
+      scheduleSave("ship");
+    });
+
+    const actions = document.createElement("div");
+    actions.className = "entry-actions";
+    const removeButton = document.createElement("button");
+    removeButton.type = "button";
+    removeButton.className = "btn ghost small";
+    removeButton.textContent = "Remove";
+    removeButton.addEventListener("click", () => {
+      shipModules = shipModules.filter((item) => item.id !== entry.id);
+      renderShipModules();
+      scheduleSave("ship");
+    });
+    actions.appendChild(removeButton);
+
+    card.appendChild(createField("Module", nameInput));
+    card.appendChild(createField("Description", descriptionInput));
+    card.appendChild(actions);
+    shipModulesList.appendChild(card);
+  });
+};
+
 const renderClocks = () => {
   if (!clocksList) return;
   clocksList.innerHTML = "";
@@ -1572,10 +1817,26 @@ const addDebt = (item) => {
   scheduleSave();
 };
 
-fields.forEach((field) => {
+const addShipModule = (item) => {
+  shipModules.push(normalizeShipModuleEntry(item));
+  renderShipModules();
+  scheduleSave("ship");
+};
+
+characterFields.forEach((field) => {
   if (field === radsInput) return;
   const handler = () => {
-    scheduleSave();
+    scheduleSave("character");
+  };
+
+  field.addEventListener("input", handler);
+  field.addEventListener("change", handler);
+});
+
+shipFields.forEach((field) => {
+  if (shipTrackInputs.includes(field)) return;
+  const handler = () => {
+    scheduleSave("ship");
   };
 
   field.addEventListener("input", handler);
@@ -1595,14 +1856,31 @@ if (roleSelect) {
 if (radsInput) {
   const radsHandler = () => {
     updateRadsDisplay();
-    scheduleSave();
+    scheduleSave("character");
   };
   radsInput.addEventListener("input", radsHandler);
   radsInput.addEventListener("change", radsHandler);
 }
 
-exportButton.addEventListener("click", exportSheet);
-resetButton.addEventListener("click", resetSheet);
+if (shipTrackInputs.length) {
+  shipTrackInputs.forEach((input) => {
+    const handler = () => {
+      updateShipTrackDisplay(input);
+      scheduleSave("ship");
+    };
+    input.addEventListener("input", handler);
+    input.addEventListener("change", handler);
+  });
+}
+
+exportButton.addEventListener("click", () => exportSheet());
+resetButton.addEventListener("click", () => resetSheet());
+
+if (sheetToggleButton) {
+  sheetToggleButton.addEventListener("click", () => {
+    setActiveSheet(activeSheet === "ship" ? "character" : "ship");
+  });
+}
 
 if (addClockButton) {
   addClockButton.addEventListener("click", openAddClockModal);
@@ -1636,6 +1914,10 @@ if (addDebtButton) {
   addDebtButton.addEventListener("click", openAddDebtModal);
 }
 
+if (addShipModuleButton) {
+  addShipModuleButton.addEventListener("click", openAddShipModuleModal);
+}
+
 if (clockCancelButton) {
   clockCancelButton.addEventListener("click", () => closeModal(clockModal));
 }
@@ -1666,6 +1948,12 @@ if (modCancelButton) {
 
 if (debtCancelButton) {
   debtCancelButton.addEventListener("click", () => closeModal(debtModal));
+}
+
+if (shipModuleCancelButton) {
+  shipModuleCancelButton.addEventListener("click", () =>
+    closeModal(shipModuleModal)
+  );
 }
 
 if (clockForm) {
@@ -1863,6 +2151,26 @@ if (debtForm) {
   });
 }
 
+if (shipModuleForm) {
+  shipModuleForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const name = shipModuleNameInput ? shipModuleNameInput.value.trim() : "";
+    if (!name) {
+      shipModuleNameInput.focus();
+      return;
+    }
+    const description = shipModuleDescriptionInput
+      ? shipModuleDescriptionInput.value.trim()
+      : "";
+    addShipModule({
+      id: createEntryId(),
+      name,
+      description,
+    });
+    closeModal(shipModuleModal);
+  });
+}
+
 if (removeCancelButton) {
   removeCancelButton.addEventListener("click", () => closeModal(removeModal));
 }
@@ -1885,13 +2193,14 @@ document.querySelectorAll(".modal").forEach((modal) => {
 document.addEventListener("keydown", handleKeydown);
 
 window.addEventListener("pagehide", () => {
-  saveToStorage();
+  saveToStorage("character");
+  saveToStorage("ship");
 });
 
 importInput.addEventListener("change", (event) => {
   const file = event.target.files && event.target.files[0];
   if (!file) return;
-  importSheet(file);
+  importSheet(file, activeSheet);
   event.target.value = "";
 });
 
@@ -1903,8 +2212,12 @@ renderContacts();
 renderNotes();
 renderMods();
 renderDebts();
+renderShipModules();
 updateRadsDisplay();
-loadFromStorage();
+updateShipTracksDisplay();
+loadFromStorage("character");
+loadFromStorage("ship");
 ensureBaseMovesApplied();
 updateMoveOptions();
 initializeStatModifiers();
+updateSheetView();
