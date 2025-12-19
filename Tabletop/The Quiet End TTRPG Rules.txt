@@ -156,9 +156,7 @@ After a clock fills, either:
 ________________
 
 
-5.5 Core Clocks (Recommended Defaults)
-These are the five you listed
-, but with clear “what it means / what ticks it / what happens at thresholds.”
+5.5 Core Clocks
 A) CORRIDOR INSTABILITY (per route or per region)
 Type: Decay / Threat (6 segments recommended)
 Represents: How close a Corridor is to a Shift or Collapse event.
