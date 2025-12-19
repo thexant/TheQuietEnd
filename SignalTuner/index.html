@@ -450,8 +450,9 @@
         /* Mobile layout: keep all HUD elements visible */
         @media (max-width: 720px), (max-height: 700px) {
             #game-container {
-                height: 100dvh;
+                height: 100svh;
                 width: 100vw;
+                max-height: 100svh;
                 padding-bottom: calc(var(--frame-pad) + env(safe-area-inset-bottom));
             }
 
