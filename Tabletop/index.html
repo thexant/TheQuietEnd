@@ -96,6 +96,28 @@
         height: fit-content;
       }
 
+      .panel-controls {
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .panel-controls button {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: rgba(10, 8, 5, 0.85);
+        color: var(--amber-bright);
+        font-family: var(--font-body);
+        font-size: 0.72rem;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+
+      .panel-controls button:hover {
+        border-color: rgba(210, 169, 90, 0.8);
+      }
+
       .panel {
         border: 1px solid var(--line);
         border-radius: var(--radius);
@@ -147,6 +169,25 @@
 
       .panel details > *:not(summary) {
         margin-top: 12px;
+      }
+
+      .panel-body {
+        max-height: 42vh;
+        overflow-y: auto;
+        padding-right: 6px;
+      }
+
+      .panel-body::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      .panel-body::-webkit-scrollbar-thumb {
+        background: rgba(210, 169, 90, 0.4);
+        border-radius: 999px;
+      }
+
+      .panel-body::-webkit-scrollbar-track {
+        background: rgba(9, 7, 5, 0.6);
       }
 
       .panel label {
@@ -333,6 +374,10 @@
         .sidebar {
           position: static;
         }
+
+        .panel-body {
+          max-height: none;
+        }
       }
     </style>
   </head>
@@ -353,127 +398,136 @@
 
     <main class="layout">
       <aside class="sidebar">
+        <div class="panel-controls">
+          <button type="button" id="toggle-panels">Collapse all</button>
+        </div>
         <details class="panel" open>
           <summary>Search</summary>
-          <label for="search-input">Search sections</label>
-          <input id="search-input" type="search" placeholder="Search rules..." />
-          <div class="search-count" id="search-count">Loading rules...</div>
+          <div class="panel-body">
+            <label for="search-input">Search sections</label>
+            <input id="search-input" type="search" placeholder="Search rules..." />
+            <div class="search-count" id="search-count">Loading rules...</div>
+          </div>
         </details>
 
         <details class="panel" id="jump-to" open>
           <summary>Jump to</summary>
-          <nav class="toc" id="toc"></nav>
+          <div class="panel-body">
+            <nav class="toc" id="toc"></nav>
+          </div>
         </details>
 
         <details class="panel" id="quick-reference" open>
           <summary>Quick Reference</summary>
-          <div class="table-wrap">
-            <table class="quick-table">
-              <thead>
-                <tr>
-                  <th>Roll</th>
-                  <th>Outcome</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>10+</td>
-                  <td>Clean success, take a bonus or avoid a cost.</td>
-                </tr>
-                <tr>
-                  <td>7-9</td>
-                  <td>Success with a cost or complication.</td>
-                </tr>
-                <tr>
-                  <td>6-</td>
-                  <td>Mark XP, GM makes a move.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="table-wrap" style="margin-top: 16px;">
-            <table class="quick-table">
-              <thead>
-                <tr>
-                  <th>Stats</th>
-                  <th>Use</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>GRIT</td>
-                  <td>Endure, resist, push through.</td>
-                </tr>
-                <tr>
-                  <td>WITS</td>
-                  <td>Notice, plan, diagnose.</td>
-                </tr>
-                <tr>
-                  <td>TECH</td>
-                  <td>Repair, hack, operate systems.</td>
-                </tr>
-                <tr>
-                  <td>TACT</td>
-                  <td>Fight, command, pressure.</td>
-                </tr>
-                <tr>
-                  <td>FACE</td>
-                  <td>Negotiate, lie, read people.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="table-wrap" style="margin-top: 16px;">
-            <table class="quick-table">
-              <thead>
-                <tr>
-                  <th>Phase Loop</th>
-                  <th>Focus</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>Job</td>
-                  <td>Contract, intel, prep, first consequences.</td>
-                </tr>
-                <tr>
-                  <td>Travel</td>
-                  <td>Corridor runs, hazards, instability.</td>
-                </tr>
-                <tr>
-                  <td>Location</td>
-                  <td>NPCs, rumors, local politics.</td>
-                </tr>
-                <tr>
-                  <td>Docks</td>
-                  <td>Repair, refit, recovery, reduce heat.</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-          <div class="table-wrap" style="margin-top: 16px;">
-            <table class="quick-table">
-              <thead>
-                <tr>
-                  <th>Clock Size</th>
-                  <th>Use</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>4 segments</td>
-                  <td>Fast, immediate problems.</td>
-                </tr>
-                <tr>
-                  <td>6 segments</td>
-                  <td>Medium pressure, job scale.</td>
-                </tr>
-                <tr>
-                  <td>8 segments</td>
-                  <td>Slow burn, multi-session arcs.</td>
-                </tr>
-              </tbody>
-            </table>
+          <div class="panel-body">
+            <div class="table-wrap">
+              <table class="quick-table">
+                <thead>
+                  <tr>
+                    <th>Roll</th>
+                    <th>Outcome</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>10+</td>
+                    <td>Clean success, take a bonus or avoid a cost.</td>
+                  </tr>
+                  <tr>
+                    <td>7-9</td>
+                    <td>Success with a cost or complication.</td>
+                  </tr>
+                  <tr>
+                    <td>6-</td>
+                    <td>Mark XP, GM makes a move.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="table-wrap" style="margin-top: 16px;">
+              <table class="quick-table">
+                <thead>
+                  <tr>
+                    <th>Stats</th>
+                    <th>Use</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>GRIT</td>
+                    <td>Endure, resist, push through.</td>
+                  </tr>
+                  <tr>
+                    <td>WITS</td>
+                    <td>Notice, plan, diagnose.</td>
+                  </tr>
+                  <tr>
+                    <td>TECH</td>
+                    <td>Repair, hack, operate systems.</td>
+                  </tr>
+                  <tr>
+                    <td>TACT</td>
+                    <td>Fight, command, pressure.</td>
+                  </tr>
+                  <tr>
+                    <td>FACE</td>
+                    <td>Negotiate, lie, read people.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="table-wrap" style="margin-top: 16px;">
+              <table class="quick-table">
+                <thead>
+                  <tr>
+                    <th>Phase Loop</th>
+                    <th>Focus</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Job</td>
+                    <td>Contract, intel, prep, first consequences.</td>
+                  </tr>
+                  <tr>
+                    <td>Travel</td>
+                    <td>Corridor runs, hazards, instability.</td>
+                  </tr>
+                  <tr>
+                    <td>Location</td>
+                    <td>NPCs, rumors, local politics.</td>
+                  </tr>
+                  <tr>
+                    <td>Docks</td>
+                    <td>Repair, refit, recovery, reduce heat.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="table-wrap" style="margin-top: 16px;">
+              <table class="quick-table">
+                <thead>
+                  <tr>
+                    <th>Clock Size</th>
+                    <th>Use</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>4 segments</td>
+                    <td>Fast, immediate problems.</td>
+                  </tr>
+                  <tr>
+                    <td>6 segments</td>
+                    <td>Medium pressure, job scale.</td>
+                  </tr>
+                  <tr>
+                    <td>8 segments</td>
+                    <td>Slow burn, multi-session arcs.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </details>
       </aside>
@@ -495,6 +549,7 @@
       const tocContainer = document.getElementById("toc");
       const searchInput = document.getElementById("search-input");
       const searchCount = document.getElementById("search-count");
+      const togglePanelsButton = document.getElementById("toggle-panels");
 
       const escapeHtml = (value) =>
         value
@@ -699,6 +754,21 @@
         });
       };
 
+      const wirePanelControls = () => {
+        if (!togglePanelsButton) {
+          return;
+        }
+
+        togglePanelsButton.addEventListener("click", () => {
+          const panels = Array.from(document.querySelectorAll(".sidebar details.panel"));
+          const shouldOpen = panels.some((panel) => !panel.open);
+          panels.forEach((panel) => {
+            panel.open = shouldOpen;
+          });
+          togglePanelsButton.textContent = shouldOpen ? "Collapse all" : "Expand all";
+        });
+      };
+
       fetch("The%20Quiet%20End%20TTRPG%20Rules.txt")
         .then((response) => {
           if (!response.ok) {
@@ -711,6 +781,7 @@
           renderSections(sections);
           buildToc(sections);
           wireSearch();
+          wirePanelControls();
         })
         .catch(() => {
           rulesContainer.innerHTML =

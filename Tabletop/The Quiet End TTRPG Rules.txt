@@ -1,11 +1,5 @@
 ﻿The Quiet End
 A PbtA-based tabletop framework for roleplaying in “The Quiet End” universe
-0) Design Goals
-* Play stays fast: 2d6 + Stat, fiction-first, minimal math.
-* The crew manages two sheets: Character + Ship (shared).
-* Scarcity matters: Supply, Parts, Fuel, Data, Heat.
-* Travel is drama: Corridor Runs are structured and dangerous.
-* Truth is local: no FTL comms, delayed consequences, rumor economies.
 ________________
 
 
