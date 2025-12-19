@@ -29,6 +29,9 @@
         --line: rgba(118, 226, 183, 0.18);
         --grid: rgba(118, 226, 183, 0.05);
         --glow: rgba(118, 226, 183, 0.22);
+        --signal-tuner: #be76e2;
+        --signal-tuner-line: rgba(190, 118, 226, 0.28);
+        --signal-tuner-glow: rgba(190, 118, 226, 0.45);
         --radius: 3px;
         --font-title: "B612 Mono", "Courier New", monospace;
         --font-body: "Share Tech Mono", "Courier New", monospace;
@@ -267,6 +270,24 @@
         background: rgba(210, 169, 90, 0.28);
       }
 
+      .card.signaltuner {
+        border-color: rgba(190, 118, 226, 0.6);
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.45);
+      }
+
+      .card.signaltuner:hover {
+        border-color: rgba(190, 118, 226, 0.95);
+      }
+
+      .card.signaltuner .tag {
+        color: var(--signal-tuner);
+        text-shadow: 0 0 10px var(--signal-tuner-glow);
+      }
+
+      .card.signaltuner::before {
+        background: var(--signal-tuner-line);
+      }
+
       .tag {
         font-family: var(--font-body);
         font-size: 0.72rem;
@@ -485,6 +506,13 @@
             <div class="tag">Console 04</div>
             <h3>Tabletop Rules</h3>
             <p>Open the full TTRPG rules reference with searchable sections.</p>
+          </a>
+        </article>
+		<article class="card signaltuner">
+          <a href="SignalTuner/">
+            <div class="tag">Console 05</div>
+            <h3>Signal Tuner</h3>
+            <p>Browser based minigame. Align Gate signals to maintain Corridor connections.</p>
           </a>
         </article>
       </section>
