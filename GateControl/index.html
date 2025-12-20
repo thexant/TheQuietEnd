@@ -44,6 +44,7 @@
       --ink: #b6ffd9;
       --muted: #6aa98d;
       --signal: #4dff9a;
+      --good: var(--signal);
       --line: rgba(77, 255, 154, 0.18);
       --grid: rgba(77, 255, 154, 0.05);
       --glow: rgba(77, 255, 154, 0.35);
@@ -55,6 +56,7 @@
 
     :root[data-theme="green"] {
       --ink: #b6ffd9; --muted: #6aa98d; --signal: #4dff9a;
+      --good: var(--signal);
       --line: rgba(77, 255, 154, 0.18); --grid: rgba(77, 255, 154, 0.05);
       --glow: rgba(77, 255, 154, 0.35); --bg-hi: #0d1a14;
       --shadowText: rgba(77, 255, 154, 0.20); --shadowText2: rgba(77, 255, 154, 0.12);
@@ -62,6 +64,7 @@
     }
     :root[data-theme="red"] {
       --ink: #ffd0d0; --muted: #b27a7a; --signal: #ff5454;
+      --good: var(--signal);
       --line: rgba(255, 84, 84, 0.18); --grid: rgba(255, 84, 84, 0.05);
       --glow: rgba(255, 84, 84, 0.35); --bg-hi: #1a0d10;
       --shadowText: rgba(255, 84, 84, 0.18); --shadowText2: rgba(255, 84, 84, 0.10);
@@ -69,6 +72,7 @@
     }
     :root[data-theme="blue"] {
       --ink: #cfe5ff; --muted: #7f97b3; --signal: #4fb3ff;
+      --good: var(--signal);
       --line: rgba(79, 179, 255, 0.18); --grid: rgba(79, 179, 255, 0.05);
       --glow: rgba(79, 179, 255, 0.35); --bg-hi: #0d141a;
       --shadowText: rgba(79, 179, 255, 0.18); --shadowText2: rgba(79, 179, 255, 0.10);
@@ -76,10 +80,19 @@
     }
     :root[data-theme="amber"] {
       --ink: #ffe9c2; --muted: #b79b63; --signal: #ffb84d;
+      --good: var(--signal);
       --line: rgba(255, 184, 77, 0.18); --grid: rgba(255, 184, 77, 0.05);
       --glow: rgba(255, 184, 77, 0.35); --bg-hi: #1a130d;
       --shadowText: rgba(255, 184, 77, 0.18); --shadowText2: rgba(255, 184, 77, 0.10);
       --stat: #ffe9c2;
+    }
+    :root[data-theme="black"] {
+      --deep: #000; --bg-hi: #000;
+      --ink: #eaeaea; --muted: #9a9a9a; --signal: #f2f2f2; --good: #4dff9a;
+      --line: rgba(255, 255, 255, 0.18); --grid: rgba(255, 255, 255, 0.05);
+      --glow: rgba(255, 255, 255, 0.22);
+      --shadowText: rgba(255, 255, 255, 0.18); --shadowText2: rgba(255, 255, 255, 0.10);
+      --stat: #d2a95a;
     }
 
     * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
@@ -804,7 +817,7 @@
 
     .terminal-line { white-space: pre-wrap; word-break: break-word; }
     .terminal-line.dim { color: var(--muted); }
-    .terminal-line.good { color: var(--signal); }
+    .terminal-line.good { color: var(--good); }
     .terminal-line.warn { color: var(--stat); }
     .terminal-line.bad { color: var(--alert); }
 
@@ -1025,6 +1038,7 @@
               <option value="red">RED</option>
               <option value="blue">BLUE</option>
               <option value="amber">AMBER</option>
+              <option value="black">BLACK</option>
             </select>
           </div>
           <button id="btn-help" aria-expanded="false" aria-controls="help-panel">HELP</button>
