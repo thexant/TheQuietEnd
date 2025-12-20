@@ -2757,15 +2757,16 @@
     function denyReasonForShip(s) {
       if (shipHasEffect(s, "VACUUM BLOOM")) return "VACUUM BLOOM HAZARD";
       if (shipIsRaider(s) || s.hiddenThreat) return "HOSTILE PROFILE";
-      if (s.transponder !== "VALID" && s.type === "UNKNOWN") return "UNVERIFIED REGISTRY";
       if (s.obscured) return "SIGNAL MASKED";
+      if (s.transponder !== "VALID") return "TRANSPONDER ANOMALY";
+      if (s.type === "UNKNOWN") return "UNVERIFIED REGISTRY";
       return "NO ACTIONABLE CAUSE";
     }
 
     function isCorrectDeny(s) {
       if (shipHasEffect(s, "VACUUM BLOOM")) return true;
       if (shipIsRaider(s) || s.hiddenThreat) return true;
-      if (s.transponder !== "VALID" && s.type === "UNKNOWN") return true;
+      if (s.transponder !== "VALID") return true;
       return false;
     }
 
@@ -2895,48 +2896,38 @@
         return;
       }
 
-      // friction rules
-      const needsAuth = (s.type === "UNKNOWN" && action !== "hold")
-        || (s.priority && action === "deny")
-        || (s.transponder !== "VALID" && action === "approve");
-
-      if (needsAuth && Math.random() < 0.45) {
-        consoleLine(`REFUSED (${id}): INSUFFICIENT AUTH`, "warn");
-        return;
-      }
-
-        if (action === "approve") {
-          if (s.transponder !== "VALID") {
-            s.state = "HOLD";
-            s.reason = "TRANSPONDER VERIFY";
-            s.wasCleared = true;
-            s.eta = Math.max(s.eta, randRange(90, 180));
-            consoleLine(`CLEARANCE HELD: ${id} (TRANSPONDER VERIFY)`, "warn");
-            if (g.id === runtime.activeGateId) eventLine(`AUTH HOLD: ${id} (TRANSPONDER VERIFY)`, "warn");
-          } else {
-            s.state = "CLEARED";
-            s.reason = null;
-            s.wasCleared = true;
-            consoleLine(`CLEARED: ${id} (${s.request})`, "good");
-            if (["DOCK","DECON","REFUEL","CREW TRANSFER"].includes(s.request)) bumpConcourse(g, 8 + Math.random() * 6);
-          }
-        } else if (action === "hold") {
-          s.state = "HOLD";
-          if (s.transponder !== "VALID") {
-            s.reason = "TRANSPONDER VERIFY";
-          } else {
-            s.reason = s.reason || pick(Math.random, HOLD_REASONS);
-          }
-          consoleLine(`HOLD SET: ${id} (${s.reason})`, "warn");
-        } else if (action === "deny") {
-          s.state = "DENIED";
-          const correct = isCorrectDeny(s);
-          s.reason = correct ? denyReasonForShip(s) : "NO ACTIONABLE CAUSE";
-          if (prevState !== "DENIED") bumpStat(g, correct ? "deniedCorrect" : "deniedIncorrect");
-          s.doneAt = Date.now();
-          consoleLine(`DENIED: ${id} (${s.reason})`, "bad");
-          if (!correct && g.id === runtime.activeGateId) eventLine(`DENY PENALTY: ${id} (NO CAUSE)`, "warn");
+      if (action === "approve") {
+        if (s.transponder !== "VALID") {
+          s.state = "CLEARED";
+          s.reason = "TRANSPONDER OVERRIDE";
+          s.wasCleared = true;
+          consoleLine(`CLEARED: ${id} (TRANSPONDER OVERRIDE)`, "warn");
+          if (g.id === runtime.activeGateId) eventLine(`CLEARANCE OVERRIDE: ${id} (TRANSPONDER)`, "warn");
+          if (["DOCK","DECON","REFUEL","CREW TRANSFER"].includes(s.request)) bumpConcourse(g, 8 + Math.random() * 6);
+        } else {
+          s.state = "CLEARED";
+          s.reason = null;
+          s.wasCleared = true;
+          consoleLine(`CLEARED: ${id} (${s.request})`, "good");
+          if (["DOCK","DECON","REFUEL","CREW TRANSFER"].includes(s.request)) bumpConcourse(g, 8 + Math.random() * 6);
         }
+      } else if (action === "hold") {
+        s.state = "HOLD";
+        if (s.transponder !== "VALID") {
+          s.reason = "TRANSPONDER VERIFY";
+        } else {
+          s.reason = s.reason || pick(Math.random, HOLD_REASONS);
+        }
+        consoleLine(`HOLD SET: ${id} (${s.reason})`, "warn");
+      } else if (action === "deny") {
+        s.state = "DENIED";
+        const correct = isCorrectDeny(s);
+        s.reason = correct ? denyReasonForShip(s) : "NO ACTIONABLE CAUSE";
+        if (prevState !== "DENIED") bumpStat(g, correct ? "deniedCorrect" : "deniedIncorrect");
+        s.doneAt = Date.now();
+        consoleLine(`DENIED: ${id} (${s.reason})`, "bad");
+        if (!correct && g.id === runtime.activeGateId) eventLine(`DENY PENALTY: ${id} (NO CAUSE)`, "warn");
+      }
 
       if (prevState !== "CLEARED" && s.state === "CLEARED") g.stats.approved++;
       if (prevState !== "DENIED" && s.state === "DENIED") g.stats.denied++;
