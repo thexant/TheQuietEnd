@@ -268,26 +268,28 @@
       letter-spacing: 0.14em;
       text-transform: uppercase;
       color: var(--signal);
-      font-size: 0.78rem;
+      font-size: clamp(0.78rem, 1.6vmin, 0.95rem);
     }
     .help-sub {
-      font-size: 0.64rem;
+      font-size: clamp(0.62rem, 1.3vmin, 0.78rem);
       letter-spacing: 0.16em;
       text-transform: uppercase;
       color: var(--muted);
     }
     .help-body {
       display: grid;
-      gap: 8px;
-      font-size: 0.78rem;
-      line-height: 1.4;
+      gap: 10px;
+      font-size: clamp(0.82rem, 1.8vmin, 0.96rem);
+      line-height: 1.55;
       overflow: auto;
       padding-right: 6px;
+      font-family: var(--font-body);
+      letter-spacing: 0.01em;
     }
     .help-row {
       display: grid;
-      grid-template-columns: 120px 1fr;
-      gap: 8px;
+      grid-template-columns: minmax(120px, 160px) 1fr;
+      gap: 10px;
       align-items: start;
     }
     .help-key {
@@ -295,7 +297,7 @@
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--muted);
-      font-size: 0.62rem;
+      font-size: clamp(0.62rem, 1.2vmin, 0.72rem);
     }
     .help-actions {
       display: flex;
@@ -308,6 +310,19 @@
       text-transform: uppercase;
       letter-spacing: 0.18em;
       color: var(--muted);
+    }
+
+    .gate-display {
+      font-family: var(--font-title);
+      font-size: 0.85rem;
+      color: var(--signal);
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 8px 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      min-width: 140px;
     }
 
     select, button, input {
@@ -833,6 +848,7 @@
       .controls { gap: 8px; }
       .ctl { text-align: left; }
       select, button, input { font-size: 0.9rem; padding: 10px 12px; }
+      .gate-display { font-size: 0.9rem; padding: 10px 12px; }
       .prompt { grid-template-columns: 1fr; }
       .prompt .ps1 { white-space: normal; }
       footer { gap: 6px; }
@@ -841,6 +857,7 @@
       .logbox {
         max-height: min(42vh, 360px);
       }
+      .help-row { grid-template-columns: 1fr; gap: 4px; }
     }
   </style>
 </head>
@@ -898,8 +915,8 @@
       <div class="header-right">
         <div class="controls">
           <div class="ctl">
-            <label for="gate-select">Gate Node</label>
-            <select id="gate-select"></select>
+            <label>Gate Node</label>
+            <div id="gate-display" class="gate-display">GATE-00</div>
           </div>
           <div class="ctl">
             <label for="theme-select">Display</label>
@@ -911,7 +928,6 @@
             </select>
           </div>
           <button id="btn-help" aria-expanded="false" aria-controls="help-panel">HELP</button>
-          <button id="btn-next" title="Switch gate (next)">NEXT</button>
         </div>
 
         <div id="help-panel" class="help-panel" aria-hidden="true">
@@ -942,7 +958,7 @@
             </div>
             <div class="help-row">
               <div class="help-key">Resources</div>
-              <div>Fuel drains over time. Supplies drain during work orders and decon. Order buttons appear when reserves drop to 25%.</div>
+              <div>Fuel drains over time. Supplies drain during work orders and decon. Order buttons appear when reserves drop to 25% and deliveries move through stages.</div>
             </div>
             <div class="help-row">
               <div class="help-key">Maintenance</div>
@@ -955,6 +971,34 @@
             <div class="help-row">
               <div class="help-key">Console</div>
               <div>Type commands for deeper control. Start with HELP to list commands. STATUS shows node health, LINKS shows corridors, LIST INBOUND/OUTBOUND shows quick lists.</div>
+            </div>
+            <div class="help-row">
+              <div class="help-key">Quick keys</div>
+              <div>Enter submits a command. ArrowUp recalls the last command. Esc clears the input. Esc also dismisses this panel.</div>
+            </div>
+            <div class="help-row">
+              <div class="help-key">Ship detail</div>
+              <div>DETAIL &lt;ID&gt; reveals current state, ETA, dock slot, transponder, priority flag, effects, and notes. NOTE &lt;ID&gt; &lt;TEXT&gt; saves operator notes.</div>
+            </div>
+            <div class="help-row">
+              <div class="help-key">Decon</div>
+              <div>Use DECON START &lt;ID&gt; to begin decontamination. Ships in decon pause in place until the cycle completes.</div>
+            </div>
+            <div class="help-row">
+              <div class="help-key">Work orders</div>
+              <div>WORKORDER &lt;SYSTEM&gt; queues repairs on offline facility systems and consumes supplies until the work order resolves.</div>
+            </div>
+            <div class="help-row">
+              <div class="help-key">Relays</div>
+              <div>RELAYS lists node relays. PING &lt;RELAY-ID&gt; checks status. ACK &lt;RELAY-ID&gt; clears pending acknowledgments before they expire.</div>
+            </div>
+            <div class="help-row">
+              <div class="help-key">Orders</div>
+              <div>ORDER FUEL or ORDER SUPPLY queues resupply when levels drop. Use PACKETS to review recent transmission chatter.</div>
+            </div>
+            <div class="help-row">
+              <div class="help-key">Logs</div>
+              <div>CLEAR wipes the console output. CLEAR EVENTS wipes the event log.</div>
             </div>
             <div class="help-row">
               <div class="help-key">Workflow</div>
@@ -1663,9 +1707,8 @@
     // UI + Runtime
     // ---------------------------
     const ui = {
-      gateSelect: document.getElementById("gate-select"),
+      gateDisplay: document.getElementById("gate-display"),
       themeSelect: document.getElementById("theme-select"),
-      nextBtn: document.getElementById("btn-next"),
       btnHelp: document.getElementById("btn-help"),
       helpPanel: document.getElementById("help-panel"),
       helpDismiss: document.getElementById("btn-help-dismiss"),
@@ -1803,7 +1846,9 @@
       runtime.gateIndex = idx >= 0 ? idx : 0;
 
       runtime.activeGateId = runtime.catalog[runtime.gateIndex];
-      ui.gateSelect.value = runtime.activeGateId;
+      if (ui.gateDisplay) {
+        ui.gateDisplay.textContent = runtime.activeGateId;
+      }
       localStorage.setItem(LS.gateCurrent, runtime.activeGateId);
 
       ui.ps1.textContent = `${runtime.activeGateId}>`;
@@ -1872,7 +1917,6 @@
       localStorage.setItem(LS.gateCurrent, newId);
       if (oldId) localStorage.removeItem(LS.gateStatePrefix + oldId);
 
-      updateGateSelectOptions();
       document.body.classList.remove("severed");
       clearLog(ui.events);
       clearLog(ui.console);
@@ -3364,7 +3408,6 @@
       consoleLine("  RELAYS | PING <RELAY-ID> | ACK <RELAY-ID>", "dim");
       consoleLine("  PACKETS", "dim");
       consoleLine("  ORDER FUEL | ORDER SUPPLY", "dim");
-      consoleLine("  GATE <NODE> | NEXT", "dim");
       consoleLine("  THEME GREEN|RED|BLUE|AMBER", "dim");
       consoleLine("  CLEAR (console)", "dim");
       consoleLine("  CLEAR EVENTS", "dim");
@@ -3517,20 +3560,6 @@
       if (cmd === "PACKETS") return cmdPackets();
       if (cmd === "ORDER") return cmdOrder(parts.slice(1).join(" "));
 
-      if (cmd === "NEXT") return nextGate();
-
-      if (cmd === "GATE") {
-        const target = parts[1] || "";
-        if (!target) { consoleLine("USAGE: GATE <NODE>", "warn"); return; }
-        if (!runtime.catalog.includes(target)) {
-          consoleLine(`UNKNOWN NODE: ${target}`, "bad");
-          consoleLine("TIP: USE NEXT OR PICK FROM DROPDOWN", "dim");
-          return;
-        }
-        setGateById(target);
-        return;
-      }
-
       if (cmd === "THEME") {
         const t = (parts[1] || "").toLowerCase();
         if (!["green","red","blue","amber"].includes(t)) {
@@ -3555,31 +3584,9 @@
       consoleLine("UNKNOWN COMMAND. TYPE HELP.", "warn");
     }
 
-    function nextGate() {
-      if (runtime.catalog.length <= 1) return;
-      runtime.gateIndex = (runtime.gateIndex + 1) % runtime.catalog.length;
-      setGateById(runtime.catalog[runtime.gateIndex]);
-    }
-
     // ---------------------------
     // Wire up UI
     // ---------------------------
-    function updateGateSelectOptions() {
-      ui.gateSelect.innerHTML = runtime.catalog.map(g => `<option value="${escapeText(g)}">${escapeText(g)}</option>`).join("");
-      const single = runtime.catalog.length <= 1;
-      ui.gateSelect.disabled = single;
-      if (ui.nextBtn) {
-        ui.nextBtn.disabled = single;
-        ui.nextBtn.style.display = single ? "none" : "";
-      }
-    }
-
-    function populateGateSelect() {
-      updateGateSelectOptions();
-      ui.gateSelect.addEventListener("change", () => setGateById(ui.gateSelect.value));
-      if (ui.nextBtn) ui.nextBtn.addEventListener("click", nextGate);
-    }
-
     ui.themeSelect.addEventListener("change", () => setTheme(ui.themeSelect.value));
 
     function queueMaintenance(kind, btn) {
@@ -3667,11 +3674,9 @@
     function boot() {
       loadTheme();
       runtime.shiftStart = Date.now();
-      populateGateSelect();
-
       const lastGate = localStorage.getItem(LS.gateCurrent);
       const initialGate = (lastGate && runtime.catalog.includes(lastGate)) ? lastGate : runtime.catalog[0];
-      ui.gateSelect.value = initialGate;
+      if (ui.gateDisplay) ui.gateDisplay.textContent = initialGate;
 
       runtime.activeGateId = initialGate;
 
