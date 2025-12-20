@@ -71,6 +71,59 @@
             text-shadow: 0 0 10px rgba(190, 118, 226, 0.2), 1px 0 0 rgba(190, 118, 226, 0.12);
         }
 
+        .page-shell {
+            position: relative;
+            width: 100vw;
+            max-width: 100%;
+            display: grid;
+            gap: var(--interface-gap);
+        }
+
+        .page-header {
+            display: none;
+            border: 1px solid var(--line);
+            background: rgba(13, 10, 13, 0.78);
+            border-radius: var(--radius);
+            padding: clamp(14px, 2.4vmin, 20px);
+            box-shadow: 0 0 20px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(190, 118, 226, 0.12);
+        }
+
+        .page-brand {
+            display: grid;
+            gap: 10px;
+            max-width: 760px;
+        }
+
+        .signal-tag {
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--signal);
+            border: 1px solid var(--line);
+            padding: 8px 10px;
+            border-radius: var(--radius);
+            width: fit-content;
+            background: rgba(13, 10, 13, 0.85);
+            box-shadow: inset 0 0 10px rgba(190, 118, 226, 0.12);
+        }
+
+        .page-header h1 {
+            margin: 0;
+            font-family: var(--font-title);
+            font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--signal);
+            text-shadow: 0 0 16px var(--glow);
+        }
+
+        .page-header .intro {
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.92rem;
+            line-height: 1.6;
+        }
+
         /* Scanline Overlay */
         .crt-overlay {
             position: absolute;
@@ -507,16 +560,52 @@
             }
         }
 
+        @media (min-width: 721px) and (min-height: 701px) {
+            body {
+                justify-content: flex-start;
+                padding: clamp(18px, 3.2vmin, 32px) 0;
+            }
+
+            .page-shell {
+                width: min(1100px, 94vw);
+            }
+
+            .page-header {
+                display: block;
+            }
+
+            #game-container {
+                width: 100%;
+                height: min(720px, 72vh);
+                max-height: none;
+            }
+
+            .game-title {
+                display: none;
+            }
+        }
+
     </style>
 </head>
 <body>
     <div class="crt-overlay"></div>
 
-    <div id="game-container">
+    <div class="page-shell">
+        <div class="page-header">
+            <div class="page-brand">
+                <div class="signal-tag">Signal Tuner Console</div>
+                <h1>Signal Tuner</h1>
+                <p class="intro">
+                    Mini-game to align azimuth and frequency to lock onto a gate beacon signal.
+                </p>
+            </div>
+        </div>
+
+        <div id="game-container">
         <header>
             <div class="brand">
                 <div class="breadcrumbs"><a href="../">Homepage</a> // Signal Tuner</div>
-                <h1>Signal Tuner</h1>
+                <h1 class="game-title">Signal Tuner</h1>
                 <div style="font-size: 0.75rem; color: var(--muted);">v.0.95 // RESTRICTED ACCESS</div>
             </div>
             <div class="stats">
@@ -592,6 +681,7 @@
             </div>
             <button class="main-btn" onclick="startGame()">Re-Initialize</button>
         </div>
+    </div>
     </div>
 
     <script>
