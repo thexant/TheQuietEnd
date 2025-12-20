@@ -1,5 +1,5 @@
 {
-  "activePreset": "stable",
+  "activePreset": "critical",
   "presets": {
     "low": {
       "signalStability": "Signal stability: Low.",
