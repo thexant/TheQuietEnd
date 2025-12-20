@@ -3332,7 +3332,7 @@
 
       // keep completed ships visible for a bit; then drop them
       const now = Date.now();
-      const keepMs = 90_000; // 90s visibility
+      const keepMs = 30_000; // 30s visibility
       g.inbound = g.inbound.filter(s => !(s.state === "ARRIVED" && s.doneAt && (now - s.doneAt) > keepMs) && !(s.state === "DENIED" && s.doneAt && (now - s.doneAt) > keepMs) && !(s.state === "COMPLETE" && s.doneAt && (now - s.doneAt) > keepMs));
       g.outbound = g.outbound.filter(s => !(s.state === "DEPARTED" && s.doneAt && (now - s.doneAt) > keepMs) && !(s.state === "DENIED" && s.doneAt && (now - s.doneAt) > keepMs));
     }
@@ -4036,7 +4036,7 @@
       btn.disabled = true;
       btn.classList.add("btn-busy");
 
-      const delaySec = randRange(5, 15);
+      const delaySec = randRange(3, 5);
       const endAt = Date.now() + delaySec * 1000;
 
       btn.textContent = `${label} (IN PROCESS ${delaySec}s)`;
