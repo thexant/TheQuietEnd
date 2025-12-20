@@ -1072,6 +1072,10 @@
               <div>Shows gate health, beacon state, alignment, sync, corridors, and facility status. Degraded or offline systems can trigger alerts and slow traffic.</div>
             </div>
             <div class="help-row">
+              <div class="help-key">Sync State</div>
+              <div>Sync can slip to ASYNC or FAULT during drift, relay instability, or failed restores. RESET handshakes and healthy relays make it easier to return to SYNC.</div>
+            </div>
+            <div class="help-row">
               <div class="help-key">Resources</div>
               <div>Fuel drains over time. Supplies drain during work orders and decon. Order buttons appear when reserves drop to 25% and deliveries move through stages.</div>
             </div>
@@ -1467,6 +1471,7 @@
       { id: "SUPPLY", name: "SUPPLY", startMin: 65, startMax: 88, restockMin: 30, restockMax: 50, request: "RESUPPLY" }
     ];
     const RESOURCE_ORDER_THRESHOLD = 25;
+    const RESOURCE_CRITICAL_THRESHOLD = 10;
     const RESOURCE_ORDER_PHASES = [
       { key: "PROCESSING ORDER", min: 90, max: 180 },
       { key: "PREPARING ORDER", min: 120, max: 240 },
@@ -1492,6 +1497,19 @@
       fuelDrain: 0.025,
       supplyDrainWorkOrder: 0.035,
       supplyDrainDecon: 0.05
+    };
+
+    const CORRIDOR_TRAFFIC_WEIGHTS = {
+      STABLE: 1,
+      DEGRADED: 0.85,
+      INTERMITTENT: 0.6,
+      OFFLINE: 0.25
+    };
+
+    const SYNC_TRAFFIC_WEIGHTS = {
+      SYNC: 1,
+      ASYNC: 0.8,
+      FAULT: 0.55
     };
 
     // ETA ranges in seconds (slow but not ridiculous)
@@ -1521,6 +1539,7 @@
         type = "UNKNOWN";
         transponder = "UNKNOWN";
       }
+      const infoMasked = !obscured && rng() < 0.075;
       const req = dir === "IN" ? pick(rng, REQUESTS_IN) : pick(rng, REQUESTS_OUT);
 
       const state = "PENDING";
@@ -1554,6 +1573,7 @@
         effects,
         hazardDeadline: 0,
         obscured,
+        infoMasked,
         hiddenThreat
       };
     }
@@ -1580,38 +1600,28 @@
       const seed = strHash(`${gateId}::${dailySalt()}`);
       const rng = mulberry32(seed);
 
-      const healthRoll = rng();
-      const health =
-        healthRoll < 0.70 ? "OPERATIONAL" :
-        healthRoll < 0.90 ? "OPERATIONAL (DEGRADED)" :
-        healthRoll < 0.98 ? "DEGRADED" : "MAINTENANCE";
-
-      const beacon = pick(rng, BEACON_ARRAY);
-      const alignment = pick(rng, ALIGNMENT);
-      const sync = pick(rng, SYNC);
+      const beacon = "ONLINE";
+      const alignment = "WITHIN TOLERANCE";
+      const sync = "SYNC";
 
       const links = ["A","B","C"];
       if (rng() < 0.25) links.push("D");
 
       const corridors = links.map(link => {
-        const st = pick(rng, CORRIDOR_STATES);
+        const st = CORRIDOR_STATES[0];
         return { link, status: st.key, cls: st.cls, lastChange: Date.now() };
       });
 
       const inbound = Array.from({length: initialCount(rng)}, () => makeShip(rng, "IN"));
       const outbound = Array.from({length: initialCount(rng)}, () => makeShip(rng, "OUT"));
 
-      const facility = FACILITY_SYSTEMS.map(sys => {
-        const roll = rng();
-        const status = roll < 0.86 ? "ONLINE" : (roll < 0.95 ? "DEGRADED" : "OFFLINE");
-        return {
-          id: sys.id,
-          name: sys.name,
-          status,
-          lastChange: Date.now(),
-          stableUntil: Date.now() + randRange(18 * 60_000, 40 * 60_000)
-        };
-      });
+      const facility = FACILITY_SYSTEMS.map(sys => ({
+        id: sys.id,
+        name: sys.name,
+        status: "ONLINE",
+        lastChange: Date.now(),
+        stableUntil: Date.now() + randRange(18 * 60_000, 40 * 60_000)
+      }));
 
       const dockSlots = ["SLOT-1", "SLOT-2", "SLOT-3", "SLOT-4"].map(id => ({
         id,
@@ -1621,31 +1631,26 @@
       }));
 
       const relayCount = 2;
-      const relays = Array.from({ length: relayCount }, (_, i) => {
-        const r = rng();
-        const status = r < 0.78 ? "ONLINE" : (r < 0.94 ? "WEAK" : "FAULT");
-        return {
-          id: `RELAY-${i + 1}`,
-          status,
-          lastChange: Date.now(),
-          lastPacketAt: 0,
-          lastRelayPingAt: 0,
-          lastAckAt: 0,
-          awaitingAck: false,
-          ackDueAt: 0,
-          offline: false,
-          hiddenOffline: false,
-          offlineReason: null,
-          offlineSince: 0
-        };
-      });
+      const relays = Array.from({ length: relayCount }, (_, i) => ({
+        id: `RELAY-${i + 1}`,
+        status: "ONLINE",
+        lastChange: Date.now(),
+        lastPacketAt: 0,
+        lastRelayPingAt: 0,
+        lastAckAt: 0,
+        awaitingAck: false,
+        ackDueAt: 0,
+        offline: false,
+        hiddenOffline: false,
+        offlineReason: null,
+        offlineSince: 0
+      }));
 
-      return {
+      const gate = {
         id: gateId,
         createdAt: Date.now(),
         lastRefresh: Date.now(),
         lastScanAt: 0,
-        health,
         beacon,
         alignment,
         sync,
@@ -1679,6 +1684,8 @@
           wobbleSuppressedUntil: 0
         }
       };
+      gate.health = computeHealth(gate);
+      return gate;
     }
 
     function reviveGateState(raw) {
@@ -1854,9 +1861,11 @@
         s.shipmentDelivered = typeof s.shipmentDelivered === "boolean" ? s.shipmentDelivered : false;
         s.hazardDeadline ||= 0;
         s.obscured = typeof s.obscured === "boolean" ? s.obscured : false;
+        s.infoMasked = typeof s.infoMasked === "boolean" ? s.infoMasked : false;
         s.hiddenThreat = typeof s.hiddenThreat === "boolean" ? s.hiddenThreat : false;
         if (typeof s.eta !== "number") s.eta = ETA.min + Math.floor(Math.random() * 400);
       }
+      recomputeHealth(g);
       return g;
     }
 
@@ -2163,6 +2172,43 @@
       return { text: "QUIET", cls: "ok" };
     }
 
+    function relayDisplayStatus(r) {
+      return (r.offline && !r.hiddenOffline) ? "OFFLINE" : r.status;
+    }
+
+    function computeHealth(g) {
+      const resources = ensureResources(g);
+      const fuelLevel = resources.FUEL?.level ?? 100;
+      const supplyLevel = resources.SUPPLY?.level ?? 100;
+      const resourceCritical = fuelLevel <= RESOURCE_CRITICAL_THRESHOLD || supplyLevel <= RESOURCE_CRITICAL_THRESHOLD;
+
+      const criticalOffline =
+        g.beacon === "OFFLINE" ||
+        g.sync === "FAULT" ||
+        (g.corridors || []).some(c => c.status === "OFFLINE") ||
+        (g.facility || []).some(f => f.status === "OFFLINE") ||
+        (g.relays || []).some(r => relayDisplayStatus(r) === "OFFLINE");
+
+      if (criticalOffline || resourceCritical) return "MAINTENANCE";
+
+      const degraded =
+        g.beacon === "FAULT" ||
+        g.sync === "ASYNC" ||
+        g.alignment !== "WITHIN TOLERANCE" ||
+        (g.corridors || []).some(c => c.status !== "STABLE") ||
+        (g.facility || []).some(f => f.status === "DEGRADED") ||
+        (g.relays || []).some(r => ["WEAK", "FAULT"].includes(relayDisplayStatus(r))) ||
+        fuelLevel <= RESOURCE_ORDER_THRESHOLD ||
+        supplyLevel <= RESOURCE_ORDER_THRESHOLD;
+
+      return degraded ? "OPERATIONAL (DEGRADED)" : "OPERATIONAL";
+    }
+
+    function recomputeHealth(g) {
+      g.health = computeHealth(g);
+      return g.health;
+    }
+
     function workOrderClass(state) {
       if (state === "COMPLETE") return "ok";
       if (state === "REPAIRING") return "warn";
@@ -2217,7 +2263,7 @@
       }
 
       for (const r of g.relays || []) {
-        const displayStatus = (r.offline && !r.hiddenOffline) ? "OFFLINE" : r.status;
+        const displayStatus = relayDisplayStatus(r);
         if (displayStatus === "OFFLINE") mark(2, `${r.id} OFFLINE`);
         else if (displayStatus === "FAULT") mark(1, `${r.id} FAULT`);
       }
@@ -2226,12 +2272,22 @@
       for (const r of RESOURCE_TYPES) {
         const res = resources[r.id];
         if (!res) continue;
-        if (res.level <= 10) mark(2, `${r.name} CRITICAL`);
+        if (res.level <= RESOURCE_CRITICAL_THRESHOLD) mark(2, `${r.name} CRITICAL`);
         else if (res.level <= RESOURCE_ORDER_THRESHOLD) mark(1, `${r.name} LOW`);
       }
 
       if (severity === 0) return { text: "ALL SYSTEMS NOMINAL", cls: "ok", detail: "NO ACTIVE ISSUES" };
-      if (severity === 1) return { text: "DEGRADED", cls: "warn", detail: `${issues.length} ACTIVE ISSUE${issues.length === 1 ? "" : "S"}` };
+      if (severity === 1) {
+        const text = issues.length >= 3 ? "ELEVATED" : "DEGRADED";
+        return { text, cls: "warn", detail: `${issues.length} ACTIVE ISSUE${issues.length === 1 ? "" : "S"}` };
+      }
+
+      if (issues.length <= 2) {
+        return { text: "ELEVATED", cls: "warn", detail: `${issues.length} ACTIVE ISSUE${issues.length === 1 ? "" : "S"}` };
+      }
+      if (issues.length <= 4) {
+        return { text: "SEVERE", cls: "bad", detail: `${issues.length} ACTIVE ISSUE${issues.length === 1 ? "" : "S"}` };
+      }
       return { text: "CRITICAL", cls: "bad", detail: `${issues.length} ACTIVE ISSUE${issues.length === 1 ? "" : "S"}` };
     }
 
@@ -2253,6 +2309,15 @@
 
     function relayIsDown(r) {
       return !!r.offline;
+    }
+
+    function relaysFunctional(g) {
+      const relays = g.relays || [];
+      if (relays.length < 2) return false;
+      return relays.every(r => {
+        const status = relayDisplayStatus(r);
+        return status === "ONLINE" || status === "WEAK";
+      });
     }
 
     function allRelaysDown(g) {
@@ -2307,17 +2372,17 @@
       const [pText, pCls] = shipStatusPill(s);
       const deconTime = deconCountdown(s);
       const eta = (["DENIED","ARRIVED","DEPARTED","WAITING TO DOCK","WAITING DECON","DECON","SERVICING","CLEARING","COMPLETE"].includes(s.state)) ? "—" : formatMMSS(s.eta);
-      const prio = s.priority ? " ★" : "";
-        const tr = (s.transponder !== "VALID") ? " !" : "";
+      const prio = shipDisplayPriority(s) ? " ★" : "";
+        const tr = (shipDisplayTransponder(s) !== "VALID") ? " !" : "";
         const mask = s.obscured ? " X" : "";
-        const canQuery = s.transponder !== "VALID" && !s.queryPending;
+        const canQuery = (s.infoMasked || s.transponder !== "VALID") && !s.queryPending;
         const deconOnline = getFacility(g, "DECON")?.status === "ONLINE";
         const canDecon = s.dir === "IN" && s.state === "WAITING DECON" && deconOnline && !shipHasEffect(s, "VACUUM BLOOM");
         return `
           <tr>
-            <td class="code" data-label="Id" title="${escapeText(s.request)} / ${escapeText(s.transponder)}">${escapeText(s.id)}${prio}${tr}${mask}</td>
+            <td class="code" data-label="Id" title="${escapeText(shipDisplayRequest(s))} / ${escapeText(shipDisplayTransponder(s))}">${escapeText(s.id)}${prio}${tr}${mask}</td>
             <td data-label="Eta">${escapeText(eta)}</td>
-            <td data-label="Type" title="${escapeText(s.request)}">${escapeText(s.type)}</td>
+            <td data-label="Type" title="${escapeText(shipDisplayRequest(s))}">${escapeText(shipDisplayType(s))}</td>
             <td data-label="Status">
               <span class="pill ${pCls}">${escapeText(pText)}</span>
               ${deconTime ? `<div class="status-meta">T-${escapeText(deconTime)}</div>` : ""}
@@ -2420,7 +2485,7 @@
         const res = resources[r.id];
         const level = clamp(res.level, 0, 100);
         const pct = Math.round(level);
-        const isCritical = level <= 10;
+        const isCritical = level <= RESOURCE_CRITICAL_THRESHOLD;
         const isLow = level <= RESOURCE_ORDER_THRESHOLD;
         const fillCls = isCritical ? "bad" : (isLow ? "warn" : "");
         let statusText = `${pct}%`;
@@ -2549,9 +2614,10 @@
     }
 
     function renderAll() {
+      const g = activeGate();
+      recomputeHealth(g);
       renderQueues();
       renderSystems();
-      const g = activeGate();
       ui.dataAge.textContent = formatMMSS((Date.now() - g.lastRefresh) / 1000);
     }
 
@@ -2650,6 +2716,7 @@
         effects: [],
         hazardDeadline: 0,
         obscured: false,
+        infoMasked: false,
         hiddenThreat: false,
         shipmentType: resourceId,
         shipmentDelivered: false
@@ -2760,6 +2827,26 @@
       return (s.effects || []).some(e => e.name === name);
     }
 
+    function shipInfoMasked(s) {
+      return !!s.infoMasked;
+    }
+
+    function shipDisplayType(s) {
+      return shipInfoMasked(s) ? "UNKNOWN" : s.type;
+    }
+
+    function shipDisplayRequest(s) {
+      return shipInfoMasked(s) ? "UNKNOWN" : s.request;
+    }
+
+    function shipDisplayTransponder(s) {
+      return shipInfoMasked(s) ? "UNKNOWN" : s.transponder;
+    }
+
+    function shipDisplayPriority(s) {
+      return shipInfoMasked(s) ? false : s.priority;
+    }
+
     function shipHasDangerEffect(s) {
       return shipHasEffect(s, "CORRIDOR RADIATION") || shipHasEffect(s, "VACUUM BLOOM");
     }
@@ -2772,6 +2859,7 @@
       if (shipHasEffect(s, "VACUUM BLOOM")) return "VACUUM BLOOM HAZARD";
       if (shipIsRaider(s) || s.hiddenThreat) return "HOSTILE PROFILE";
       if (s.obscured) return "SIGNAL MASKED";
+      if (s.infoMasked) return "UNVERIFIED REGISTRY";
       if (s.transponder !== "VALID") return "TRANSPONDER ANOMALY";
       if (s.type === "UNKNOWN") return "UNVERIFIED REGISTRY";
       return "NO ACTIONABLE CAUSE";
@@ -2825,6 +2913,40 @@
     function queueQuery(g, s) {
       if (s.queryPending) {
         consoleLine(`QUERY PENDING: ${s.id}`, "warn");
+        return;
+      }
+      if (s.infoMasked) {
+        s.queryPending = true;
+        consoleLine(`QUERY SENT: ${s.id}`, "dim");
+        const delay = randRange(3, 8) * 1000;
+        setTimeout(() => {
+          const target = findShipById(g, s.id);
+          if (!target) return;
+          target.queryPending = false;
+          target.infoMasked = false;
+          const revealed = [];
+          for (const ef of target.effects || []) {
+            ef.revealed = true;
+            revealed.push(ef.name);
+          }
+          if ((target.effects || []).length === 0) {
+            target.effects = [{
+              name: pick(Math.random, ["RAIDER", "PIRATE"]),
+              hidden: true,
+              revealed: false
+            }];
+          }
+          if (g.id === runtime.activeGateId) {
+            if (revealed.length) {
+              const sample = revealed.slice(0, 2).join(" / ");
+              eventLine(`QUERY RESOLVED: ${target.id} ${shipDisplayType(target)} (${sample}${revealed.length > 2 ? " / ..." : ""})`, "warn");
+            } else {
+              eventLine(`QUERY RESOLVED: ${target.id} ${shipDisplayType(target)}`, "dim");
+            }
+          }
+          g.lastRefresh = Date.now();
+          renderAll();
+        }, delay);
         return;
       }
       if (s.obscured) {
@@ -2922,7 +3044,7 @@
           s.state = "CLEARED";
           s.reason = null;
           s.wasCleared = true;
-          consoleLine(`CLEARED: ${id} (${s.request})`, "good");
+          consoleLine(`CLEARED: ${id} (${shipDisplayRequest(s)})`, "good");
           if (["DOCK","DECON","REFUEL","CREW TRANSFER"].includes(s.request)) bumpConcourse(g, 8 + Math.random() * 6);
         }
       } else if (action === "hold") {
@@ -2955,11 +3077,15 @@
     // ---------------------------
     function maybeSpawnShip(g, dir) {
       if (g.beacon !== "ONLINE") return;
+      const trafficMod = trafficMultiplier(g);
+      if (trafficMod <= 0) return;
       const list = dir === "IN" ? g.inbound : g.outbound;
-      const cap = dir === "IN" ? RATES.maxIn : RATES.maxOut;
+      const baseCap = dir === "IN" ? RATES.maxIn : RATES.maxOut;
+      const cap = Math.max(0, Math.round(baseCap * trafficMod));
       if (list.length >= cap) return;
 
-      const chance = dir === "IN" ? RATES.spawnInChance : RATES.spawnOutChance;
+      const baseChance = dir === "IN" ? RATES.spawnInChance : RATES.spawnOutChance;
+      const chance = baseChance * trafficMod;
       if (Math.random() > chance) return;
 
       const rng = mulberry32(strHash(`${g.id}::${Date.now()}::${dir}`));
@@ -2967,10 +3093,38 @@
       list.unshift(s);
 
       const msg = dir === "IN"
-        ? `INBOUND REQUEST: ${s.id} // ${s.request} // ETA ${formatMMSS(s.eta)}`
-        : `OUTBOUND REQUEST: ${s.id} // ${s.request} // ETA ${formatMMSS(s.eta)}`;
+        ? `INBOUND REQUEST: ${s.id} // ${shipDisplayRequest(s)} // ETA ${formatMMSS(s.eta)}`
+        : `OUTBOUND REQUEST: ${s.id} // ${shipDisplayRequest(s)} // ETA ${formatMMSS(s.eta)}`;
 
       if (g.id === runtime.activeGateId) eventLine(msg, "dim");
+    }
+
+    function corridorTrafficMultiplier(g) {
+      if (!g.corridors || !g.corridors.length) return 1;
+      let sum = 0;
+      for (const c of g.corridors) {
+        sum += CORRIDOR_TRAFFIC_WEIGHTS[c.status] ?? 1;
+      }
+      return sum / g.corridors.length;
+    }
+
+    function syncTrafficMultiplier(g) {
+      return SYNC_TRAFFIC_WEIGHTS[g.sync] ?? 1;
+    }
+
+    function trafficMultiplier(g) {
+      return clamp(corridorTrafficMultiplier(g) * syncTrafficMultiplier(g), 0, 1);
+    }
+
+    function enforceBeaconDependency(g) {
+      const amp = getFacility(g, "BEACON");
+      if (!amp || amp.status !== "OFFLINE") return;
+      if (g.beacon !== "OFFLINE") {
+        g.beacon = "OFFLINE";
+        if (g.id === runtime.activeGateId) {
+          eventLine("BEACON ARRAY: OFFLINE (AMPLIFIER OFFLINE)", "bad");
+        }
+      }
     }
 
     function maybeGenerateReport(g) {
@@ -2978,17 +3132,37 @@
 
       const templates = [
         ["dim", "REPORT: AUX POWER FLUCTUATION"],
-        ["dim", "REPORT: DECON BAY READY"],
         ["dim", "REPORT: CONCOURSE QUIET"],
         ["warn", "NOTICE: HANDSHAKE LATENCY"],
-        ["warn", "NOTICE: DOCK SLOT CONGESTION"],
-        ["dim", "REPORT: INVENTORY REQUEST (SUPPLIES)"],
       ];
 
       const offline = g.corridors.find(c => c.status === "OFFLINE");
       if (offline && Math.random() < 0.55) {
         if (g.id === runtime.activeGateId) eventLine(`ALERT: LINK ${offline.link} OFFLINE`, "bad");
         return;
+      }
+
+      const resources = ensureResources(g);
+      if (resourceOrderAvailable(resources.SUPPLY)) {
+        templates.push(["dim", "REPORT: INVENTORY REQUEST (SUPPLIES)"]);
+      }
+      if (resourceOrderAvailable(resources.FUEL)) {
+        templates.push(["dim", "REPORT: INVENTORY REQUEST (FUEL)"]);
+      }
+
+      const slots = g.dockSlots || [];
+      const allSlotsFilled = slots.length > 0 && slots.every(slot => slot.state !== "EMPTY");
+      const waitingToDock = g.inbound.some(s => s.state === "WAITING TO DOCK");
+      if (allSlotsFilled && waitingToDock) {
+        templates.push(["warn", "NOTICE: DOCK SLOT CONGESTION"]);
+      }
+
+      const deconOnline = getFacility(g, "DECON")?.status === "ONLINE";
+      const deconReady = deconOnline && g.inbound.some(s =>
+        s.state === "WAITING DECON" && !shipHasEffect(s, "VACUUM BLOOM")
+      );
+      if (deconReady) {
+        templates.push(["dim", "REPORT: DECON BAY READY"]);
       }
 
       const [cls, msg] = pick(Math.random, templates);
@@ -3009,6 +3183,11 @@
       if (Math.random() < 0.015) {
         g.sync = (Math.random() < 0.88) ? "ASYNC" : "FAULT";
         if (g.id === runtime.activeGateId) eventLine(`SYSTEM: SYNC ${g.sync}`, g.sync === "FAULT" ? "bad" : "warn");
+      }
+
+      if (g.sync === "ASYNC" && relaysFunctional(g) && Math.random() < 0.04) {
+        g.sync = "SYNC";
+        if (g.id === runtime.activeGateId) eventLine("SYSTEM: SYNC RESTORED", "good");
       }
 
       if (wobbleAllowed && Math.random() < RATES.wobbleChance && g.corridors.length) {
@@ -3340,15 +3519,17 @@
     function tickGate(g) {
       resolveTraffic(g);
       tickDockSlots(g);
-      maybeSpawnShip(g, "IN");
-      maybeSpawnShip(g, "OUT");
       driftSystems(g);
       driftFacility(g);
       tickWorkOrders(g);
+      enforceBeaconDependency(g);
+      maybeSpawnShip(g, "IN");
+      maybeSpawnShip(g, "OUT");
       tickResources(g);
       driftConcourse(g);
       driftRelays(g);
       maybeGenerateReport(g);
+      recomputeHealth(g);
       if (g.id === runtime.activeGateId) {
         const severReason = gateSeverReason(g);
         if (severReason) {
@@ -3432,17 +3613,21 @@
         return;
       }
 
-      if (kind === "reset") {
-        consoleLine("MAINT: RESET HANDSHAKE (IN PROGRESS)...", "dim");
-        setTimeout(() => {
+        if (kind === "reset") {
+          consoleLine("MAINT: RESET HANDSHAKE (IN PROGRESS)...", "dim");
+          setTimeout(() => {
           // fix sync most of the time
-          g.sync = (Math.random() < 0.92) ? "ASYNC" : "FAULT";
+          if (relaysFunctional(g) && Math.random() < 0.45) {
+            g.sync = "SYNC";
+          } else {
+            g.sync = (Math.random() < 0.92) ? "ASYNC" : "FAULT";
+          }
           // beacon recovers often
           if (g.beacon !== "ONLINE" && Math.random() < 0.70) g.beacon = "ONLINE";
           // reset can suppress corridor wobble briefly (stabilization window)
           g.tech.wobbleSuppressedUntil = Date.now() + 90_000;
 
-          consoleLine(`MAINT: SYNC ${g.sync}`, g.sync === "FAULT" ? "bad" : "warn");
+          consoleLine(`MAINT: SYNC ${g.sync}`, g.sync === "SYNC" ? "good" : (g.sync === "FAULT" ? "bad" : "warn"));
           consoleLine(`MAINT: BEACON ${g.beacon}`, g.beacon === "ONLINE" ? "good" : "bad");
           consoleLine("MAINT: LINK WOBBLE SUPPRESSED (TEMP)", "dim");
 
@@ -3698,7 +3883,7 @@
       const g = activeGate();
       consoleLine("RELAYS", "dim");
       for (const r of g.relays || []) {
-        const displayStatus = (r.offline && !r.hiddenOffline) ? "OFFLINE" : r.status;
+        const displayStatus = relayDisplayStatus(r);
         const ackFlag = r.awaitingAck ? "  ACK DUE" : "";
         const cls = displayStatus === "ONLINE" ? "good" : (displayStatus === "OFFLINE" || displayStatus === "FAULT" ? "bad" : "warn");
         consoleLine(`  ${r.id}  ${displayStatus}${ackFlag}`, cls);
@@ -3814,8 +3999,11 @@
       consoleLine(`${dir === "IN" ? "INBOUND" : "OUTBOUND"} (${list.length})`, "dim");
       for (const s of list.slice(0, 10)) {
         const eta = (["DENIED","ARRIVED","DEPARTED"].includes(s.state)) ? "--:--" : formatMMSS(s.eta);
-        const flags = `${s.priority ? "★" : ""}${s.transponder !== "VALID" ? "!" : ""}${s.obscured ? "X" : ""}`.padEnd(2, " ");
-        consoleLine(`  ${s.id}  ${eta}  ${flags}  ${s.type}  ${s.request}  ${s.state}`, "dim");
+        const displayType = shipDisplayType(s);
+        const displayRequest = shipDisplayRequest(s);
+        const displayTransponder = shipDisplayTransponder(s);
+        const flags = `${shipDisplayPriority(s) ? "★" : ""}${displayTransponder !== "VALID" ? "!" : ""}${s.obscured ? "X" : ""}`.padEnd(2, " ");
+        consoleLine(`  ${s.id}  ${eta}  ${flags}  ${displayType}  ${displayRequest}  ${s.state}`, "dim");
       }
       if (list.length > 10) consoleLine("  ...", "dim");
     }
@@ -3883,20 +4071,20 @@
       const deconTime = deconCountdown(s);
       consoleLine(`DETAIL: ${s.id}`, "dim");
       consoleLine(`  DIR: ${s.dir}`, "dim");
-      consoleLine(`  TYPE: ${s.type}`, "dim");
-      consoleLine(`  REQUEST: ${s.request}`, "dim");
+      consoleLine(`  TYPE: ${shipDisplayType(s)}`, "dim");
+      consoleLine(`  REQUEST: ${shipDisplayRequest(s)}`, "dim");
       consoleLine(`  STATE: ${s.state}`, "dim");
       if (deconTime) consoleLine(`  DECON REMAIN: ${deconTime}`, "dim");
       consoleLine(`  ETA: ${["DENIED","ARRIVED","DEPARTED","WAITING TO DOCK","WAITING DECON","DECON","SERVICING","CLEARING","COMPLETE"].includes(s.state) ? "--:--" : formatMMSS(s.eta)}`, "dim");
       consoleLine(`  SLOT: ${s.slotId || "--"}`, "dim");
       consoleLine(`  DOCK: ${s.dockState || "--"}`, "dim");
-      consoleLine(`  TRANSPONDER: ${s.transponder}`, s.transponder === "VALID" ? "good" : "warn");
-      consoleLine(`  PRIORITY: ${s.priority ? "YES" : "NO"}`, s.priority ? "warn" : "dim");
+      const displayTransponder = shipDisplayTransponder(s);
+      consoleLine(`  TRANSPONDER: ${displayTransponder}`, displayTransponder === "VALID" ? "good" : "warn");
+      consoleLine(`  PRIORITY: ${shipDisplayPriority(s) ? "YES" : "NO"}`, shipDisplayPriority(s) ? "warn" : "dim");
       consoleLine(`  REASON: ${s.reason || "—"}`, "dim");
       const visibleEffects = (s.effects || []).filter(e => !e.hidden || e.revealed).map(e => e.name);
-      const hiddenCount = (s.effects || []).filter(e => e.hidden && !e.revealed).length;
-      const effectLine = visibleEffects.length ? visibleEffects.join(" / ") : (hiddenCount ? "UNRESOLVED (SCAN REQUIRED)" : "NONE");
-      consoleLine(`  EFFECTS: ${effectLine}`, hiddenCount ? "warn" : "dim");
+      const effectLine = visibleEffects.length ? visibleEffects.join(" / ") : "NONE";
+      consoleLine(`  EFFECTS: ${effectLine}`, visibleEffects.length ? "warn" : "dim");
       consoleLine(`  NOTES: ${s.notes ? s.notes : "—"}`, "dim");
     }
 
