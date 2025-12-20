@@ -513,6 +513,67 @@
       .btn-mini { min-width: 40px; padding: 4px 6px; }
       :root { --frame-pad: 10px; }
     }
+
+    @media (max-width: 680px) {
+      body {
+        height: auto;
+        min-height: 100dvh;
+        overflow-y: auto;
+      }
+      #game-container {
+        height: auto;
+        min-height: 100dvh;
+        grid-template-rows: auto auto auto;
+      }
+      header { padding-bottom: 8px; }
+      .interface {
+        grid-template-rows: auto auto auto;
+      }
+      .scroll {
+        overflow: visible;
+      }
+      table {
+        table-layout: auto;
+        font-size: 0.82rem;
+      }
+      thead { display: none; }
+      tbody, tr, td { display: block; width: 100%; }
+      tr {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 8px 8px 6px;
+        margin-bottom: 8px;
+        background: rgba(0,0,0,0.18);
+      }
+      td {
+        border: none;
+        padding: 4px 0;
+        text-overflow: clip;
+      }
+      td::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 0.14em;
+        color: var(--muted);
+        margin-bottom: 2px;
+      }
+      td.code { white-space: nowrap; }
+      th:last-child, td:last-child,
+      th:nth-child(2), td:nth-child(2),
+      th:nth-child(1), td:nth-child(1) { width: auto; }
+      .row-actions { justify-content: flex-start; flex-wrap: wrap; }
+      .btn-mini { min-width: 64px; padding: 6px 8px; }
+      .controls, .stats { width: 100%; }
+      .controls { gap: 8px; }
+      .ctl { text-align: left; }
+      select, button, input { font-size: 0.9rem; padding: 10px 12px; }
+      .prompt { grid-template-columns: 1fr; }
+      .prompt .ps1 { white-space: normal; }
+      footer { gap: 6px; }
+      .hint { white-space: normal; }
+    }
   </style>
 </head>
 
@@ -1088,21 +1149,21 @@
       const eta = (["DENIED","ARRIVED","DEPARTED"].includes(s.state)) ? "—" : formatMMSS(s.eta);
       const prio = s.priority ? " ★" : "";
       const tr = (s.transponder !== "VALID") ? " !" : "";
-      return `
-        <tr>
-          <td class="code" title="${escapeText(s.request)} / ${escapeText(s.transponder)}">${escapeText(s.id)}${prio}${tr}</td>
-          <td>${escapeText(eta)}</td>
-          <td title="${escapeText(s.request)}">${escapeText(s.type)}</td>
-          <td><span class="pill ${pCls}">${escapeText(pText)}</span></td>
-          <td style="text-align:right;">
-            <div class="row-actions">
-              <button class="btn-mini approve" data-action="approve" data-id="${escapeText(s.id)}">APP</button>
-              <button class="btn-mini hold" data-action="hold" data-id="${escapeText(s.id)}">HOLD</button>
-              <button class="btn-mini deny" data-action="deny" data-id="${escapeText(s.id)}">DENY</button>
-            </div>
-          </td>
-        </tr>
-      `;
+        return `
+          <tr>
+            <td class="code" data-label="Id" title="${escapeText(s.request)} / ${escapeText(s.transponder)}">${escapeText(s.id)}${prio}${tr}</td>
+            <td data-label="Eta">${escapeText(eta)}</td>
+            <td data-label="Type" title="${escapeText(s.request)}">${escapeText(s.type)}</td>
+            <td data-label="Status"><span class="pill ${pCls}">${escapeText(pText)}</span></td>
+            <td data-label="Action" style="text-align:right;">
+              <div class="row-actions">
+                <button class="btn-mini approve" data-action="approve" data-id="${escapeText(s.id)}">APP</button>
+                <button class="btn-mini hold" data-action="hold" data-id="${escapeText(s.id)}">HOLD</button>
+                <button class="btn-mini deny" data-action="deny" data-id="${escapeText(s.id)}">DENY</button>
+              </div>
+            </td>
+          </tr>
+        `;
     }
 
     function renderQueues() {
