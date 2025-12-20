@@ -1041,6 +1041,7 @@
               <option value="black">BLACK</option>
             </select>
           </div>
+          <button id="btn-share" aria-label="Share or resume this session">SHARE / RESUME</button>
           <button id="btn-help" aria-expanded="false" aria-controls="help-panel">HELP</button>
           <button id="btn-hard-reset" class="btn-danger" aria-label="Reset gate simulation">RESET</button>
         </div>
@@ -1367,6 +1368,57 @@
     function formatClock(ts) {
       const d = new Date(ts);
       return `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+    }
+
+    const SAVE_VERSION = "v1";
+    const SAVE_HASH_KEY = "save";
+    const CLEAR_HASH_AFTER_LOAD = false;
+
+    function bytesToBase64Url(bytes) {
+      let binary = "";
+      for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+      return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+    }
+
+    function base64UrlToBytes(str) {
+      const base64 = str.replace(/-/g, "+").replace(/_/g, "/");
+      const pad = base64.length % 4 ? "=".repeat(4 - (base64.length % 4)) : "";
+      const binary = atob(base64 + pad);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      return bytes;
+    }
+
+    async function compressBytes(bytes) {
+      if (typeof CompressionStream !== "function") {
+        return bytes;
+      }
+      const stream = new Blob([bytes]).stream().pipeThrough(new CompressionStream("deflate"));
+      const buffer = await new Response(stream).arrayBuffer();
+      return new Uint8Array(buffer);
+    }
+
+    async function decompressBytes(bytes) {
+      if (typeof DecompressionStream !== "function") {
+        return bytes;
+      }
+      const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate"));
+      const buffer = await new Response(stream).arrayBuffer();
+      return new Uint8Array(buffer);
+    }
+
+    async function compressJsonToUrl(data) {
+      const json = JSON.stringify(data);
+      const bytes = new TextEncoder().encode(json);
+      const compressed = await compressBytes(bytes);
+      return bytesToBase64Url(compressed);
+    }
+
+    async function decompressJsonFromUrl(str) {
+      const bytes = base64UrlToBytes(str);
+      const decompressed = await decompressBytes(bytes);
+      const json = new TextDecoder().decode(decompressed);
+      return JSON.parse(json);
     }
 
     // ---------------------------
@@ -1886,12 +1938,107 @@
       } catch (_) {}
     }
 
+    function serializeGateForSave(g) {
+      const copy = JSON.parse(JSON.stringify(g));
+      copy.reports = (copy.reports || []).slice(-40);
+      copy.packets = (copy.packets || []).slice(-20);
+      return copy;
+    }
+
+    function buildSaveState() {
+      const gateList = Array.isArray(runtime.catalog) ? runtime.catalog.slice() : [];
+      const activeGateId = runtime.activeGateId || gateList[0] || "";
+      const gates = gateList.map((id) => {
+        const g = runtime.gates.get(id) || loadGateState(id) || makeGateState(id);
+        return serializeGateForSave(g);
+      });
+      const shiftMs = Math.max(0, Date.now() - runtime.shiftStart);
+      return {
+        v: 1,
+        theme: document.documentElement.dataset.theme || localStorage.getItem(LS.theme) || "green",
+        gateList,
+        activeGateId,
+        shiftMs,
+        gates,
+        severed: !!runtime.severed,
+        lastSevered: runtime.lastSevered || null
+      };
+    }
+
+    function applySaveState(save) {
+      if (!save || !Array.isArray(save.gateList) || !save.gateList.length) return false;
+      localStorage.setItem(LS.gateList, JSON.stringify(save.gateList));
+      if (save.activeGateId) localStorage.setItem(LS.gateCurrent, save.activeGateId);
+      if (save.theme) localStorage.setItem(LS.theme, save.theme);
+      if (Array.isArray(save.gates)) {
+        for (const raw of save.gates) {
+          const revived = reviveGateState(raw);
+          if (revived) saveGateState(revived);
+        }
+      }
+      runtime.gates.clear();
+      runtime.severed = !!save.severed;
+      runtime.lastSevered = save.lastSevered || null;
+      runtime.resumeShiftMs = typeof save.shiftMs === "number" ? save.shiftMs : 0;
+      return true;
+    }
+
+    function getHashSaveValue() {
+      const hash = location.hash.startsWith("#") ? location.hash.slice(1) : "";
+      if (!hash) return null;
+      const params = new URLSearchParams(hash);
+      return params.get(SAVE_HASH_KEY);
+    }
+
+    async function loadSaveFromHash() {
+      const value = getHashSaveValue();
+      if (!value) return false;
+      const [prefix, data] = value.split(":");
+      if (prefix !== SAVE_VERSION || !data) return false;
+      try {
+        const save = await decompressJsonFromUrl(data);
+        const applied = applySaveState(save);
+        if (applied && CLEAR_HASH_AFTER_LOAD) {
+          history.replaceState(null, "", location.pathname + location.search);
+        }
+        return applied;
+      } catch (_) {
+        return false;
+      }
+    }
+
+    async function writeShareHash() {
+      const save = buildSaveState();
+      const payload = await compressJsonToUrl(save);
+      const hashValue = `${SAVE_VERSION}:${payload}`;
+      history.replaceState(null, "", `#${SAVE_HASH_KEY}=${hashValue}`);
+      return location.href;
+    }
+
+    async function copyToClipboard(text) {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+      const el = document.createElement("textarea");
+      el.value = text;
+      el.setAttribute("readonly", "true");
+      el.style.position = "absolute";
+      el.style.left = "-9999px";
+      document.body.appendChild(el);
+      el.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(el);
+      return ok;
+    }
+
     // ---------------------------
     // UI + Runtime
     // ---------------------------
     const ui = {
       gateDisplay: document.getElementById("gate-display"),
       themeSelect: document.getElementById("theme-select"),
+      btnShare: document.getElementById("btn-share"),
       btnHelp: document.getElementById("btn-help"),
       btnHardReset: document.getElementById("btn-hard-reset"),
       helpPanel: document.getElementById("help-panel"),
@@ -1963,7 +2110,8 @@
       saveTick: 0,
       severed: false,
       lastSevered: null,
-      maintenance: {}
+      maintenance: {},
+      resumeShiftMs: null
     };
 
     function getGate(gateId) {
@@ -2058,17 +2206,38 @@
     function consoleLine(text, cls = "dim") { logLine(ui.console, text, cls); }
     function eventLine(text, cls = "dim") { logLine(ui.events, text, cls); }
 
-    function setTheme(theme) {
+    const THEME_OPTIONS = ["green", "red", "blue", "amber", "black"];
+
+    function pickRandomTheme(exclude) {
+      const options = THEME_OPTIONS.filter((t) => t !== exclude);
+      const pool = options.length ? options : THEME_OPTIONS;
+      return pool[Math.floor(Math.random() * pool.length)];
+    }
+
+    function setTheme(theme, silent = false) {
       document.documentElement.dataset.theme = theme;
       ui.themeSelect.value = theme;
       localStorage.setItem(LS.theme, theme);
-      consoleLine(`DISPLAY SET: ${theme.toUpperCase()}`, "dim");
+      if (!silent) consoleLine(`DISPLAY SET: ${theme.toUpperCase()}`, "dim");
+    }
+
+    function randomizeTheme(silent = false) {
+      const current = document.documentElement.dataset.theme || localStorage.getItem(LS.theme);
+      const next = pickRandomTheme(current);
+      setTheme(next, silent);
+      return next;
     }
 
     function loadTheme() {
-      const t = localStorage.getItem(LS.theme) || "green";
-      document.documentElement.dataset.theme = t;
-      ui.themeSelect.value = t;
+      const stored = localStorage.getItem(LS.theme);
+      if (stored) {
+        document.documentElement.dataset.theme = stored;
+        ui.themeSelect.value = stored;
+        return;
+      }
+      const hasGateList = !!localStorage.getItem(LS.gateList);
+      const initial = hasGateList ? "green" : pickRandomTheme();
+      setTheme(initial, true);
     }
 
     function setGateById(gateId, silent = false) {
@@ -2110,6 +2279,7 @@
 
     function severGate(reason) {
       if (runtime.severed) return;
+      randomizeTheme();
       const g = activeGate();
       const stats = ensureGateStats(g);
       const shiftMs = Date.now() - runtime.shiftStart;
@@ -2151,6 +2321,7 @@
       clearLog(ui.events);
       clearLog(ui.console);
       setGateById(newId, true);
+      randomizeTheme();
       eventLine("EVENT LOG: ACTIVE", "dim");
       consoleLine(`NODE RESET: ${newId}`, "warn");
     }
@@ -4214,6 +4385,17 @@
     // Wire up UI
     // ---------------------------
     ui.themeSelect.addEventListener("change", () => setTheme(ui.themeSelect.value));
+    if (ui.btnShare) {
+      ui.btnShare.addEventListener("click", async () => {
+        try {
+          const url = await writeShareHash();
+          const copied = await copyToClipboard(url);
+          consoleLine(copied ? "SHARE URL COPIED" : "SHARE URL READY", copied ? "good" : "warn");
+        } catch (_) {
+          consoleLine("SHARE FAILED", "warn");
+        }
+      });
+    }
 
     function queueMaintenance(kind, btn) {
       if (!btn) return;
@@ -4326,9 +4508,14 @@
     // ---------------------------
     // Boot
     // ---------------------------
-    function boot() {
+    async function boot() {
+      await loadSaveFromHash();
       loadTheme();
-      runtime.shiftStart = Date.now();
+      runtime.catalog = loadGateCatalog();
+      runtime.shiftStart = (typeof runtime.resumeShiftMs === "number")
+        ? Date.now() - runtime.resumeShiftMs
+        : Date.now();
+      runtime.resumeShiftMs = null;
       const lastGate = localStorage.getItem(LS.gateCurrent);
       const initialGate = (lastGate && runtime.catalog.includes(lastGate)) ? lastGate : runtime.catalog[0];
       if (ui.gateDisplay) ui.gateDisplay.textContent = initialGate;
@@ -4340,6 +4527,12 @@
 
       setGateById(initialGate, true);
       eventLine("EVENT LOG: ACTIVE", "dim");
+      if (runtime.severed && runtime.lastSevered) {
+        updateSeveredOverlay(runtime.lastSevered);
+        document.body.classList.add("severed");
+      } else {
+        document.body.classList.remove("severed");
+      }
 
       if (runtime.tickTimer) clearInterval(runtime.tickTimer);
       if (runtime.uiTimer) clearInterval(runtime.uiTimer);
