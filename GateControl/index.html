@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Gate Control Terminal // The Quiet End</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=B612+Mono:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      color-scheme: dark;
+
+      /* Base */
+      --deep: #050406;
+      --alert: #e16464;
+      --radius: 3px;
+      --font-title: "B612 Mono", "Courier New", monospace;
+      --font-body: "Share Tech Mono", "Courier New", monospace;
+
+      --interface-gap: clamp(8px, 2vmin, 14px);
+      --frame-pad: clamp(10px, 2.6vmin, 18px);
+      --terminal-h: clamp(220px, 30vh, 360px);
+
+      /* Theme defaults (green) */
+      --ink: #b6ffd9;
+      --muted: #6aa98d;
+      --signal: #4dff9a;
+      --line: rgba(77, 255, 154, 0.18);
+      --grid: rgba(77, 255, 154, 0.05);
+      --glow: rgba(77, 255, 154, 0.35);
+      --bg-hi: #0d1a14;
+      --shadowText: rgba(77, 255, 154, 0.20);
+      --shadowText2: rgba(77, 255, 154, 0.12);
+      --stat: #d2a95a;
+    }
+
+    :root[data-theme="green"] {
+      --ink: #b6ffd9; --muted: #6aa98d; --signal: #4dff9a;
+      --line: rgba(77, 255, 154, 0.18); --grid: rgba(77, 255, 154, 0.05);
+      --glow: rgba(77, 255, 154, 0.35); --bg-hi: #0d1a14;
+      --shadowText: rgba(77, 255, 154, 0.20); --shadowText2: rgba(77, 255, 154, 0.12);
+      --stat: #d2a95a;
+    }
+    :root[data-theme="red"] {
+      --ink: #ffd0d0; --muted: #b27a7a; --signal: #ff5454;
+      --line: rgba(255, 84, 84, 0.18); --grid: rgba(255, 84, 84, 0.05);
+      --glow: rgba(255, 84, 84, 0.35); --bg-hi: #1a0d10;
+      --shadowText: rgba(255, 84, 84, 0.18); --shadowText2: rgba(255, 84, 84, 0.10);
+      --stat: #d2a95a;
+    }
+    :root[data-theme="blue"] {
+      --ink: #cfe5ff; --muted: #7f97b3; --signal: #4fb3ff;
+      --line: rgba(79, 179, 255, 0.18); --grid: rgba(79, 179, 255, 0.05);
+      --glow: rgba(79, 179, 255, 0.35); --bg-hi: #0d141a;
+      --shadowText: rgba(79, 179, 255, 0.18); --shadowText2: rgba(79, 179, 255, 0.10);
+      --stat: #d2a95a;
+    }
+    :root[data-theme="amber"] {
+      --ink: #ffe9c2; --muted: #b79b63; --signal: #ffb84d;
+      --line: rgba(255, 184, 77, 0.18); --grid: rgba(255, 184, 77, 0.05);
+      --glow: rgba(255, 184, 77, 0.35); --bg-hi: #1a130d;
+      --shadowText: rgba(255, 184, 77, 0.18); --shadowText2: rgba(255, 184, 77, 0.10);
+      --stat: #ffe9c2;
+    }
+
+    * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; }
+
+    body {
+      margin: 0;
+      width: 100vw;
+      height: 100vh;
+      min-height: 100dvh;
+      font-family: var(--font-body);
+      color: var(--ink);
+      background: radial-gradient(circle at center, var(--bg-hi) 0%, var(--deep) 100%);
+      overflow: hidden;
+      text-shadow: 0 0 10px var(--shadowText), 1px 0 0 var(--shadowText2);
+    }
+
+    /* Scanline Overlay */
+    .crt-overlay {
+      position: fixed;
+      inset: 0;
+      background:
+        linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%),
+        linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+      background-size: 100% 2px, 3px 100%;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* Container - full screen */
+    #game-container {
+      position: relative;
+      z-index: 1;
+      width: 100vw;
+      height: 100dvh;
+      padding:
+        calc(var(--frame-pad) + env(safe-area-inset-top))
+        calc(var(--frame-pad) + env(safe-area-inset-right))
+        calc(var(--frame-pad) + env(safe-area-inset-bottom))
+        calc(var(--frame-pad) + env(safe-area-inset-left));
+      border: 1px solid var(--line);
+      background: rgba(13, 10, 13, 0.85);
+      border-radius: 0;
+      box-shadow: 0 0 24px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(255,255,255,0.06);
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: var(--interface-gap);
+      overflow: hidden;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 12px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand { display: grid; gap: 6px; min-width: min(520px, 100%); }
+
+    /* breadcrumb navigation - keep your pattern */
+    .breadcrumbs {
+      font-size: clamp(0.6rem, 1.6vmin, 0.72rem);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border: 1px solid var(--line);
+      padding: clamp(4px, 1.2vmin, 6px) clamp(6px, 2vmin, 10px);
+      border-radius: var(--radius);
+      width: fit-content;
+      background: rgba(13, 10, 13, 0.75);
+      box-shadow: inset 0 0 12px rgba(255,255,255,0.05);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .breadcrumbs a { color: var(--signal); text-decoration: none; }
+    .breadcrumbs a:hover { text-decoration: underline; }
+
+    h1 {
+      font-family: var(--font-title);
+      margin: 0;
+      color: var(--signal);
+      text-transform: uppercase;
+      font-size: clamp(1.05rem, 2.6vmin, 1.5rem);
+      letter-spacing: 0.1em;
+      text-shadow: 0 0 12px var(--glow);
+    }
+
+    .sub { font-size: 0.75rem; color: var(--muted); }
+
+    .header-right {
+      display: grid;
+      gap: 8px;
+      justify-items: end;
+      min-width: min(520px, 100%);
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .ctl { display: grid; gap: 4px; text-align: right; }
+    .ctl label {
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--muted);
+    }
+
+    select, button, input {
+      font-family: var(--font-title);
+      font-size: 0.85rem;
+      color: var(--signal);
+      background: rgba(0,0,0,0.25);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      padding: 8px 10px;
+      outline: none;
+    }
+    select:focus, input:focus {
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.06), 0 0 18px var(--glow);
+    }
+    button { cursor: pointer; transition: all 0.12s; }
+    button:hover { background: rgba(255,255,255,0.05); box-shadow: 0 0 14px var(--glow); }
+    button:active { background: var(--signal); color: #000; box-shadow: 0 0 18px var(--signal); }
+
+    .stats {
+      text-align: right;
+      font-size: clamp(0.7rem, 1.8vmin, 0.9rem);
+      color: var(--muted);
+      display: grid;
+      gap: 4px;
+    }
+    .stat-row { display: flex; gap: 10px; justify-content: flex-end; align-items: baseline; flex-wrap: wrap; }
+    .stat-label { letter-spacing: 0.14em; text-transform: uppercase; font-size: 0.72rem; }
+    .stat-value {
+      color: var(--stat);
+      font-weight: bold;
+      font-size: clamp(0.95rem, 2.2vmin, 1.2rem);
+      font-family: var(--font-title);
+      letter-spacing: 0.06em;
+    }
+
+    .label {
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .interface {
+      display: grid;
+      grid-template-columns: 1.25fr 1fr;
+      grid-template-rows: minmax(0, 1fr) var(--terminal-h);
+      grid-template-areas:
+        "traffic systems"
+        "terminal terminal";
+      gap: var(--interface-gap);
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,0.25);
+      border-radius: var(--radius);
+      box-shadow: inset 0 0 12px rgba(0,0,0,0.45);
+      padding: 10px;
+      min-height: 0;
+      position: relative;
+      isolation: isolate; /* helps prevent hit-testing weirdness */
+    }
+    .panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background:
+        linear-gradient(transparent 70%, rgba(255,255,255,0.015) 70%),
+        radial-gradient(circle at 20% 0%, var(--grid) 0%, transparent 55%);
+      pointer-events: none;
+      opacity: 0.8;
+    }
+    .panel > * { position: relative; z-index: 1; }
+
+    #traffic { grid-area: traffic; display: grid; grid-template-rows: auto minmax(0,1fr); gap: 10px; }
+    #systems { grid-area: systems; display: grid; grid-template-rows: auto minmax(0,1fr); gap: 10px; }
+    #terminal { grid-area: terminal; display: grid; grid-template-rows: auto minmax(0,1fr) auto; gap: 8px; }
+
+    .queue { display: grid; grid-template-columns: 1fr; gap: 10px; min-height: 0; }
+
+    .queue-section {
+      border: 1px dashed var(--line);
+      border-radius: 4px;
+      padding: 8px;
+      background: rgba(0,0,0,0.18);
+      min-height: 0;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr);
+      gap: 6px;
+    }
+
+    .queue-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+
+    .queue-title {
+      font-family: var(--font-title);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--signal);
+      font-size: 0.85rem;
+    }
+    .queue-meta {
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .scroll { overflow: auto; -webkit-overflow-scrolling: touch; min-height: 0; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; table-layout: fixed; }
+    th, td {
+      padding: 6px 6px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      vertical-align: top;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    th {
+      color: var(--muted);
+      font-weight: 700;
+      font-family: var(--font-title);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-size: 0.68rem;
+      white-space: nowrap;
+    }
+
+    th:last-child, td:last-child { width: 156px; }
+    th:nth-child(2), td:nth-child(2) { width: 74px; }
+    th:nth-child(1), td:nth-child(1) { width: 106px; }
+
+    td.code {
+      font-family: var(--font-title);
+      color: var(--ink);
+      letter-spacing: 0.08em;
+      white-space: nowrap;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--line);
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      background: rgba(0,0,0,0.15);
+      white-space: nowrap;
+    }
+    .pill.ok { color: var(--signal); }
+    .pill.warn { color: var(--stat); border-color: rgba(210,169,90,0.25); }
+    .pill.bad { color: var(--alert); border-color: rgba(225,100,100,0.25); }
+
+    .row-actions { display: flex; gap: 6px; flex-wrap: nowrap; justify-content: flex-end; align-items: center; }
+    .btn-mini {
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border-radius: 4px;
+      white-space: nowrap;
+      line-height: 1.2;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 44px;
+    }
+    .btn-mini.deny { color: var(--alert); border-color: rgba(225,100,100,0.35); }
+    .btn-mini.hold { color: var(--stat); border-color: rgba(210,169,90,0.35); }
+    .btn-mini.approve { color: var(--signal); }
+    .btn-mini:active { background: rgba(255,255,255,0.06); color: var(--ink); }
+
+    .sys-grid { display: grid; grid-template-columns: 1fr; gap: 10px; min-height: 0; }
+    .sys-block {
+      border: 1px dashed var(--line);
+      border-radius: 4px;
+      padding: 8px;
+      background: rgba(0,0,0,0.18);
+    }
+
+    .kv {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 6px 10px;
+      align-items: baseline;
+      font-size: 0.85rem;
+    }
+    .kv .k {
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-size: 0.70rem;
+      font-family: var(--font-title);
+    }
+    .kv .v {
+      font-family: var(--font-title);
+      letter-spacing: 0.08em;
+      color: var(--ink);
+    }
+
+    .sys-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .sys-actions button {
+      padding: 8px 10px;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      border-radius: 4px;
+    }
+
+    /* Console + Event log split */
+    .logs {
+      display: grid;
+      grid-template-columns: 1.35fr 0.65fr;
+      gap: var(--interface-gap);
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    .logbox {
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      background: rgba(0,0,0,0.35);
+      padding: 10px;
+      min-height: 0;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      font-size: 0.88rem;
+      line-height: 1.35;
+      box-shadow: inset 0 0 18px rgba(0,0,0,0.55);
+      position: relative;
+    }
+
+    .loghead {
+      position: sticky;
+      top: 0;
+      margin: -10px -10px 10px -10px;
+      padding: 8px 10px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      background: rgba(0,0,0,0.55);
+      font-family: var(--font-title);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      font-size: 0.70rem;
+      color: var(--muted);
+      z-index: 2;
+      backdrop-filter: blur(2px);
+    }
+
+    .terminal-line { white-space: pre-wrap; word-break: break-word; }
+    .terminal-line.dim { color: var(--muted); }
+    .terminal-line.good { color: var(--signal); }
+    .terminal-line.warn { color: var(--stat); }
+    .terminal-line.bad { color: var(--alert); }
+
+    .prompt {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+    .prompt .ps1 {
+      font-family: var(--font-title);
+      color: var(--signal);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      white-space: nowrap;
+    }
+    #cmd {
+      width: 100%;
+      user-select: text;
+      color: var(--ink);
+      border-color: rgba(255,255,255,0.08);
+    }
+
+    footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+      color: var(--muted);
+      font-size: 0.74rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      flex-wrap: wrap;
+    }
+    .footer-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+    .hint {
+      border: 1px solid rgba(255,255,255,0.08);
+      padding: 4px 8px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: rgba(0,0,0,0.18);
+      white-space: nowrap;
+    }
+
+    @media (max-width: 920px) {
+      .brand { min-width: 100%; }
+      .header-right { min-width: 100%; justify-items: start; }
+      .controls { justify-content: flex-start; }
+      .stats { text-align: left; }
+      .stat-row { justify-content: flex-start; }
+    }
+
+    @media (max-width: 780px) {
+      :root { --terminal-h: clamp(320px, 44vh, 520px); }
+      .interface {
+        grid-template-columns: 1fr;
+        grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) var(--terminal-h);
+        grid-template-areas: "traffic" "systems" "terminal";
+      }
+      .kv { grid-template-columns: 120px 1fr; }
+      .logs { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 420px) {
+      th:nth-child(1), td:nth-child(1) { width: 98px; }
+      th:nth-child(2), td:nth-child(2) { width: 70px; }
+      th:last-child, td:last-child { width: 140px; }
+      .row-actions { flex-wrap: wrap; gap: 4px; }
+      .btn-mini { min-width: 40px; padding: 4px 6px; }
+      :root { --frame-pad: 10px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="crt-overlay"></div>
+
+  <div id="game-container">
+    <header>
+      <div class="brand">
+        <div class="breadcrumbs"><a href="../">Homepage</a> // Gate Control Terminal</div>
+        <h1>Gate Control Terminal</h1>
+        <div class="sub">v.0.23 // LOCAL MONITORING ONLY // RESTRICTED ACCESS</div>
+      </div>
+
+      <div class="header-right">
+        <div class="controls">
+          <div class="ctl">
+            <label for="gate-select">Gate Node</label>
+            <select id="gate-select"></select>
+          </div>
+          <div class="ctl">
+            <label for="theme-select">Display</label>
+            <select id="theme-select">
+              <option value="green">GREEN</option>
+              <option value="red">RED</option>
+              <option value="blue">BLUE</option>
+              <option value="amber">AMBER</option>
+            </select>
+          </div>
+          <button id="btn-next" title="Switch gate (next)">NEXT</button>
+        </div>
+
+        <div class="stats">
+          <div class="stat-row">
+            <span class="stat-label">Shift Time</span>
+            <span id="shift-time" class="stat-value">00:00:00</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Alerts</span>
+            <span id="alert-count" class="stat-value">0</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="interface">
+      <!-- TRAFFIC -->
+      <section id="traffic" class="panel">
+        <div class="label">Traffic Queue</div>
+
+        <div class="queue">
+          <div class="queue-section">
+            <div class="queue-head">
+              <div class="queue-title">Inbound</div>
+              <div id="inbound-meta" class="queue-meta">—</div>
+            </div>
+
+            <div class="scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Id</th>
+                    <th>Eta</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th style="text-align:right;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="inbound-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="queue-section">
+            <div class="queue-head">
+              <div class="queue-title">Outbound</div>
+              <div id="outbound-meta" class="queue-meta">—</div>
+            </div>
+
+            <div class="scroll">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Id</th>
+                    <th>Eta</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                    <th style="text-align:right;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="outbound-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SYSTEMS -->
+      <section id="systems" class="panel">
+        <div class="label">Systems</div>
+
+        <div class="sys-grid">
+          <div class="sys-block">
+            <div class="queue-head">
+              <div class="queue-title">Gate Systems</div>
+              <div id="gate-health-pill" class="pill ok">OK</div>
+            </div>
+
+            <div class="kv">
+              <div class="k">Node</div><div id="kv-node" class="v">—</div>
+              <div class="k">Beacon Array</div><div id="kv-beacon" class="v">—</div>
+              <div class="k">Alignment</div><div id="kv-align" class="v">—</div>
+              <div class="k">Sync State</div><div id="kv-sync" class="v">—</div>
+            </div>
+          </div>
+
+          <div class="sys-block">
+            <div class="queue-head">
+              <div class="queue-title">Corridor Links</div>
+              <div id="corridor-meta" class="queue-meta">—</div>
+            </div>
+            <div id="corridor-list" class="kv"></div>
+          </div>
+
+          <div class="sys-block">
+            <div class="queue-head">
+              <div class="queue-title">Maintenance</div>
+              <div class="queue-meta">LOCAL AUTH</div>
+            </div>
+            <div class="sys-actions">
+              <button id="btn-realign">REALIGN</button>
+              <button id="btn-reset">RESET</button>
+              <button id="btn-purge">PURGE</button>
+              <button id="btn-scan">SCAN</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TERMINAL -->
+      <section id="terminal" class="panel">
+        <div class="label">Operator Console</div>
+
+        <div class="logs">
+          <div id="console-log" class="logbox" aria-label="Console output">
+            <div class="loghead">Console</div>
+          </div>
+
+          <div id="events-log" class="logbox" aria-label="Events log">
+            <div class="loghead">Events</div>
+          </div>
+        </div>
+
+        <div class="prompt">
+          <div id="ps1" class="ps1">GATE-—&gt;</div>
+          <input id="cmd" type="text" placeholder="HELP / STATUS / DETAIL V-9012 / APPROVE V-9012 ..." autocomplete="off" spellcheck="false">
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      <div>LOCAL SCOPE // NO NAVIGATIONAL GUARANTEE // DATA AGE: <span id="data-age">00:00</span></div>
+      <div class="footer-right">
+        <span class="hint">ENTER: RUN</span>
+        <span class="hint">↑: HISTORY</span>
+        <span class="hint">ESC: CLEAR</span>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    // ---------------------------
+    // Utilities
+    // ---------------------------
+    const pad2 = (n) => String(n).padStart(2, "0");
+
+    function formatHMS(ms) {
+      const s = Math.floor(ms / 1000);
+      const hh = Math.floor(s / 3600);
+      const mm = Math.floor((s % 3600) / 60);
+      const ss = s % 60;
+      return `${pad2(hh)}:${pad2(mm)}:${pad2(ss)}`;
+    }
+
+    function formatMMSS(sec) {
+      sec = Math.max(0, Math.floor(sec));
+      const mm = Math.floor(sec / 60);
+      const ss = sec % 60;
+      return `${pad2(mm)}:${pad2(ss)}`; // allows > 59 minutes (e.g. 120:00)
+    }
+
+    function strHash(s) {
+      // Deterministic 32-bit hash
+      let h = 2166136261 >>> 0;
+      for (let i = 0; i < s.length; i++) {
+        h ^= s.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return h >>> 0;
+    }
+
+    function mulberry32(seed) {
+      let a = seed >>> 0;
+      return function() {
+        a |= 0; a = (a + 0x6D2B79F5) | 0;
+        let t = Math.imul(a ^ (a >>> 15), 1 | a);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    function pick(rng, arr) { return arr[Math.floor(rng() * arr.length)]; }
+    function clamp(n, a, b) { return Math.max(a, Math.min(b, n)); }
+    function escapeText(s) { return String(s).replace(/[&<>]/g, (c) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;" }[c])); }
+
+    // ---------------------------
+    // Gate Catalog (semi-random, stored locally)
+    // ---------------------------
+    const LS = {
+      theme: "tqe_gate_terminal_theme",
+      gateList: "tqe_gate_terminal_gate_list",
+      gateCurrent: "tqe_gate_terminal_gate_current",
+      gateStatePrefix: "tqe_gate_terminal_gate_state::"
+    };
+
+	function buildGateList(count = 3) {
+	  const rng = mulberry32((crypto.getRandomValues(new Uint32Array(1))[0]) >>> 0);
+	  const set = new Set();
+
+	  while (set.size < count) {
+		const num = pad2(1 + Math.floor(rng() * 99));
+		const suffix = rng() < 0.35 ? "-" + pick(rng, ["K","M","R","V","S","T"]) : "";
+		set.add(`GATE-${num}${suffix}`); // <-- removed the letter
+	  }
+
+	  return Array.from(set).sort();
+	}
+
+	function loadGateCatalog() {
+	  const GATE_COUNT = 3;
+
+	  try {
+		const raw = localStorage.getItem(LS.gateList);
+		if (raw) {
+		  const parsed = JSON.parse(raw);
+		  if (Array.isArray(parsed) && parsed.length === GATE_COUNT) return parsed;
+		}
+	  } catch (_) {}
+
+	  const list = buildGateList(GATE_COUNT);
+	  localStorage.setItem(LS.gateList, JSON.stringify(list));
+	  return list;
+	}
+
+    // ---------------------------
+    // State Model (lonelier / slower)
+    // ---------------------------
+    const TYPES_IN = ["CARGO", "CIVILIAN", "MAINT", "ESCORT", "MED", "UNKNOWN"];
+    const TYPES_OUT = ["CARGO", "CIVILIAN", "ESCORT", "MAINT", "MAINT", "MED"];
+
+    const REQUESTS_IN = ["DOCK", "DECON", "REFUEL", "MED", "CARGO OFFLOAD", "CUSTOMS"];
+    const REQUESTS_OUT = ["DEPART", "TOW", "REFUEL", "CREW TRANSFER", "CARGO LOAD"];
+
+    const CORRIDOR_STATES = [
+      { key: "STABLE", cls: "ok" },
+      { key: "DEGRADED", cls: "warn" },
+      { key: "INTERMITTENT", cls: "warn" },
+      { key: "OFFLINE", cls: "bad" }
+    ];
+
+    const BEACON_ARRAY = ["ONLINE", "ONLINE", "FAULT", "OFFLINE"];
+    const ALIGNMENT = ["WITHIN TOLERANCE", "DRIFTING", "OUT OF TOLERANCE"];
+    const SYNC = ["SYNC", "ASYNC", "FAULT"];
+
+    const HOLD_REASONS = ["NO SLOT", "CUSTOMS", "DECON", "SYNC CHECK", "TRAFFIC", "UNKNOWN TRANS"];
+
+    // Sparse rates (per second tick)
+    const RATES = {
+      maxIn: 3,
+      maxOut: 3,
+      spawnInChance: 0.0055,   // ~1 every 2.7 min
+      spawnOutChance: 0.0055,  // ~1 every 3.3 min
+      reportChance: 0.018,    // sparse ambient chatter
+      driftChance: 0.028,     // alignment drift
+      wobbleChance: 0.035     // corridor wobble
+    };
+
+    // ETA ranges in seconds (slow but not ridiculous)
+    const ETA = { min: 120, max: 1200 }; // 2–20 minutes
+
+    function dailySalt() {
+      const d = new Date();
+      const y = d.getUTCFullYear();
+      const m = pad2(d.getUTCMonth() + 1);
+      const day = pad2(d.getUTCDate());
+      return `${y}-${m}-${day}`;
+    }
+
+    function makeShipId(rng) {
+      const prefix = pick(rng, ["V","A","M","R","K","S","T","H"]);
+      const num = 1000 + Math.floor(rng() * 8999);
+      return `${prefix}-${num}`;
+    }
+
+    function makeShip(rng, dir) {
+      const type = dir === "IN" ? pick(rng, TYPES_IN) : pick(rng, TYPES_OUT);
+      const priority = rng() < 0.10; // rarer
+      const transponder = rng() < 0.90 ? "VALID" : (rng() < 0.60 ? "MISMATCH" : "UNKNOWN");
+      const req = dir === "IN" ? pick(rng, REQUESTS_IN) : pick(rng, REQUESTS_OUT);
+
+      const state =
+        dir === "IN"
+          ? (rng() < 0.10 ? "HOLD" : "PENDING")
+          : (rng() < 0.70 ? "PENDING AUTH" : "CLEARED");
+
+      return {
+        id: makeShipId(rng),
+        dir,
+        eta: ETA.min + Math.floor(rng() * (ETA.max - ETA.min + 1)),
+        type,
+        request: req,
+        state,
+        transponder,
+        priority,
+        reason: null,
+        notes: "",
+        doneAt: 0
+      };
+    }
+
+    function initialCount(rng) {
+      // mostly 0 or 1; sometimes 2
+      let n = (rng() < 0.58) ? 0 : 1;
+      if (rng() < 0.10) n += 1;
+      return n;
+    }
+
+    function makeGateState(gateId) {
+      const seed = strHash(`${gateId}::${dailySalt()}`);
+      const rng = mulberry32(seed);
+
+      const healthRoll = rng();
+      const health =
+        healthRoll < 0.70 ? "OPERATIONAL" :
+        healthRoll < 0.90 ? "OPERATIONAL (DEGRADED)" :
+        healthRoll < 0.98 ? "DEGRADED" : "MAINTENANCE";
+
+      const beacon = pick(rng, BEACON_ARRAY);
+      const alignment = pick(rng, ALIGNMENT);
+      const sync = pick(rng, SYNC);
+
+      const links = ["A","B","C"];
+      if (rng() < 0.25) links.push("D");
+
+      const corridors = links.map(link => {
+        const st = pick(rng, CORRIDOR_STATES);
+        return { link, status: st.key, cls: st.cls, lastChange: Date.now() };
+      });
+
+      const inbound = Array.from({length: initialCount(rng)}, () => makeShip(rng, "IN"));
+      const outbound = Array.from({length: initialCount(rng)}, () => makeShip(rng, "OUT"));
+
+      return {
+        id: gateId,
+        createdAt: Date.now(),
+        lastRefresh: Date.now(),
+        lastScanAt: 0,
+        health,
+        beacon,
+        alignment,
+        sync,
+        corridors,
+        inbound,
+        outbound,
+        alerts: [],
+        reports: [],
+        tech: {
+          driftSuppressedUntil: 0,
+          wobbleSuppressedUntil: 0
+        }
+      };
+    }
+
+    function reviveGateState(raw) {
+      const g = raw && typeof raw === "object" ? raw : null;
+      if (!g || !g.id) return null;
+
+      g.createdAt ||= Date.now();
+      g.lastRefresh ||= Date.now();
+      g.lastScanAt ||= 0;
+      g.alerts ||= [];
+      g.reports ||= [];
+      g.tech ||= { driftSuppressedUntil: 0, wobbleSuppressedUntil: 0 };
+
+      g.corridors ||= [];
+      for (const c of g.corridors) {
+        c.lastChange ||= Date.now();
+        c.cls ||= (CORRIDOR_STATES.find(x => x.key === c.status)?.cls || "warn");
+      }
+
+      g.inbound ||= [];
+      g.outbound ||= [];
+      for (const s of [...g.inbound, ...g.outbound]) {
+        s.request ||= (s.dir === "IN" ? "DOCK" : "DEPART");
+        s.transponder ||= "VALID";
+        s.priority ||= false;
+        s.reason ||= null;
+        s.notes ||= "";
+        s.doneAt ||= 0;
+        if (typeof s.eta !== "number") s.eta = ETA.min + Math.floor(Math.random() * 400);
+      }
+      return g;
+    }
+
+    function loadGateState(gateId) {
+      try {
+        const raw = localStorage.getItem(LS.gateStatePrefix + gateId);
+        if (!raw) return null;
+        return reviveGateState(JSON.parse(raw));
+      } catch (_) { return null; }
+    }
+
+    function saveGateState(g) {
+      try {
+        const copy = JSON.parse(JSON.stringify(g));
+        copy.reports = (copy.reports || []).slice(-40);
+        localStorage.setItem(LS.gateStatePrefix + g.id, JSON.stringify(copy));
+      } catch (_) {}
+    }
+
+    // ---------------------------
+    // UI + Runtime
+    // ---------------------------
+    const ui = {
+      gateSelect: document.getElementById("gate-select"),
+      themeSelect: document.getElementById("theme-select"),
+      nextBtn: document.getElementById("btn-next"),
+
+      shiftTime: document.getElementById("shift-time"),
+      alertCount: document.getElementById("alert-count"),
+      dataAge: document.getElementById("data-age"),
+
+      inboundMeta: document.getElementById("inbound-meta"),
+      outboundMeta: document.getElementById("outbound-meta"),
+      inboundBody: document.getElementById("inbound-body"),
+      outboundBody: document.getElementById("outbound-body"),
+
+      gateHealthPill: document.getElementById("gate-health-pill"),
+      kvNode: document.getElementById("kv-node"),
+      kvBeacon: document.getElementById("kv-beacon"),
+      kvAlign: document.getElementById("kv-align"),
+      kvSync: document.getElementById("kv-sync"),
+      corridorMeta: document.getElementById("corridor-meta"),
+      corridorList: document.getElementById("corridor-list"),
+
+      btnRealign: document.getElementById("btn-realign"),
+      btnReset: document.getElementById("btn-reset"),
+      btnPurge: document.getElementById("btn-purge"),
+      btnScan: document.getElementById("btn-scan"),
+
+      console: document.getElementById("console-log"),
+      events: document.getElementById("events-log"),
+      ps1: document.getElementById("ps1"),
+      cmd: document.getElementById("cmd")
+    };
+
+    const runtime = {
+      shiftStart: Date.now(),
+      catalog: loadGateCatalog(),
+      gateIndex: 0,
+      activeGateId: "",
+      gates: new Map(),
+      tickTimer: null,
+      uiTimer: null,
+      cmdHistory: [],
+      cmdPtr: 0,
+      saveTick: 0
+    };
+
+    function getGate(gateId) {
+      if (runtime.gates.has(gateId)) return runtime.gates.get(gateId);
+      const g = loadGateState(gateId) || makeGateState(gateId);
+      runtime.gates.set(gateId, g);
+      return g;
+    }
+
+    function activeGate() { return getGate(runtime.activeGateId); }
+
+    function clearLog(el) {
+      // Keep the sticky header (first child)
+      const head = el.querySelector(".loghead");
+      el.innerHTML = "";
+      if (head) el.appendChild(head);
+    }
+
+    function logLine(el, text, cls = "dim") {
+      const div = document.createElement("div");
+      div.className = `terminal-line ${cls}`;
+      div.innerHTML = escapeText(text);
+      el.appendChild(div);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function consoleLine(text, cls = "dim") { logLine(ui.console, text, cls); }
+    function eventLine(text, cls = "dim") { logLine(ui.events, text, cls); }
+
+    function setTheme(theme) {
+      document.documentElement.dataset.theme = theme;
+      ui.themeSelect.value = theme;
+      localStorage.setItem(LS.theme, theme);
+      consoleLine(`DISPLAY SET: ${theme.toUpperCase()}`, "dim");
+    }
+
+    function loadTheme() {
+      const t = localStorage.getItem(LS.theme) || "green";
+      document.documentElement.dataset.theme = t;
+      ui.themeSelect.value = t;
+    }
+
+    function setGateById(gateId, silent = false) {
+      const idx = runtime.catalog.indexOf(gateId);
+      runtime.gateIndex = idx >= 0 ? idx : 0;
+
+      runtime.activeGateId = runtime.catalog[runtime.gateIndex];
+      ui.gateSelect.value = runtime.activeGateId;
+      localStorage.setItem(LS.gateCurrent, runtime.activeGateId);
+
+      ui.ps1.textContent = `${runtime.activeGateId}>`;
+
+      // Reset console only; keep events for context when switching
+      clearLog(ui.console);
+      if (!silent) consoleLine(`SWITCHED NODE: ${runtime.activeGateId}`, "good");
+
+      consoleLine(`GATE TERMINAL MONITORING`, "dim");
+      consoleLine(`NODE: ${runtime.activeGateId}`, "dim");
+      consoleLine(`AUTH: LOCAL`, "dim");
+      consoleLine(`TYPE HELP FOR COMMANDS`, "dim");
+      consoleLine("", "dim");
+
+      renderAll();
+    }
+
+    function pillForHealth(health) {
+      if (health.includes("MAINTENANCE")) return { text: "MAINT", cls: "bad" };
+      if (health.includes("DEGRADED")) return { text: "DEGRADED", cls: "warn" };
+      return { text: "OK", cls: "ok" };
+    }
+
+    function computeAlerts(g) {
+      const alerts = [];
+      if (g.beacon === "OFFLINE" || g.beacon === "FAULT") alerts.push("BEACON ARRAY FAULT");
+      if (g.alignment === "OUT OF TOLERANCE") alerts.push("ALIGNMENT OUT OF TOLERANCE");
+      if (g.sync === "FAULT") alerts.push("SYNC FAULT");
+      for (const c of g.corridors) if (c.status === "OFFLINE") alerts.push(`LINK ${c.link} OFFLINE`);
+      const stuckInbound = g.inbound.filter(s => s.state === "HOLD").length;
+      if (stuckInbound >= 2) alerts.push("INBOUND HOLDS STACKING");
+      g.alerts = alerts;
+      return alerts;
+    }
+
+    function shipStatusPill(s) {
+      const st = String(s.state).toUpperCase();
+      if (st.includes("DEN")) return ["DENIED", "bad"];
+      if (st.includes("HOLD")) return ["HOLD", "warn"];
+      if (st.includes("ARRIV")) return ["ARRIVED", "ok"];
+      if (st.includes("DEPART")) return ["DEPARTED", "ok"];
+      if (st.includes("CLEAR")) return ["CLEARED", "ok"];
+      return ["PENDING", "warn"];
+    }
+
+    function shipRow(s) {
+      const [pText, pCls] = shipStatusPill(s);
+      const eta = (["DENIED","ARRIVED","DEPARTED"].includes(s.state)) ? "—" : formatMMSS(s.eta);
+      const prio = s.priority ? " ★" : "";
+      const tr = (s.transponder !== "VALID") ? " !" : "";
+      return `
+        <tr>
+          <td class="code" title="${escapeText(s.request)} / ${escapeText(s.transponder)}">${escapeText(s.id)}${prio}${tr}</td>
+          <td>${escapeText(eta)}</td>
+          <td title="${escapeText(s.request)}">${escapeText(s.type)}</td>
+          <td><span class="pill ${pCls}">${escapeText(pText)}</span></td>
+          <td style="text-align:right;">
+            <div class="row-actions">
+              <button class="btn-mini approve" data-action="approve" data-id="${escapeText(s.id)}">APP</button>
+              <button class="btn-mini hold" data-action="hold" data-id="${escapeText(s.id)}">HOLD</button>
+              <button class="btn-mini deny" data-action="deny" data-id="${escapeText(s.id)}">DENY</button>
+            </div>
+          </td>
+        </tr>
+      `;
+    }
+
+    function renderQueues() {
+      const g = activeGate();
+      ui.inboundMeta.textContent = `${g.inbound.length} CONTACTS`;
+      ui.outboundMeta.textContent = `${g.outbound.length} CONTACTS`;
+
+      ui.inboundBody.innerHTML = g.inbound.map(s => shipRow(s)).join("");
+      ui.outboundBody.innerHTML = g.outbound.map(s => shipRow(s)).join("");
+
+      // bind buttons per render (small tables)
+      ui.inboundBody.querySelectorAll("[data-action]").forEach(btn => {
+        btn.addEventListener("click", () => handleAction(btn.getAttribute("data-action"), btn.getAttribute("data-id")));
+      });
+      ui.outboundBody.querySelectorAll("[data-action]").forEach(btn => {
+        btn.addEventListener("click", () => handleAction(btn.getAttribute("data-action"), btn.getAttribute("data-id")));
+      });
+    }
+
+    function renderSystems() {
+      const g = activeGate();
+      const p = pillForHealth(g.health);
+      ui.gateHealthPill.className = `pill ${p.cls}`;
+      ui.gateHealthPill.textContent = p.text;
+
+      ui.kvNode.textContent = g.health;
+      ui.kvBeacon.textContent = g.beacon;
+      ui.kvAlign.textContent = g.alignment;
+      ui.kvSync.textContent = g.sync;
+
+      ui.corridorMeta.textContent = `${g.corridors.length} LINKS`;
+      ui.corridorList.innerHTML = g.corridors.map(c => `
+        <div class="k">LINK ${escapeText(c.link)}</div>
+        <div class="v"><span class="pill ${c.cls}">${escapeText(c.status)}</span></div>
+      `).join("");
+
+      ui.alertCount.textContent = String(computeAlerts(g).length);
+    }
+
+    function renderAll() {
+      renderQueues();
+      renderSystems();
+      const g = activeGate();
+      ui.dataAge.textContent = formatMMSS((Date.now() - g.lastRefresh) / 1000);
+    }
+
+    function findShipById(g, id) {
+      return g.inbound.find(s => s.id === id) || g.outbound.find(s => s.id === id) || null;
+    }
+
+    function handleAction(action, id) {
+      const g = activeGate();
+      const s = findShipById(g, id);
+      if (!s) {
+        consoleLine(`NOT FOUND: ${id}`, "bad");
+        return;
+      }
+
+      // friction rules
+      const needsAuth = (s.type === "UNKNOWN" && action !== "hold")
+        || (s.priority && action === "deny")
+        || (s.transponder !== "VALID" && action === "approve");
+
+      if (needsAuth && Math.random() < 0.45) {
+        consoleLine(`REFUSED (${id}): INSUFFICIENT AUTH`, "warn");
+        return;
+      }
+
+      if (action === "approve") {
+        s.state = "CLEARED";
+        s.reason = null;
+        consoleLine(`CLEARED: ${id} (${s.request})`, "good");
+      } else if (action === "hold") {
+        s.state = "HOLD";
+        s.reason = s.reason || pick(Math.random, HOLD_REASONS);
+        consoleLine(`HOLD SET: ${id} (${s.reason})`, "warn");
+      } else if (action === "deny") {
+        s.state = "DENIED";
+        s.reason = s.reason || "DENIED";
+        s.doneAt = Date.now();
+        consoleLine(`DENIED: ${id}`, "bad");
+      }
+
+      g.lastRefresh = Date.now();
+      renderAll();
+    }
+
+    // ---------------------------
+    // Gate tick + events (slow, lonely)
+    // ---------------------------
+    function maybeSpawnShip(g, dir) {
+      const list = dir === "IN" ? g.inbound : g.outbound;
+      const cap = dir === "IN" ? RATES.maxIn : RATES.maxOut;
+      if (list.length >= cap) return;
+
+      const chance = dir === "IN" ? RATES.spawnInChance : RATES.spawnOutChance;
+      if (Math.random() > chance) return;
+
+      const rng = mulberry32(strHash(`${g.id}::${Date.now()}::${dir}`));
+      const s = makeShip(rng, dir);
+      list.unshift(s);
+
+      const msg = dir === "IN"
+        ? `INBOUND REQUEST: ${s.id} // ${s.request} // ETA ${formatMMSS(s.eta)}`
+        : `OUTBOUND REQUEST: ${s.id} // ${s.request} // ETA ${formatMMSS(s.eta)}`;
+
+      if (g.id === runtime.activeGateId) eventLine(msg, "dim");
+    }
+
+    function maybeGenerateReport(g) {
+      if (Math.random() > RATES.reportChance) return;
+
+      const templates = [
+        ["dim", "REPORT: AUX POWER FLUCTUATION"],
+        ["dim", "REPORT: DECON BAY READY"],
+        ["dim", "REPORT: CONCOURSE QUIET"],
+        ["warn", "NOTICE: HANDSHAKE LATENCY"],
+        ["warn", "NOTICE: DOCK SLOT CONGESTION"],
+        ["dim", "REPORT: INVENTORY REQUEST (SUPPLIES)"],
+      ];
+
+      const offline = g.corridors.find(c => c.status === "OFFLINE");
+      if (offline && Math.random() < 0.55) {
+        if (g.id === runtime.activeGateId) eventLine(`ALERT: LINK ${offline.link} OFFLINE`, "bad");
+        return;
+      }
+
+      const [cls, msg] = pick(Math.random, templates);
+      if (g.id === runtime.activeGateId) eventLine(msg, cls);
+    }
+
+    function driftSystems(g) {
+      const now = Date.now();
+      const driftAllowed = now > (g.tech?.driftSuppressedUntil || 0);
+      const wobbleAllowed = now > (g.tech?.wobbleSuppressedUntil || 0);
+
+      if (driftAllowed && Math.random() < RATES.driftChance) {
+        const drift = ["DRIFTING","OUT OF TOLERANCE"];
+        g.alignment = pick(mulberry32(strHash(`${g.id}::align::${Date.now()}`)), drift);
+        if (g.id === runtime.activeGateId) eventLine(`SYSTEM: ALIGNMENT ${g.alignment}`, g.alignment === "OUT OF TOLERANCE" ? "bad" : "warn");
+      }
+
+      if (Math.random() < 0.015) {
+        g.sync = (Math.random() < 0.88) ? "ASYNC" : "FAULT";
+        if (g.id === runtime.activeGateId) eventLine(`SYSTEM: SYNC ${g.sync}`, g.sync === "FAULT" ? "bad" : "warn");
+      }
+
+      if (wobbleAllowed && Math.random() < RATES.wobbleChance && g.corridors.length) {
+        const idx = Math.floor(Math.random() * g.corridors.length);
+        const current = g.corridors[idx].status;
+
+        const next = (current === "STABLE") ? pick(Math.random, ["DEGRADED","INTERMITTENT"]) :
+                     (current === "DEGRADED") ? pick(Math.random, ["STABLE","INTERMITTENT"]) :
+                     (current === "INTERMITTENT") ? pick(Math.random, ["DEGRADED","OFFLINE","STABLE"]) :
+                     (current === "OFFLINE") ? pick(Math.random, ["INTERMITTENT","DEGRADED"]) : "STABLE";
+
+        g.corridors[idx].status = next;
+        g.corridors[idx].cls = CORRIDOR_STATES.find(x => x.key === next)?.cls || "warn";
+        g.corridors[idx].lastChange = Date.now();
+
+        if (g.id === runtime.activeGateId) {
+          eventLine(`LINK ${g.corridors[idx].link}: ${next}`, next === "OFFLINE" ? "bad" : (next === "STABLE" ? "good" : "warn"));
+        }
+      }
+    }
+
+    function resolveTraffic(g) {
+      // step size (sim-time): slow enough to feel lonely; still moves
+      for (const s of [...g.inbound, ...g.outbound]) {
+        if (s.state === "DENIED") continue;
+        if (s.state === "HOLD") continue;
+
+        if (["ARRIVED","DEPARTED"].includes(s.state)) continue;
+
+        const isPending = s.state === "PENDING" || s.state === "PENDING AUTH";
+        const step = isPending ? 0.6 : 1.2; // seconds per tick
+        s.eta = Math.max(0, s.eta - step);
+
+        if (s.eta <= 0) {
+          if (s.dir === "IN") {
+            if (s.state === "CLEARED") {
+              s.state = "ARRIVED";
+              s.doneAt = Date.now();
+              if (g.id === runtime.activeGateId) eventLine(`DOCK EVENT: ${s.id} ARRIVED`, "dim");
+            } else {
+              s.state = "HOLD";
+              s.reason = s.reason || "NO CLEARANCE";
+              if (g.id === runtime.activeGateId) eventLine(`AUTO HOLD: ${s.id} (NO CLEARANCE)`, "warn");
+            }
+          } else {
+            if (s.state === "CLEARED") {
+              s.state = "DEPARTED";
+              s.doneAt = Date.now();
+              if (g.id === runtime.activeGateId) eventLine(`DEPART EVENT: ${s.id} DEPARTED`, "dim");
+            } else {
+              s.state = "PENDING AUTH";
+              s.eta = 60 + Math.floor(Math.random() * 240); // 1–5 min more waiting
+              if (g.id === runtime.activeGateId) eventLine(`OUTBOUND STALL: ${s.id} (AUTH WAIT)`, "warn");
+            }
+          }
+        }
+      }
+
+      // keep completed ships visible for a bit; then drop them
+      const now = Date.now();
+      const keepMs = 90_000; // 90s visibility
+      g.inbound = g.inbound.filter(s => !(s.state === "ARRIVED" && s.doneAt && (now - s.doneAt) > keepMs) && !(s.state === "DENIED" && s.doneAt && (now - s.doneAt) > keepMs));
+      g.outbound = g.outbound.filter(s => !(s.state === "DEPARTED" && s.doneAt && (now - s.doneAt) > keepMs) && !(s.state === "DENIED" && s.doneAt && (now - s.doneAt) > keepMs));
+    }
+
+    function tickGate(g) {
+      resolveTraffic(g);
+      maybeSpawnShip(g, "IN");
+      maybeSpawnShip(g, "OUT");
+      driftSystems(g);
+      maybeGenerateReport(g);
+
+      g.lastRefresh = Date.now();
+    }
+
+    function tickAllGates() {
+      for (const g of runtime.gates.values()) tickGate(g);
+
+      runtime.saveTick++;
+      if (runtime.saveTick % 12 === 0) {
+        for (const g of runtime.gates.values()) saveGateState(g);
+      }
+
+      renderAll();
+    }
+
+    // ---------------------------
+    // Maintenance actions (now actually changes systems/links)
+    // ---------------------------
+    function improveLinkOneStep(g) {
+      if (!g.corridors.length) return null;
+      // pick the worst link to improve first
+      const score = (st) => st === "OFFLINE" ? 3 : (st === "INTERMITTENT" ? 2 : (st === "DEGRADED" ? 1 : 0));
+      const worst = [...g.corridors].sort((a,b) => score(b.status) - score(a.status))[0];
+      if (!worst) return null;
+
+      const next = (worst.status === "OFFLINE") ? "INTERMITTENT"
+                 : (worst.status === "INTERMITTENT") ? "DEGRADED"
+                 : (worst.status === "DEGRADED") ? "STABLE"
+                 : "STABLE";
+
+      worst.status = next;
+      worst.cls = CORRIDOR_STATES.find(x => x.key === next)?.cls || "warn";
+      worst.lastChange = Date.now();
+      return worst;
+    }
+
+    function worsenRandomLink(g) {
+      if (!g.corridors.length) return null;
+      const c = g.corridors[Math.floor(Math.random() * g.corridors.length)];
+      const next = (c.status === "STABLE") ? "DEGRADED"
+                 : (c.status === "DEGRADED") ? "INTERMITTENT"
+                 : (c.status === "INTERMITTENT") ? "OFFLINE"
+                 : "OFFLINE";
+      c.status = next;
+      c.cls = CORRIDOR_STATES.find(x => x.key === next)?.cls || "warn";
+      c.lastChange = Date.now();
+      return c;
+    }
+
+    function doMaintenance(kind) {
+      const g = activeGate();
+
+      if (kind === "realign") {
+        consoleLine("MAINT: REALIGN (IN PROGRESS)...", "dim");
+        setTimeout(() => {
+          g.alignment = "WITHIN TOLERANCE";
+          g.tech.driftSuppressedUntil = Date.now() + 120_000; // calmer for 2 min
+          consoleLine("MAINT: ALIGNMENT WITHIN TOLERANCE", "good");
+
+          // realign can also stabilize one link (sometimes)
+          if (Math.random() < 0.70) {
+            const improved = improveLinkOneStep(g);
+            if (improved) consoleLine(`MAINT: LINK ${improved.link} -> ${improved.status}`, improved.status === "STABLE" ? "good" : "warn");
+          } else {
+            consoleLine("MAINT: LINK STATE UNCHANGED", "dim");
+          }
+
+          g.lastRefresh = Date.now();
+          renderAll();
+        }, 950);
+        return;
+      }
+
+      if (kind === "reset") {
+        consoleLine("MAINT: RESET HANDSHAKE (IN PROGRESS)...", "dim");
+        setTimeout(() => {
+          // fix sync most of the time
+          g.sync = (Math.random() < 0.92) ? "ASYNC" : "FAULT";
+          // beacon recovers often
+          if (g.beacon !== "ONLINE" && Math.random() < 0.70) g.beacon = "ONLINE";
+          // reset can suppress corridor wobble briefly (stabilization window)
+          g.tech.wobbleSuppressedUntil = Date.now() + 90_000;
+
+          consoleLine(`MAINT: SYNC ${g.sync}`, g.sync === "FAULT" ? "bad" : "warn");
+          consoleLine(`MAINT: BEACON ${g.beacon}`, g.beacon === "ONLINE" ? "good" : "bad");
+          consoleLine("MAINT: LINK WOBBLE SUPPRESSED (TEMP)", "dim");
+
+          g.lastRefresh = Date.now();
+          renderAll();
+        }, 800);
+        return;
+      }
+
+      if (kind === "purge") {
+        consoleLine("MAINT: PURGE QUEUE (LOCAL)", "warn");
+        // remove non-priority pending; also clears some holds
+        g.inbound = g.inbound.filter(s => !(s.state === "PENDING" && !s.priority));
+        g.outbound = g.outbound.filter(s => !(s.state === "PENDING AUTH" && !s.priority));
+        if (Math.random() < 0.35) {
+          const held = g.inbound.filter(s => s.state === "HOLD");
+          if (held.length) {
+            const target = held[Math.floor(Math.random() * held.length)];
+            target.state = "PENDING";
+            target.reason = null;
+            consoleLine(`MAINT: RELEASED HOLD (${target.id})`, "dim");
+          }
+        }
+        g.lastRefresh = Date.now();
+        renderAll();
+        return;
+      }
+
+      if (kind === "scan") {
+        const now = Date.now();
+        if (now - g.lastScanAt < 12_000) {
+          consoleLine("SCAN: COOLDOWN", "warn");
+          return;
+        }
+        g.lastScanAt = now;
+        consoleLine("SCAN: ACTIVE SWEEP...", "dim");
+
+        setTimeout(() => {
+          // scan can reveal issues AND occasionally triggers a soft fault
+          const flagged = [...g.inbound, ...g.outbound].filter(s => s.transponder !== "VALID");
+          if (!flagged.length) {
+            consoleLine("SCAN: NO ANOMALIES (LOW CONF)", "good");
+          } else {
+            const sample = flagged.slice(0, 3).map(s => s.id).join(" / ");
+            consoleLine(`SCAN: FLAGGED ${flagged.length} CONTACTS (${sample}${flagged.length > 3 ? " / ..." : ""})`, "warn");
+          }
+
+          if (Math.random() < 0.16) {
+            const c = worsenRandomLink(g);
+            if (c) eventLine(`SCAN SIDE EFFECT: LINK ${c.link} -> ${c.status}`, c.status === "OFFLINE" ? "bad" : "warn");
+          }
+
+          g.lastRefresh = Date.now();
+          renderAll();
+        }, 700);
+      }
+    }
+
+    // ---------------------------
+    // Terminal commands (console-only; events keep running)
+    // ---------------------------
+    function listShips(dir) {
+      const g = activeGate();
+      const list = dir === "IN" ? g.inbound : g.outbound;
+      consoleLine(`${dir === "IN" ? "INBOUND" : "OUTBOUND"} (${list.length})`, "dim");
+      for (const s of list.slice(0, 10)) {
+        const eta = (["DENIED","ARRIVED","DEPARTED"].includes(s.state)) ? "--:--" : formatMMSS(s.eta);
+        const flags = `${s.priority ? "★" : ""}${s.transponder !== "VALID" ? "!" : ""}`.padEnd(2, " ");
+        consoleLine(`  ${s.id}  ${eta}  ${flags}  ${s.type}  ${s.request}  ${s.state}`, "dim");
+      }
+      if (list.length > 10) consoleLine("  ...", "dim");
+    }
+
+    function cmdHelp() {
+      consoleLine("COMMANDS", "dim");
+      consoleLine("  HELP", "dim");
+      consoleLine("  STATUS", "dim");
+      consoleLine("  LINKS", "dim");
+      consoleLine("  LIST INBOUND | LIST OUTBOUND", "dim");
+      consoleLine("  DETAIL <ID>", "dim");
+      consoleLine("  NOTE <ID> <TEXT>", "dim");
+      consoleLine("  APPROVE <ID> | HOLD <ID> | DENY <ID>", "dim");
+      consoleLine("  REALIGN | RESET | PURGE | SCAN", "dim");
+      consoleLine("  GATE <NODE> | NEXT", "dim");
+      consoleLine("  THEME GREEN|RED|BLUE|AMBER", "dim");
+      consoleLine("  CLEAR (console)", "dim");
+      consoleLine("  CLEAR EVENTS", "dim");
+    }
+
+    function cmdStatus() {
+      const g = activeGate();
+      consoleLine(`NODE: ${g.id}`, "dim");
+      consoleLine(`HEALTH: ${g.health}`, "dim");
+      consoleLine(`BEACON: ${g.beacon}`, g.beacon === "ONLINE" ? "good" : "bad");
+      consoleLine(`ALIGN: ${g.alignment}`, g.alignment === "OUT OF TOLERANCE" ? "bad" : (g.alignment === "DRIFTING" ? "warn" : "dim"));
+      consoleLine(`SYNC: ${g.sync}`, g.sync === "FAULT" ? "bad" : "dim");
+      consoleLine(`LINKS: ${g.corridors.map(c => `${c.link}:${c.status}`).join("  ")}`, "dim");
+      const alerts = computeAlerts(g);
+      consoleLine(`ALERTS: ${alerts.length ? alerts.join(" / ") : "NONE"}`, alerts.length ? "warn" : "good");
+    }
+
+    function cmdLinks() {
+      const g = activeGate();
+      consoleLine("CORRIDOR LINKS", "dim");
+      for (const c of g.corridors) {
+        const age = Math.floor((Date.now() - (c.lastChange || Date.now())) / 1000);
+        consoleLine(`  ${c.link}  ${c.status}  (age ${formatMMSS(age)})`, c.status === "STABLE" ? "good" : (c.status === "OFFLINE" ? "bad" : "warn"));
+      }
+    }
+
+    function cmdDetail(id) {
+      const g = activeGate();
+      const s = findShipById(g, id);
+      if (!s) { consoleLine(`NOT FOUND: ${id}`, "bad"); return; }
+      consoleLine(`DETAIL: ${s.id}`, "dim");
+      consoleLine(`  DIR: ${s.dir}`, "dim");
+      consoleLine(`  TYPE: ${s.type}`, "dim");
+      consoleLine(`  REQUEST: ${s.request}`, "dim");
+      consoleLine(`  STATE: ${s.state}`, "dim");
+      consoleLine(`  ETA: ${["DENIED","ARRIVED","DEPARTED"].includes(s.state) ? "--:--" : formatMMSS(s.eta)}`, "dim");
+      consoleLine(`  TRANSPONDER: ${s.transponder}`, s.transponder === "VALID" ? "good" : "warn");
+      consoleLine(`  PRIORITY: ${s.priority ? "YES" : "NO"}`, s.priority ? "warn" : "dim");
+      consoleLine(`  REASON: ${s.reason || "—"}`, "dim");
+      consoleLine(`  NOTES: ${s.notes ? s.notes : "—"}`, "dim");
+    }
+
+    function cmdNote(id, note) {
+      const g = activeGate();
+      const s = findShipById(g, id);
+      if (!s) { consoleLine(`NOT FOUND: ${id}`, "bad"); return; }
+      s.notes = (note || "").slice(0, 120);
+      consoleLine(`NOTE SET: ${id}`, "dim");
+      g.lastRefresh = Date.now();
+    }
+
+    function runCommand(lineRaw) {
+      const line = lineRaw.trim();
+      if (!line) return;
+
+      consoleLine(`${runtime.activeGateId}> ${line}`, "dim");
+
+      const parts = line.split(/\s+/);
+      const cmd = parts[0].toUpperCase();
+
+      if (cmd === "HELP" || cmd === "?") return cmdHelp();
+      if (cmd === "STATUS") return cmdStatus();
+      if (cmd === "LINKS") return cmdLinks();
+
+      if (cmd === "LIST") {
+        const arg1 = (parts[1] || "").toUpperCase();
+        if (arg1 === "INBOUND" || arg1 === "IN") return listShips("IN");
+        if (arg1 === "OUTBOUND" || arg1 === "OUT") return listShips("OUT");
+        consoleLine("USAGE: LIST INBOUND | LIST OUTBOUND", "warn");
+        return;
+      }
+
+      if (cmd === "DETAIL") {
+        const id = (parts[1] || "").toUpperCase();
+        if (!id) return consoleLine("USAGE: DETAIL <ID>", "warn");
+        return cmdDetail(id);
+      }
+
+      if (cmd === "NOTE") {
+        const id = (parts[1] || "").toUpperCase();
+        const note = parts.slice(2).join(" ");
+        if (!id || !note) return consoleLine("USAGE: NOTE <ID> <TEXT>", "warn");
+        return cmdNote(id, note);
+      }
+
+      if (cmd === "APPROVE" || cmd === "HOLD" || cmd === "DENY") {
+        const id = (parts[1] || "").toUpperCase();
+        if (!id) return consoleLine(`USAGE: ${cmd} <ID>`, "warn");
+        handleAction(cmd.toLowerCase(), id);
+        return;
+      }
+
+      if (cmd === "REALIGN") return doMaintenance("realign");
+      if (cmd === "RESET") return doMaintenance("reset");
+      if (cmd === "PURGE") return doMaintenance("purge");
+      if (cmd === "SCAN") return doMaintenance("scan");
+
+      if (cmd === "NEXT") return nextGate();
+
+      if (cmd === "GATE") {
+        const target = parts[1] || "";
+        if (!target) { consoleLine("USAGE: GATE <NODE>", "warn"); return; }
+        if (!runtime.catalog.includes(target)) {
+          consoleLine(`UNKNOWN NODE: ${target}`, "bad");
+          consoleLine("TIP: USE NEXT OR PICK FROM DROPDOWN", "dim");
+          return;
+        }
+        setGateById(target);
+        return;
+      }
+
+      if (cmd === "THEME") {
+        const t = (parts[1] || "").toLowerCase();
+        if (!["green","red","blue","amber"].includes(t)) {
+          consoleLine("USAGE: THEME GREEN|RED|BLUE|AMBER", "warn");
+          return;
+        }
+        setTheme(t);
+        return;
+      }
+
+      if (cmd === "CLEAR" || cmd === "CLS") {
+        if ((parts[1] || "").toUpperCase() === "EVENTS") {
+          clearLog(ui.events);
+          eventLine("EVENT LOG CLEARED", "dim");
+        } else {
+          clearLog(ui.console);
+          consoleLine("CONSOLE CLEARED", "dim");
+        }
+        return;
+      }
+
+      consoleLine("UNKNOWN COMMAND. TYPE HELP.", "warn");
+    }
+
+    function nextGate() {
+      runtime.gateIndex = (runtime.gateIndex + 1) % runtime.catalog.length;
+      setGateById(runtime.catalog[runtime.gateIndex]);
+    }
+
+    // ---------------------------
+    // Wire up UI
+    // ---------------------------
+    function populateGateSelect() {
+      ui.gateSelect.innerHTML = runtime.catalog.map(g => `<option value="${escapeText(g)}">${escapeText(g)}</option>`).join("");
+      ui.gateSelect.addEventListener("change", () => setGateById(ui.gateSelect.value));
+      ui.nextBtn.addEventListener("click", nextGate);
+    }
+
+    ui.themeSelect.addEventListener("change", () => setTheme(ui.themeSelect.value));
+
+    ui.btnRealign.addEventListener("click", () => doMaintenance("realign"));
+    ui.btnReset.addEventListener("click", () => doMaintenance("reset"));
+    ui.btnPurge.addEventListener("click", () => doMaintenance("purge"));
+    ui.btnScan.addEventListener("click", () => doMaintenance("scan"));
+
+    ui.cmd.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        const v = ui.cmd.value;
+        ui.cmd.value = "";
+        runtime.cmdHistory.push(v);
+        runtime.cmdPtr = runtime.cmdHistory.length;
+        runCommand(v);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        runtime.cmdPtr = clamp(runtime.cmdPtr - 1, 0, runtime.cmdHistory.length);
+        ui.cmd.value = runtime.cmdHistory[runtime.cmdPtr] ?? "";
+      } else if (e.key === "Escape") {
+        ui.cmd.value = "";
+      }
+    });
+
+    // ---------------------------
+    // Boot
+    // ---------------------------
+    function boot() {
+      loadTheme();
+      populateGateSelect();
+
+      const lastGate = localStorage.getItem(LS.gateCurrent);
+      const initialGate = (lastGate && runtime.catalog.includes(lastGate)) ? lastGate : runtime.catalog[0];
+      ui.gateSelect.value = initialGate;
+
+      runtime.activeGateId = initialGate;
+
+      clearLog(ui.console);
+      clearLog(ui.events);
+
+      setGateById(initialGate, true);
+      eventLine("EVENT LOG: ACTIVE", "dim");
+
+      if (runtime.tickTimer) clearInterval(runtime.tickTimer);
+      if (runtime.uiTimer) clearInterval(runtime.uiTimer);
+
+      runtime.tickTimer = setInterval(tickAllGates, 1000);
+      runtime.uiTimer = setInterval(() => {
+        ui.shiftTime.textContent = formatHMS(Date.now() - runtime.shiftStart);
+        const g = activeGate();
+        ui.dataAge.textContent = formatMMSS((Date.now() - g.lastRefresh) / 1000);
+      }, 250);
+
+      setTimeout(() => ui.cmd.focus(), 150);
+    }
+
+    boot();
+  </script>
+</body>
+</html>

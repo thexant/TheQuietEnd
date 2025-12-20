@@ -32,6 +32,9 @@
         --signal-tuner: #be76e2;
         --signal-tuner-line: rgba(190, 118, 226, 0.28);
         --signal-tuner-glow: rgba(190, 118, 226, 0.45);
+		--gate-tech: #00cc00;
+        --gate-tech-line: rgba(0, 204, 0, 0.28);
+        --gate-tech-glow: rgba(0, 204, 0, 0.45);
         --radius: 3px;
         --font-title: "B612 Mono", "Courier New", monospace;
         --font-body: "Share Tech Mono", "Courier New", monospace;
@@ -287,6 +290,24 @@
       .card.signaltuner::before {
         background: var(--signal-tuner-line);
       }
+	  
+	  .card.gatetech {
+        border-color: rgba(0, 204, 0, 0.6);
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.45);
+      }
+
+      .card.gatetech:hover {
+        border-color: rgba(0, 204, 0, 0.95);
+      }
+
+      .card.gatetech .tag {
+        color: var(--gate-tech);
+        text-shadow: 0 0 10px var(--gate-tech-glow);
+      }
+
+      .card.gatetech::before {
+        background: var(--gate-tech-line);
+      }
 
       .tag {
         font-family: var(--font-body);
@@ -515,11 +536,11 @@
             <p>Browser based minigame. Align Gate signals to maintain Corridor connections.</p>
           </a>
         </article>
-		<article class="card restricted">
-          <a href="Restricted/">
+		<article class="card gatetech">
+          <a href="GateControl/">
             <div class="tag">Console 06</div>
-            <h3>RESTRICTED ACCESS</h3>
-            <p>CONSOLE ACCESSIBLE BY AUTHORIZED PERSONNEL ONLY.</p>
+            <h3>Gate Control</h3>
+            <p>Manage incoming/outgoing traffic and other Gate maintenance events.</p>
           </a>
         </article>
       </section>
