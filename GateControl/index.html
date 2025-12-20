@@ -1041,11 +1041,14 @@
               <option value="black">BLACK</option>
             </select>
           </div>
-          <button id="btn-share" aria-label="Share or resume this session">SHARE / RESUME</button>
+          <button id="btn-share" aria-label="Share this session">SHARE</button>
+          <button id="btn-export" aria-label="Export this session">EXPORT</button>
+          <button id="btn-resume" aria-label="Resume from an exported save">RESUME</button>
           <button id="btn-help" aria-expanded="false" aria-controls="help-panel">HELP</button>
           <button id="btn-hard-reset" class="btn-danger" aria-label="Reset gate simulation">RESET</button>
         </div>
 
+        <input id="resume-file" type="file" accept=".tqe,application/json" hidden>
         <div id="help-panel" class="help-panel" aria-hidden="true">
           <div class="help-head">
             <div class="help-title">Help // Operator Quickstart</div>
@@ -1991,6 +1994,10 @@
     }
 
     async function loadSaveFromHash() {
+      if (runtime.skipHashLoad) {
+        runtime.skipHashLoad = false;
+        return false;
+      }
       const value = getHashSaveValue();
       if (!value) return false;
       const [prefix, data] = value.split(":");
@@ -2013,6 +2020,43 @@
       const hashValue = `${SAVE_VERSION}:${payload}`;
       history.replaceState(null, "", `#${SAVE_HASH_KEY}=${hashValue}`);
       return location.href;
+    }
+
+    function makeExportFilename(gateId) {
+      const safe = String(gateId || "").toUpperCase().replace(/[^A-Z0-9-]/g, "");
+      return `${safe || "GATE"}.tqe`;
+    }
+
+    function downloadTextFile(filename, text) {
+      const blob = new Blob([text], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    async function exportSaveFile() {
+      const save = buildSaveState();
+      const gateId = runtime.activeGateId || save.activeGateId || "";
+      const filename = makeExportFilename(gateId);
+      const json = JSON.stringify(save, null, 2);
+      downloadTextFile(filename, json);
+      return filename;
+    }
+
+    async function resumeFromFile(file) {
+      const text = await file.text();
+      const save = JSON.parse(text);
+      const applied = applySaveState(save);
+      if (!applied) return false;
+      runtime.skipHashLoad = true;
+      history.replaceState(null, "", location.pathname + location.search);
+      await boot();
+      return true;
     }
 
     async function copyToClipboard(text) {
@@ -2039,6 +2083,9 @@
       gateDisplay: document.getElementById("gate-display"),
       themeSelect: document.getElementById("theme-select"),
       btnShare: document.getElementById("btn-share"),
+      btnExport: document.getElementById("btn-export"),
+      btnResume: document.getElementById("btn-resume"),
+      resumeInput: document.getElementById("resume-file"),
       btnHelp: document.getElementById("btn-help"),
       btnHardReset: document.getElementById("btn-hard-reset"),
       helpPanel: document.getElementById("help-panel"),
@@ -2111,7 +2158,8 @@
       severed: false,
       lastSevered: null,
       maintenance: {},
-      resumeShiftMs: null
+      resumeShiftMs: null,
+      skipHashLoad: false
     };
 
     function getGate(gateId) {
@@ -4393,6 +4441,30 @@
           consoleLine(copied ? "SHARE URL COPIED" : "SHARE URL READY", copied ? "good" : "warn");
         } catch (_) {
           consoleLine("SHARE FAILED", "warn");
+        }
+      });
+    }
+    if (ui.btnExport) {
+      ui.btnExport.addEventListener("click", async () => {
+        try {
+          const filename = await exportSaveFile();
+          consoleLine(`EXPORT READY: ${filename}`, "good");
+        } catch (_) {
+          consoleLine("EXPORT FAILED", "warn");
+        }
+      });
+    }
+    if (ui.btnResume && ui.resumeInput) {
+      ui.btnResume.addEventListener("click", () => ui.resumeInput.click());
+      ui.resumeInput.addEventListener("change", async () => {
+        const file = ui.resumeInput.files?.[0];
+        ui.resumeInput.value = "";
+        if (!file) return;
+        try {
+          const ok = await resumeFromFile(file);
+          consoleLine(ok ? "RESUME LOADED" : "RESUME FAILED", ok ? "good" : "warn");
+        } catch (_) {
+          consoleLine("RESUME FAILED", "warn");
         }
       });
     }
