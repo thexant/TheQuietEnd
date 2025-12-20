@@ -720,16 +720,18 @@
 
     @media (max-width: 680px) {
       body {
-        height: 100vh;
+        height: auto;
         min-height: 100dvh;
-        overflow: hidden;
+        overflow-y: auto;
       }
       #game-container {
-        height: 100dvh;
+        height: auto;
+        min-height: 100dvh;
+        grid-template-rows: auto auto auto;
       }
       header { padding-bottom: 8px; }
       .interface {
-        grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) minmax(0, var(--terminal-h));
+        grid-template-rows: auto auto auto;
       }
       .scroll {
         overflow: visible;
@@ -776,6 +778,9 @@
       footer { gap: 6px; }
       .hint { white-space: normal; }
       .severed-grid { grid-template-columns: 1fr; }
+      .logbox {
+        max-height: min(42vh, 360px);
+      }
     }
   </style>
 </head>
