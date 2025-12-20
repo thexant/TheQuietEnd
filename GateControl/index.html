@@ -1105,7 +1105,7 @@
             </div>
               <div class="help-row">
                 <div class="help-key">Relays</div>
-                <div>RELAYS lists node relays. PING &lt;RELAY-ID&gt; checks status. ACK &lt;RELAY-ID&gt; clears pending acknowledgments before they expire. RESTORE &lt;RELAY-ID&gt; attempts to recover a FAULT relay and can backfire.</div>
+                <div>RELAYS lists node relays. PING &lt;RELAY-ID&gt; checks status. ACK &lt;RELAY-ID&gt; clears pending acknowledgments before they expire. RESTORE &lt;RELAY-ID&gt; attempts to recover a FAULT or WEAK relay and can backfire.</div>
               </div>
             <div class="help-row">
               <div class="help-key">Orders</div>
@@ -2483,7 +2483,7 @@
           const pr = pillForState(RELAY_STATES, displayStatus);
           const ackMeta = r.awaitingAck ? `<span class="status-meta">ACK REQUIRED</span>` : "";
           const ackClass = r.awaitingAck ? "attn" : "";
-          const canRestore = displayStatus === "FAULT";
+          const canRestore = displayStatus === "FAULT" || displayStatus === "WEAK";
           const needsRelayWO = relayIsDown(r) && !r.hiddenOffline && !hasActiveWorkOrder(g, r.id);
           return `
             <div class="status-row">
@@ -3628,8 +3628,8 @@
         consoleLine(`RESTORE REFUSED: ${relay.id} OFFLINE`, "warn");
         return;
       }
-      if (relay.status !== "FAULT") {
-        consoleLine(`RESTORE REFUSED: ${relay.id} NOT IN FAULT`, "dim");
+      if (!["FAULT", "WEAK"].includes(relay.status)) {
+        consoleLine(`RESTORE REFUSED: ${relay.id} NOT FAULT/WEAK`, "dim");
         return;
       }
 
