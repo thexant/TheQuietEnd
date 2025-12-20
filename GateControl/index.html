@@ -720,18 +720,16 @@
 
     @media (max-width: 680px) {
       body {
-        height: auto;
+        height: 100vh;
         min-height: 100dvh;
-        overflow-y: auto;
+        overflow: hidden;
       }
       #game-container {
-        height: auto;
-        min-height: 100dvh;
-        grid-template-rows: auto auto auto;
+        height: 100dvh;
       }
       header { padding-bottom: 8px; }
       .interface {
-        grid-template-rows: auto auto auto;
+        grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) minmax(0, var(--terminal-h));
       }
       .scroll {
         overflow: visible;
