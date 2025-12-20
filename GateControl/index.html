@@ -521,10 +521,21 @@
       justify-content: center;
       min-width: 44px;
     }
+    .btn-mini.attn {
+      color: #140f06;
+      background: rgba(210,169,90,0.9);
+      border-color: rgba(210,169,90,0.8);
+      box-shadow: 0 0 16px rgba(210,169,90,0.5);
+      animation: ackPulse 0.9s ease-in-out infinite;
+    }
     .btn-mini.deny { color: var(--alert); border-color: rgba(225,100,100,0.35); }
     .btn-mini.hold { color: var(--stat); border-color: rgba(210,169,90,0.35); }
     .btn-mini.approve { color: var(--signal); }
     .btn-mini:active { background: rgba(255,255,255,0.06); color: var(--ink); }
+    @keyframes ackPulse {
+      0%, 100% { box-shadow: 0 0 10px rgba(210,169,90,0.3); }
+      50% { box-shadow: 0 0 18px rgba(210,169,90,0.7); }
+    }
 
     .sys-grid { display: grid; grid-template-columns: 1fr; gap: 10px; min-height: 0; overflow: auto; padding-right: 4px; }
     .sys-block {
@@ -599,6 +610,55 @@
       letter-spacing: 0.14em;
       text-transform: uppercase;
       font-size: 0.62rem;
+    }
+
+    .resource-list { display: grid; gap: 10px; }
+    .resource-row { display: grid; gap: 6px; }
+    .resource-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .resource-title {
+      font-family: var(--font-title);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--signal);
+      font-size: 0.74rem;
+    }
+    .resource-meta {
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .resource-bar {
+      height: 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,0.35);
+      overflow: hidden;
+      position: relative;
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.45);
+    }
+    .resource-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--signal), rgba(77, 255, 154, 0.25));
+      box-shadow: 0 0 10px rgba(77, 255, 154, 0.4);
+      transition: width 0.2s ease;
+    }
+    .resource-fill.warn {
+      background: linear-gradient(90deg, #d2a95a, rgba(210, 169, 90, 0.2));
+      box-shadow: 0 0 12px rgba(210, 169, 90, 0.45);
+    }
+    .resource-fill.bad {
+      background: linear-gradient(90deg, var(--alert), rgba(225, 100, 100, 0.2));
+      box-shadow: 0 0 12px rgba(225, 100, 100, 0.45);
+    }
+    .resource-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     /* Console + Event log split */
@@ -881,6 +941,10 @@
               <div>Shows gate health, beacon state, alignment, sync, corridors, and facility status. Degraded or offline systems can trigger alerts and slow traffic.</div>
             </div>
             <div class="help-row">
+              <div class="help-key">Resources</div>
+              <div>Fuel drains over time. Supplies drain during work orders and decon. Order buttons appear when reserves drop to 25%.</div>
+            </div>
+            <div class="help-row">
               <div class="help-key">Maintenance</div>
               <div>Realign improves alignment, Reset reestablishes handshake and can recover the beacon, Purge clears low-priority queue entries, Scan looks for anomalies and reveals hidden effects.</div>
             </div>
@@ -1005,6 +1069,14 @@
             <div id="facility-list" class="status-list"></div>
             <div class="label-mini">Work Orders</div>
             <div id="workorder-list" class="status-list"></div>
+          </div>
+
+          <div class="sys-block">
+            <div class="queue-head">
+              <div class="queue-title">Resources</div>
+              <div id="resource-meta" class="queue-meta">2 TRACKS</div>
+            </div>
+            <div id="resource-list" class="resource-list"></div>
           </div>
 
           <div class="sys-block">
@@ -1216,7 +1288,19 @@
     const RELAY_STATES = [
       { key: "ONLINE", cls: "ok" },
       { key: "WEAK", cls: "warn" },
-      { key: "FAULT", cls: "bad" }
+      { key: "FAULT", cls: "bad" },
+      { key: "OFFLINE", cls: "bad" }
+    ];
+
+    const RESOURCE_TYPES = [
+      { id: "FUEL", name: "FUEL", startMin: 70, startMax: 92, restockMin: 35, restockMax: 55, request: "REFUEL" },
+      { id: "SUPPLY", name: "SUPPLY", startMin: 65, startMax: 88, restockMin: 30, restockMax: 50, request: "RESUPPLY" }
+    ];
+    const RESOURCE_ORDER_THRESHOLD = 25;
+    const RESOURCE_ORDER_PHASES = [
+      { key: "PROCESSING ORDER", min: 90, max: 180 },
+      { key: "PREPARING ORDER", min: 120, max: 240 },
+      { key: "SHIPPING", min: 180, max: 360 }
     ];
 
     // Sparse rates (per second tick)
@@ -1232,11 +1316,17 @@
       facilityWorsenChance: 0.00015,
       relayPacketChance: 0.0045,
       relayShiftChance: 0.0012,
-      concourseFade: 0.03
+      relayPingChance: 0.0032,
+      relayDropChance: 0.00035,
+      concourseFade: 0.03,
+      fuelDrain: 0.025,
+      supplyDrainWorkOrder: 0.035,
+      supplyDrainDecon: 0.05
     };
 
     // ETA ranges in seconds (slow but not ridiculous)
     const ETA = { min: 120, max: 1200 }; // 2–20 minutes
+    const RELAY_ACK_WINDOW_MS = 12_000;
 
     function dailySalt() {
       const d = new Date();
@@ -1296,6 +1386,17 @@
       return n;
     }
 
+    function makeResources(rng) {
+      const resources = {};
+      for (const r of RESOURCE_TYPES) {
+        resources[r.id] = {
+          level: randRange(r.startMin, r.startMax),
+          order: null
+        };
+      }
+      return resources;
+    }
+
     function makeGateState(gateId) {
       const seed = strHash(`${gateId}::${dailySalt()}`);
       const rng = mulberry32(seed);
@@ -1340,11 +1441,24 @@
         phaseEndsAt: 0
       }));
 
-      const relayCount = rng() < 0.55 ? 1 : 2;
+      const relayCount = 2;
       const relays = Array.from({ length: relayCount }, (_, i) => {
         const r = rng();
         const status = r < 0.78 ? "ONLINE" : (r < 0.94 ? "WEAK" : "FAULT");
-        return { id: `RELAY-${i + 1}`, status, lastChange: Date.now(), lastPacketAt: 0 };
+        return {
+          id: `RELAY-${i + 1}`,
+          status,
+          lastChange: Date.now(),
+          lastPacketAt: 0,
+          lastRelayPingAt: 0,
+          lastAckAt: 0,
+          awaitingAck: false,
+          ackDueAt: 0,
+          offline: false,
+          hiddenOffline: false,
+          offlineReason: null,
+          offlineSince: 0
+        };
       });
 
       return {
@@ -1365,6 +1479,7 @@
         dockSlots,
         relays,
         packets: [],
+        resources: makeResources(rng),
         alerts: [],
         reports: [],
         stats: {
@@ -1405,6 +1520,32 @@
         w.createdAt ||= Date.now();
       }
 
+      g.resources ||= {};
+      for (const r of RESOURCE_TYPES) {
+        const res = g.resources[r.id] ||= { level: randRange(r.startMin, r.startMax), order: null };
+        if (typeof res.level !== "number") res.level = randRange(r.startMin, r.startMax);
+        res.level = clamp(res.level, 0, 100);
+        if (res.order) {
+          res.order.resourceId ||= r.id;
+          res.order.stage ||= RESOURCE_ORDER_PHASES[0].key;
+          res.order.stageIndex = typeof res.order.stageIndex === "number" ? res.order.stageIndex : 0;
+          if (!res.order.stageEndsAt || res.order.stageEndsAt <= 0) {
+            const phase = RESOURCE_ORDER_PHASES[res.order.stageIndex] || RESOURCE_ORDER_PHASES[0];
+            res.order.stageEndsAt = Date.now() + randRange(phase.min, phase.max) * 1000;
+          }
+          if (res.order.stage === "INBOUND" && !res.order.shipmentId) {
+            res.order.stage = "SHIPPING";
+            res.order.stageIndex = RESOURCE_ORDER_PHASES.length - 1;
+            res.order.stageEndsAt = Date.now() + randRange(90, 180) * 1000;
+          }
+          if (res.order.stage === "DELIVERED") {
+            res.order.completedAt ||= Date.now();
+          }
+        } else {
+          res.order = null;
+        }
+      }
+
       g.corridors ||= [];
       for (const c of g.corridors) {
         c.lastChange ||= Date.now();
@@ -1437,16 +1578,38 @@
         slot.phaseEndsAt ||= 0;
       }
 
-      g.relays ||= Array.from({ length: 1 }, (_, i) => ({
-        id: `RELAY-${i + 1}`,
-        status: "ONLINE",
-        lastChange: Date.now(),
-        lastPacketAt: 0
-      }));
+      g.relays ||= [];
+      const desiredRelays = 2;
+      if (g.relays.length > desiredRelays) g.relays = g.relays.slice(0, desiredRelays);
+      while (g.relays.length < desiredRelays) {
+        g.relays.push({
+          id: `RELAY-${g.relays.length + 1}`,
+          status: "ONLINE",
+          lastChange: Date.now(),
+          lastPacketAt: 0,
+          lastRelayPingAt: 0,
+          lastAckAt: 0,
+          awaitingAck: false,
+          ackDueAt: 0,
+          offline: false,
+          hiddenOffline: false,
+          offlineReason: null,
+          offlineSince: 0
+        });
+      }
       for (const r of g.relays) {
         r.status ||= "ONLINE";
         r.lastChange ||= Date.now();
         r.lastPacketAt ||= 0;
+        r.lastRelayPingAt ||= 0;
+        r.lastAckAt ||= 0;
+        r.awaitingAck = typeof r.awaitingAck === "boolean" ? r.awaitingAck : false;
+        r.ackDueAt = typeof r.ackDueAt === "number" ? r.ackDueAt : 0;
+        r.offline = typeof r.offline === "boolean" ? r.offline : (r.status === "OFFLINE");
+        r.hiddenOffline = typeof r.hiddenOffline === "boolean" ? r.hiddenOffline : (r.offline && r.status !== "OFFLINE");
+        r.offlineReason = r.offlineReason || null;
+        r.offlineSince = typeof r.offlineSince === "number" ? r.offlineSince : 0;
+        if (r.offline && !r.hiddenOffline) r.status = "OFFLINE";
       }
       g.packets ||= [];
 
@@ -1471,6 +1634,8 @@
           ef.hidden = typeof ef.hidden === "boolean" ? ef.hidden : false;
           ef.revealed ||= false;
         }
+        s.shipmentType ||= null;
+        s.shipmentDelivered = typeof s.shipmentDelivered === "boolean" ? s.shipmentDelivered : false;
         s.hazardDeadline ||= 0;
         if (typeof s.eta !== "number") s.eta = ETA.min + Math.floor(Math.random() * 400);
       }
@@ -1525,6 +1690,8 @@
       facilityMeta: document.getElementById("facility-meta"),
       facilityList: document.getElementById("facility-list"),
       workorderList: document.getElementById("workorder-list"),
+      resourceMeta: document.getElementById("resource-meta"),
+      resourceList: document.getElementById("resource-list"),
       concourseStatus: document.getElementById("concourse-status"),
       concoursePill: document.getElementById("concourse-pill"),
       dockList: document.getElementById("dock-list"),
@@ -1744,23 +1911,54 @@
       if (g.sync === "FAULT") alerts.push("SYNC FAULT");
       for (const c of g.corridors) if (c.status === "OFFLINE") alerts.push(`LINK ${c.link} OFFLINE`);
       for (const f of g.facility || []) if (f.status === "OFFLINE") alerts.push(`${f.name} OFFLINE`);
+      const resources = ensureResources(g);
+      if (resources.FUEL?.level <= RESOURCE_ORDER_THRESHOLD) alerts.push("FUEL LOW");
+      if (resources.SUPPLY?.level <= RESOURCE_ORDER_THRESHOLD) alerts.push("SUPPLY LOW");
       const stuckInbound = g.inbound.filter(s => s.state === "HOLD").length;
       if (stuckInbound >= 2) alerts.push("INBOUND HOLDS STACKING");
       g.alerts = alerts;
       return alerts;
     }
 
+    function allCorridorsOffline(g) {
+      return (g.corridors || []).length > 0 && g.corridors.every(c => c.status === "OFFLINE");
+    }
+
+    function allFacilityOffline(g) {
+      return (g.facility || []).length > 0 && g.facility.every(f => f.status === "OFFLINE");
+    }
+
+    function hasActiveWorkOrders(g) {
+      return (g.workOrders || []).some(w => w.state !== "COMPLETE");
+    }
+
+    function relayIsDown(r) {
+      return !!r.offline;
+    }
+
+    function allRelaysDown(g) {
+      return (g.relays || []).length >= 2 && (g.relays || []).every(relayIsDown);
+    }
+
     function isGateSystemsFailed(g) {
-      const corridorsFailed = (g.corridors || []).length > 0 && g.corridors.every(c => c.status === "OFFLINE");
-      const facilityFailed = (g.facility || []).length > 0 && g.facility.every(f => f.status === "OFFLINE");
       const relaysFailed = (g.relays || []).length > 0 && g.relays.every(r => r.status === "FAULT");
       return g.health.includes("MAINTENANCE")
         && g.beacon === "OFFLINE"
         && g.alignment === "OUT OF TOLERANCE"
         && g.sync === "FAULT"
-        && corridorsFailed
-        && facilityFailed
+        && allCorridorsOffline(g)
+        && allFacilityOffline(g)
         && relaysFailed;
+    }
+
+    function gateSeverReason(g) {
+      const fuelLevel = ensureResources(g).FUEL?.level ?? 100;
+      if (fuelLevel <= 0) return "Gate Power Loss";
+      if (allRelaysDown(g)) return "Gate Relay Disconnected";
+      if (allCorridorsOffline(g)) return "Losing Connection to the Corridor Network";
+      if (allFacilityOffline(g) && !hasActiveWorkOrders(g)) return "Gate System Failure";
+      if (isGateSystemsFailed(g)) return "Gate Systems Failures";
+      return null;
     }
 
     function shipStatusPill(s) {
@@ -1891,6 +2089,47 @@
           `).join("")
         : `<div class="status-row"><div class="status-name">NONE</div><div class="status-meta">STANDBY</div></div>`;
 
+      const resources = ensureResources(g);
+      ui.resourceMeta.textContent = `${RESOURCE_TYPES.length} TRACKS`;
+      ui.resourceList.innerHTML = RESOURCE_TYPES.map(r => {
+        const res = resources[r.id];
+        const level = clamp(res.level, 0, 100);
+        const pct = Math.round(level);
+        const isCritical = level <= 10;
+        const isLow = level <= RESOURCE_ORDER_THRESHOLD;
+        const fillCls = isCritical ? "bad" : (isLow ? "warn" : "");
+        let statusText = `${pct}%`;
+        if (res.order) {
+          if (res.order.stage === "DELIVERED") {
+            statusText = "DELIVERED";
+          } else if (res.order.stage === "INBOUND") {
+            const ship = findShipById(g, res.order.shipmentId || "");
+            const eta = ship ? ` / ETA ${formatMMSS(ship.eta)}` : "";
+            statusText = `INBOUND: ${res.order.shipmentId || "SHIP"} / SHIPMENT${eta}`;
+          } else {
+            const remaining = res.order.stageEndsAt ? formatMMSS((res.order.stageEndsAt - Date.now()) / 1000) : "--:--";
+            statusText = `${res.order.stage} (${remaining})`;
+          }
+        } else if (isLow) {
+          statusText = "LOW - ORDER AVAILABLE";
+        }
+        return `
+          <div class="resource-row">
+            <div class="resource-head">
+              <div class="resource-title">${escapeText(r.name)}</div>
+              <div class="resource-meta">${pct}%</div>
+            </div>
+            <div class="resource-bar">
+              <div class="resource-fill ${fillCls}" style="width:${pct}%;"></div>
+            </div>
+            <div class="resource-actions">
+              <div class="resource-meta">${escapeText(statusText)}</div>
+              ${resourceOrderAvailable(res) ? `<button class="btn-mini attn" data-action="order" data-resource="${escapeText(r.id)}">ORDER</button>` : ""}
+            </div>
+          </div>
+        `;
+      }).join("");
+
       const concourse = concourseBand(g.concourseLevel || 0);
       ui.concoursePill.className = `pill ${concourse.cls}`;
       ui.concoursePill.textContent = concourse.text;
@@ -1915,14 +2154,20 @@
       }).join("");
 
       ui.relayList.innerHTML = (g.relays || []).map(r => {
-        const pr = pillForState(RELAY_STATES, r.status);
+        const displayStatus = (r.offline && !r.hiddenOffline) ? "OFFLINE" : r.status;
+        const pr = pillForState(RELAY_STATES, displayStatus);
+        const ackMeta = r.awaitingAck ? `<span class="status-meta">ACK REQUIRED</span>` : "";
+        const ackClass = r.awaitingAck ? "attn" : "";
+        const needsRelayWO = relayIsDown(r) && !r.hiddenOffline && !hasActiveWorkOrder(g, r.id);
         return `
           <div class="status-row">
             <div class="status-name">${escapeText(r.id)}</div>
             <div class="status-right">
-              <span class="pill ${pr.cls}">${escapeText(r.status)}</span>
+              <span class="pill ${pr.cls}">${escapeText(displayStatus)}</span>
+              ${ackMeta}
               <button class="btn-mini approve" data-action="ping-relay" data-relay="${escapeText(r.id)}">PING</button>
-              <button class="btn-mini hold" data-action="ack-relay" data-relay="${escapeText(r.id)}">ACK</button>
+              <button class="btn-mini hold ${ackClass}" data-action="ack-relay" data-relay="${escapeText(r.id)}">ACK</button>
+              ${needsRelayWO ? `<button class="btn-mini hold" data-action="workorder" data-system="${escapeText(r.id)}">WO</button>` : ""}
             </div>
           </div>
         `;
@@ -1931,12 +2176,28 @@
       ui.facilityList.querySelectorAll("[data-action='workorder']").forEach(btn => {
         btn.addEventListener("click", () => issueWorkOrder(btn.getAttribute("data-system")));
       });
+      ui.relayList.querySelectorAll("[data-action='workorder']").forEach(btn => {
+        btn.addEventListener("click", () => issueWorkOrder(btn.getAttribute("data-system")));
+      });
 
       ui.relayList.querySelectorAll("[data-action='ping-relay']").forEach(btn => {
         btn.addEventListener("click", () => cmdPingRelay(btn.getAttribute("data-relay")));
       });
       ui.relayList.querySelectorAll("[data-action='ack-relay']").forEach(btn => {
         btn.addEventListener("click", () => cmdAckRelay(btn.getAttribute("data-relay")));
+      });
+
+      ui.resourceList.querySelectorAll("[data-action='order']").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const resId = btn.getAttribute("data-resource");
+          if (!startResourceOrder(g, resId)) {
+            consoleLine(`ORDER REFUSED: ${resId}`, "warn");
+            return;
+          }
+          consoleLine(`ORDER PLACED: ${resId}`, "good");
+          g.lastRefresh = Date.now();
+          renderAll();
+        });
       });
 
       ui.dockList.querySelectorAll("[data-action='detail']").forEach(btn => {
@@ -1985,12 +2246,178 @@
       return alias[key] || null;
     }
 
+    function resolveResource(input) {
+      const key = String(input || "").toUpperCase().replace(/[^A-Z]/g, "");
+      if (!key) return null;
+      for (const r of RESOURCE_TYPES) {
+        if (r.id === key || r.name.replace(/[^A-Z]/g, "") === key) return r.id;
+        if (key.startsWith(r.id)) return r.id;
+      }
+      return null;
+    }
+
+    function resolveRelayId(input) {
+      const raw = String(input || "").toUpperCase();
+      const match = raw.match(/RELAY[\s-]*([12])/);
+      if (match) return `RELAY-${match[1]}`;
+      const trimmed = raw.replace(/[^A-Z0-9]/g, "");
+      if (trimmed === "R1") return "RELAY-1";
+      if (trimmed === "R2") return "RELAY-2";
+      return null;
+    }
+
     function getFacility(g, id) {
       return (g.facility || []).find(f => f.id === id) || null;
     }
 
+    function getResourceConfig(id) {
+      return RESOURCE_TYPES.find(r => r.id === id) || null;
+    }
+
+    function ensureResources(g) {
+      g.resources ||= {};
+      for (const r of RESOURCE_TYPES) {
+        if (!g.resources[r.id]) {
+          g.resources[r.id] = { level: randRange(r.startMin, r.startMax), order: null };
+        }
+        if (typeof g.resources[r.id].level !== "number") {
+          g.resources[r.id].level = randRange(r.startMin, r.startMax);
+        }
+      }
+      return g.resources;
+    }
+
+    function resourceOrderAvailable(res) {
+      return res.level <= RESOURCE_ORDER_THRESHOLD && !res.order;
+    }
+
     function hasActiveWorkOrder(g, id) {
       return (g.workOrders || []).some(w => w.systemId === id && w.state !== "COMPLETE");
+    }
+
+    function makeShipmentShip(resourceId) {
+      const config = getResourceConfig(resourceId);
+      const rng = mulberry32(strHash(`${resourceId}::shipment::${Date.now()}`));
+      return {
+        id: makeShipId(rng),
+        dir: "IN",
+        eta: randRange(240, 600),
+        type: "SHIPMENT",
+        request: config ? config.request : "RESUPPLY",
+        state: "PENDING",
+        transponder: "VALID",
+        priority: true,
+        reason: null,
+        notes: "",
+        doneAt: 0,
+        slotId: null,
+        dockState: null,
+        deconEndsAt: 0,
+        serviceEndsAt: 0,
+        clearingEndsAt: 0,
+        wasCleared: false,
+        queryPending: false,
+        effects: [],
+        hazardDeadline: 0,
+        shipmentType: resourceId,
+        shipmentDelivered: false
+      };
+    }
+
+    function startResourceOrder(g, resourceId) {
+      ensureResources(g);
+      const res = g.resources[resourceId];
+      if (!res || res.order) return false;
+      if (res.level > RESOURCE_ORDER_THRESHOLD) return false;
+      const phase = RESOURCE_ORDER_PHASES[0];
+      res.order = {
+        resourceId,
+        stage: phase.key,
+        stageIndex: 0,
+        stageEndsAt: Date.now() + randRange(phase.min, phase.max) * 1000,
+        shipmentId: null,
+        createdAt: Date.now(),
+        completedAt: 0
+      };
+      if (g.id === runtime.activeGateId) eventLine(`ORDER STARTED: ${resourceId}`, "warn");
+      return true;
+    }
+
+    function applyShipmentDelivery(g, ship) {
+      if (!ship || ship.shipmentDelivered) return;
+      const config = getResourceConfig(ship.shipmentType);
+      if (!config) return;
+      ensureResources(g);
+      const res = g.resources[ship.shipmentType];
+      const add = randRange(config.restockMin, config.restockMax);
+      res.level = clamp(res.level + add, 0, 100);
+      ship.shipmentDelivered = true;
+
+      if (res.order && res.order.shipmentId === ship.id) {
+        res.order.stage = "DELIVERED";
+        res.order.completedAt = Date.now();
+      }
+      if (g.id === runtime.activeGateId) {
+        eventLine(`SHIPMENT RECEIVED: ${ship.shipmentType} +${add}%`, "good");
+      }
+    }
+
+    function tickResourceOrders(g) {
+      ensureResources(g);
+      const now = Date.now();
+      for (const r of RESOURCE_TYPES) {
+        const res = g.resources[r.id];
+        if (!res || !res.order) continue;
+        const order = res.order;
+        if (order.stage === "DELIVERED") {
+          if (order.completedAt && now - order.completedAt > 90_000) res.order = null;
+          continue;
+        }
+        if (order.stage === "INBOUND") {
+          const ship = findShipById(g, order.shipmentId || "");
+          if (!ship || ship.state === "DENIED") {
+            order.stage = "SHIPPING";
+            order.stageIndex = RESOURCE_ORDER_PHASES.length - 1;
+            order.stageEndsAt = now + randRange(90, 180) * 1000;
+            order.shipmentId = null;
+            if (g.id === runtime.activeGateId) eventLine(`ORDER REQUEUED: ${r.id}`, "warn");
+          }
+          continue;
+        }
+        if (now < order.stageEndsAt) continue;
+        order.stageIndex++;
+        if (order.stageIndex < RESOURCE_ORDER_PHASES.length) {
+          const phase = RESOURCE_ORDER_PHASES[order.stageIndex];
+          order.stage = phase.key;
+          order.stageEndsAt = now + randRange(phase.min, phase.max) * 1000;
+          if (g.id === runtime.activeGateId) eventLine(`ORDER ${order.stage}: ${r.id}`, "dim");
+          continue;
+        }
+        const shipment = makeShipmentShip(r.id);
+        g.inbound.unshift(shipment);
+        order.stage = "INBOUND";
+        order.shipmentId = shipment.id;
+        order.stageEndsAt = 0;
+        if (g.id === runtime.activeGateId) {
+          eventLine(`ORDER INBOUND: ${r.id} // ${shipment.id}`, "warn");
+        }
+      }
+    }
+
+    function tickResources(g) {
+      ensureResources(g);
+      const fuel = g.resources.FUEL;
+      if (fuel) fuel.level = clamp(fuel.level - RATES.fuelDrain, 0, 100);
+
+      const supply = g.resources.SUPPLY;
+      if (supply) {
+        let drain = 0;
+        if (hasActiveWorkOrders(g)) drain += RATES.supplyDrainWorkOrder;
+        const deconActive = (g.dockSlots || []).some(s => s.state === "DECON");
+        if (deconActive) drain += RATES.supplyDrainDecon;
+        supply.level = clamp(supply.level - drain, 0, 100);
+      }
+      tickResourceOrders(g);
     }
 
     function bumpConcourse(g, amount) {
@@ -2258,12 +2685,26 @@
         if (g.id === runtime.activeGateId) eventLine(`WORKORDER ${w.state}: ${w.systemName}`, "dim");
         if (w.state === "COMPLETE") {
           const sys = getFacility(g, w.systemId);
+          const relay = findRelay(g, w.systemId);
           if (sys) {
             sys.status = "ONLINE";
             sys.lastChange = now;
             sys.stableUntil = now + randRange(45 * 60_000, 90 * 60_000);
           }
-          if (g.id === runtime.activeGateId) eventLine(`FACILITY: ${w.systemName} ONLINE`, "good");
+          if (relay) {
+            relay.offline = false;
+            relay.hiddenOffline = false;
+            relay.status = "ONLINE";
+            relay.lastChange = now;
+            relay.awaitingAck = false;
+            relay.ackDueAt = 0;
+            relay.offlineReason = null;
+            relay.offlineSince = 0;
+          }
+          if (g.id === runtime.activeGateId) {
+            if (relay) eventLine(`RELAY ${relay.id}: ONLINE`, "good");
+            if (sys) eventLine(`FACILITY: ${w.systemName} ONLINE`, "good");
+          }
         }
       }
       g.workOrders = g.workOrders.filter(w => !(w.state === "COMPLETE" && now > w.phaseEndsAt));
@@ -2285,6 +2726,7 @@
       s.state = "WAITING DECON";
       s.dockState = "WAITING DECON";
       s.eta = 0;
+      if (s.shipmentType) applyShipmentDelivery(g, s);
       if (shipHasDangerEffect(s)) {
         s.hazardDeadline = Date.now() + randRange(4 * 60, 7 * 60) * 1000;
       }
@@ -2349,7 +2791,7 @@
           slot.state = "CLEARING";
           ship.state = "CLEARING";
           ship.dockState = "CLEARING";
-          slot.phaseEndsAt = now + randRange(2 * 60, 4 * 60) * 1000;
+          slot.phaseEndsAt = now + randRange(1 * 60, 2 * 60) * 1000;
           if (g.id === runtime.activeGateId) eventLine(`SERVICING COMPLETE: ${ship.id} (CLEARING)`, "dim");
         } else if (slot.state === "CLEARING" && now >= slot.phaseEndsAt) {
           slot.state = "EMPTY";
@@ -2385,6 +2827,38 @@
       if (!g.relays) return;
       const now = Date.now();
       for (const r of g.relays) {
+        if (r.awaitingAck && now > r.ackDueAt) {
+          r.awaitingAck = false;
+          r.offline = true;
+          r.hiddenOffline = false;
+          r.offlineReason = "ACK_TIMEOUT";
+          r.offlineSince = now;
+          r.status = "OFFLINE";
+          r.lastChange = now;
+          if (g.id === runtime.activeGateId) eventLine(`RELAY ${r.id}: OFFLINE (ACK TIMEOUT)`, "bad");
+          continue;
+        }
+
+        if (r.offline) continue;
+
+        if (!r.awaitingAck && Math.random() < RATES.relayPingChance) {
+          r.awaitingAck = true;
+          r.ackDueAt = now + RELAY_ACK_WINDOW_MS;
+          r.lastRelayPingAt = now;
+          pushPacket(g, `PING ${r.id}`);
+          if (g.id === runtime.activeGateId) eventLine(`RELAY ${r.id}: PING`, "warn");
+        }
+
+        if (Math.random() < RATES.relayDropChance) {
+          r.offline = true;
+          r.hiddenOffline = true;
+          r.offlineReason = "SILENT_DROP";
+          r.offlineSince = now;
+          r.awaitingAck = false;
+          r.ackDueAt = 0;
+          continue;
+        }
+
         if (Math.random() < RATES.relayShiftChance) {
           if (r.status === "ONLINE" && Math.random() < 0.55) r.status = "WEAK";
           else if (r.status === "WEAK" && Math.random() < 0.4) r.status = "FAULT";
@@ -2484,13 +2958,18 @@
       driftSystems(g);
       driftFacility(g);
       tickWorkOrders(g);
+      tickResources(g);
       driftConcourse(g);
       driftRelays(g);
       maybeGenerateReport(g);
-      if (g.id === runtime.activeGateId && isGateSystemsFailed(g)) {
-        severGate("Gate Systems Failures");
-        return;
+      if (g.id === runtime.activeGateId) {
+        const severReason = gateSeverReason(g);
+        if (severReason) {
+          severGate(severReason);
+          return;
+        }
       }
+      
 
       g.lastRefresh = Date.now();
     }
@@ -2671,6 +3150,38 @@
 
     function issueWorkOrder(systemText) {
       const g = activeGate();
+      const relayId = resolveRelayId(systemText);
+      if (relayId) {
+        const relay = findRelay(g, relayId);
+        if (!relay) {
+          consoleLine(`RELAY NOT FOUND: ${relayId}`, "bad");
+          return;
+        }
+        if (!relayIsDown(relay)) {
+          consoleLine(`WORKORDER REFUSED: ${relay.id} ONLINE`, "dim");
+          return;
+        }
+        if (hasActiveWorkOrder(g, relay.id)) {
+          consoleLine(`WORKORDER EXISTS: ${relay.id}`, "warn");
+          return;
+        }
+        const phase = WORKORDER_PHASES[0];
+        const w = {
+          systemId: relay.id,
+          systemName: `${relay.id} REPEATER`,
+          state: phase.key,
+          phaseIndex: 0,
+          phaseEndsAt: Date.now() + randRange(phase.min, phase.max) * 1000,
+          createdAt: Date.now()
+        };
+        g.workOrders ||= [];
+        g.workOrders.push(w);
+        consoleLine(`WORKORDER QUEUED: ${relay.id}`, "dim");
+        if (g.id === runtime.activeGateId) eventLine(`WORKORDER QUEUED: ${relay.id}`, "dim");
+        g.lastRefresh = Date.now();
+        renderAll();
+        return;
+      }
       const sysId = resolveFacility(systemText);
       if (!sysId) {
         consoleLine("USAGE: WORKORDER <SYSTEM>", "warn");
@@ -2717,7 +3228,10 @@
       const g = activeGate();
       consoleLine("RELAYS", "dim");
       for (const r of g.relays || []) {
-        consoleLine(`  ${r.id}  ${r.status}`, r.status === "ONLINE" ? "good" : (r.status === "FAULT" ? "bad" : "warn"));
+        const displayStatus = (r.offline && !r.hiddenOffline) ? "OFFLINE" : r.status;
+        const ackFlag = r.awaitingAck ? "  ACK DUE" : "";
+        const cls = displayStatus === "ONLINE" ? "good" : (displayStatus === "OFFLINE" || displayStatus === "FAULT" ? "bad" : "warn");
+        consoleLine(`  ${r.id}  ${displayStatus}${ackFlag}`, cls);
       }
     }
 
@@ -2730,8 +3244,32 @@
       }
       consoleLine(`PING SENT: ${relay.id}`, "dim");
       pushPacket(g, `PING ${relay.id}`);
+      if (relay.offline) {
+        if (relay.hiddenOffline) {
+          relay.status = "OFFLINE";
+          relay.hiddenOffline = false;
+          relay.lastChange = Date.now();
+        }
+        consoleLine(`PING TIMEOUT: ${relay.id}`, "warn");
+        if (g.id === runtime.activeGateId) eventLine(`RELAY ${relay.id}: NO RESPONSE`, "bad");
+        g.lastRefresh = Date.now();
+        renderAll();
+        return;
+      }
       const latency = randRange(120, relay.status === "ONLINE" ? 520 : 1200);
       setTimeout(() => {
+        if (relay.offline) {
+          if (relay.hiddenOffline) {
+            relay.status = "OFFLINE";
+            relay.hiddenOffline = false;
+            relay.lastChange = Date.now();
+          }
+          consoleLine(`PING TIMEOUT: ${relay.id}`, "warn");
+          if (g.id === runtime.activeGateId) eventLine(`RELAY ${relay.id}: NO RESPONSE`, "bad");
+          g.lastRefresh = Date.now();
+          renderAll();
+          return;
+        }
         if (relay.status === "FAULT" && Math.random() < 0.6) {
           consoleLine(`PING TIMEOUT: ${relay.id}`, "warn");
           if (g.id === runtime.activeGateId) eventLine(`RELAY ${relay.id}: TIMEOUT`, "warn");
@@ -2749,8 +3287,20 @@
         consoleLine(`RELAY NOT FOUND: ${id}`, "bad");
         return;
       }
+      const now = Date.now();
+      if (relay.awaitingAck && now > relay.ackDueAt) {
+        consoleLine(`ACK LATE: ${relay.id}`, "warn");
+        return;
+      }
+      if (relay.awaitingAck) {
+        relay.awaitingAck = false;
+        relay.ackDueAt = 0;
+        relay.lastAckAt = now;
+      }
       consoleLine(`ACK SENT: ${relay.id}`, "dim");
       pushPacket(g, `ACK ${relay.id}`);
+      g.lastRefresh = now;
+      renderAll();
     }
 
     function cmdPackets() {
@@ -2759,6 +3309,30 @@
       consoleLine(`PACKETS (${packets.length})`, "dim");
       for (const p of packets) {
         consoleLine(`  ${formatClock(p.ts)}  ${p.text}`, "dim");
+      }
+    }
+
+    function cmdOrder(resourceText) {
+      const resId = resolveResource(resourceText);
+      if (!resId) {
+        consoleLine("USAGE: ORDER FUEL | ORDER SUPPLY", "warn");
+        return;
+      }
+      const g = activeGate();
+      ensureResources(g);
+      const res = g.resources[resId];
+      if (res.order) {
+        consoleLine(`ORDER PENDING: ${resId}`, "warn");
+        return;
+      }
+      if (res.level > RESOURCE_ORDER_THRESHOLD) {
+        consoleLine(`ORDER REFUSED: ${resId} ABOVE 25%`, "dim");
+        return;
+      }
+      if (startResourceOrder(g, resId)) {
+        consoleLine(`ORDER PLACED: ${resId}`, "good");
+        g.lastRefresh = Date.now();
+        renderAll();
       }
     }
 
@@ -2789,6 +3363,7 @@
       consoleLine("  WORKORDER <SYSTEM>", "dim");
       consoleLine("  RELAYS | PING <RELAY-ID> | ACK <RELAY-ID>", "dim");
       consoleLine("  PACKETS", "dim");
+      consoleLine("  ORDER FUEL | ORDER SUPPLY", "dim");
       consoleLine("  GATE <NODE> | NEXT", "dim");
       consoleLine("  THEME GREEN|RED|BLUE|AMBER", "dim");
       consoleLine("  CLEAR (console)", "dim");
@@ -2806,6 +3381,12 @@
       consoleLine(`CONCOURSE: ${concourseBand(g.concourseLevel || 0).text}`, "dim");
       consoleLine(`DOCKS: ${g.dockSlots.map(s => `${s.id}:${s.state}`).join("  ")}`, "dim");
       consoleLine(`FACILITY: ${g.facility.map(f => `${f.id}:${f.status}`).join("  ")}`, "dim");
+      const resources = ensureResources(g);
+      for (const r of RESOURCE_TYPES) {
+        const res = resources[r.id];
+        const stage = res.order ? ` (${res.order.stage})` : "";
+        consoleLine(`RESOURCE: ${r.id} ${Math.round(res.level)}%${stage}`, res.level <= RESOURCE_ORDER_THRESHOLD ? "warn" : "dim");
+      }
       const alerts = computeAlerts(g);
       consoleLine(`ALERTS: ${alerts.length ? alerts.join(" / ") : "NONE"}`, alerts.length ? "warn" : "good");
     }
@@ -2934,6 +3515,7 @@
         return cmdAckRelay(id);
       }
       if (cmd === "PACKETS") return cmdPackets();
+      if (cmd === "ORDER") return cmdOrder(parts.slice(1).join(" "));
 
       if (cmd === "NEXT") return nextGate();
 
@@ -3009,7 +3591,7 @@
       btn.disabled = true;
       btn.classList.add("btn-busy");
 
-      const delaySec = randRange(10, 30);
+      const delaySec = randRange(5, 15);
       const endAt = Date.now() + delaySec * 1000;
 
       btn.textContent = `${label} (IN PROCESS ${delaySec}s)`;
