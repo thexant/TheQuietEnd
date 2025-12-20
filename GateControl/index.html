@@ -1475,18 +1475,18 @@
 
     // Sparse rates (per second tick)
     const RATES = {
-      maxIn: 3,
-      maxOut: 3,
+      maxIn: 2,
+      maxOut: 2,
       spawnInChance: 0.0055,   // ~1 every 2.7 min
       spawnOutChance: 0.0055,  // ~1 every 3.3 min
       reportChance: 0.018,    // sparse ambient chatter
       driftChance: 0.028,     // alignment drift
       wobbleChance: 0.012,    // corridor wobble
-      facilityFaultChance: 0.00025, // rare subsystem faults
+      facilityFaultChance: 0.00085, // rare subsystem faults
       facilityWorsenChance: 0.00015,
       relayPacketChance: 0.0045,
       relayShiftChance: 0.0012,
-      relayPingChance: 0.0032,
+      relayPingChance: 0.0002,
       relayDropChance: 0.00035,
       concourseFade: 0.03,
       fuelDrain: 0.025,
@@ -1496,7 +1496,7 @@
 
     // ETA ranges in seconds (slow but not ridiculous)
     const ETA = { min: 45, max: 900 }; // 0:45-15:00 minutes
-    const RELAY_ACK_WINDOW_MS = 12_000;
+    const RELAY_ACK_WINDOW_MS = 30_000;
 
     function dailySalt() {
       const d = new Date();
