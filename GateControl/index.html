@@ -166,6 +166,51 @@
     .severed-actions button { min-width: 200px; }
     body.severed #severed-overlay { display: flex; }
 
+    #confirm-reset-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, rgba(10, 6, 8, 0.92) 0%, rgba(0,0,0,0.98) 70%);
+      z-index: 180;
+    }
+    body.resetting #confirm-reset-overlay { display: flex; }
+    .confirm-card {
+      width: min(560px, 92vw);
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(6, 8, 10, 0.94);
+      box-shadow: 0 0 30px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(255,255,255,0.05);
+      padding: 22px 20px;
+      display: grid;
+      gap: 14px;
+      border-radius: 8px;
+    }
+    .confirm-title {
+      font-family: var(--font-title);
+      color: var(--signal);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: clamp(0.95rem, 2.2vmin, 1.15rem);
+    }
+    .confirm-body {
+      font-size: clamp(0.78rem, 1.8vmin, 0.95rem);
+      color: var(--ink);
+      letter-spacing: 0.04em;
+      line-height: 1.6;
+    }
+    .confirm-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .confirm-actions button {
+      min-width: 120px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
     /* Container - full screen */
     #game-container {
       position: relative;
@@ -363,6 +408,21 @@
       border-color: rgba(210,169,90,0.45);
       background: rgba(210,169,90,0.08);
       box-shadow: 0 0 12px rgba(210,169,90,0.2);
+    }
+    button.btn-danger {
+      color: #ffe6e6;
+      border-color: rgba(225,100,100,0.55);
+      background: rgba(225,100,100,0.18);
+      box-shadow: 0 0 16px rgba(225,100,100,0.25);
+    }
+    button.btn-danger:hover {
+      background: rgba(225,100,100,0.28);
+      box-shadow: 0 0 18px rgba(225,100,100,0.35);
+    }
+    button.btn-danger:active {
+      background: var(--alert);
+      color: #130606;
+      box-shadow: 0 0 20px rgba(225,100,100,0.6);
     }
 
     .stats {
@@ -920,6 +980,19 @@
     </div>
   </div>
 
+  <div id="confirm-reset-overlay" aria-hidden="true">
+    <div class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="confirm-reset-title">
+      <div id="confirm-reset-title" class="confirm-title">Confirm Gate Reset</div>
+      <div class="confirm-body">
+        Resetting will generate a new gate and clear all queues, statuses, and logs. Proceed?
+      </div>
+      <div class="confirm-actions">
+        <button id="btn-reset-cancel">Cancel</button>
+        <button id="btn-reset-confirm" class="btn-danger">Reset</button>
+      </div>
+    </div>
+  </div>
+
   <div id="game-container">
     <header>
       <div class="brand">
@@ -944,6 +1017,7 @@
             </select>
           </div>
           <button id="btn-help" aria-expanded="false" aria-controls="help-panel">HELP</button>
+          <button id="btn-hard-reset" class="btn-danger" aria-label="Reset gate simulation">RESET</button>
         </div>
 
         <div id="help-panel" class="help-panel" aria-hidden="true">
@@ -1726,8 +1800,12 @@
       gateDisplay: document.getElementById("gate-display"),
       themeSelect: document.getElementById("theme-select"),
       btnHelp: document.getElementById("btn-help"),
+      btnHardReset: document.getElementById("btn-hard-reset"),
       helpPanel: document.getElementById("help-panel"),
       helpDismiss: document.getElementById("btn-help-dismiss"),
+      resetOverlay: document.getElementById("confirm-reset-overlay"),
+      btnResetCancel: document.getElementById("btn-reset-cancel"),
+      btnResetConfirm: document.getElementById("btn-reset-confirm"),
 
       shiftTime: document.getElementById("shift-time"),
       alertCount: document.getElementById("alert-count"),
@@ -1992,6 +2070,10 @@
       return (g.workOrders || []).some(w => w.state !== "COMPLETE");
     }
 
+    function hasActiveRelayWorkOrders(g) {
+      return (g.relays || []).some(r => hasActiveWorkOrder(g, r.id));
+    }
+
     function relayIsDown(r) {
       return !!r.offline;
     }
@@ -2014,7 +2096,7 @@
     function gateSeverReason(g) {
       const fuelLevel = ensureResources(g).FUEL?.level ?? 100;
       if (fuelLevel <= 0) return "Gate Power Loss";
-      if (allRelaysDown(g)) return "Gate Relay Disconnected";
+      if (allRelaysDown(g) && !hasActiveRelayWorkOrders(g)) return "Gate Relay Disconnected";
       if (allCorridorsOffline(g)) return "Losing Connection to the Corridor Network";
       if (allFacilityOffline(g) && !hasActiveWorkOrders(g)) return "Gate System Failure";
       if (isGateSystemsFailed(g)) return "Gate Systems Failures";
@@ -3640,6 +3722,9 @@
     ui.btnReset.addEventListener("click", () => queueMaintenance("reset", ui.btnReset));
     ui.btnPurge.addEventListener("click", () => queueMaintenance("purge", ui.btnPurge));
     ui.btnScan.addEventListener("click", () => queueMaintenance("scan", ui.btnScan));
+    if (ui.btnHardReset) {
+      ui.btnHardReset.addEventListener("click", () => setResetConfirmOpen(true));
+    }
     if (ui.btnRestart) ui.btnRestart.addEventListener("click", restartGate);
 
     function setHelpOpen(open) {
@@ -3647,6 +3732,17 @@
       ui.helpPanel.classList.toggle("open", open);
       ui.helpPanel.setAttribute("aria-hidden", open ? "false" : "true");
       ui.btnHelp.setAttribute("aria-expanded", open ? "true" : "false");
+    }
+
+    function setResetConfirmOpen(open) {
+      if (!ui.resetOverlay) return;
+      document.body.classList.toggle("resetting", open);
+      ui.resetOverlay.setAttribute("aria-hidden", open ? "false" : "true");
+      if (open) {
+        ui.btnResetConfirm?.focus();
+      } else {
+        ui.btnHardReset?.focus();
+      }
     }
 
     if (ui.btnHelp && ui.helpPanel) {
@@ -3666,7 +3762,22 @@
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
       setHelpOpen(false);
+      setResetConfirmOpen(false);
     });
+    if (ui.resetOverlay) {
+      ui.resetOverlay.addEventListener("click", (e) => {
+        if (e.target === ui.resetOverlay) setResetConfirmOpen(false);
+      });
+    }
+    if (ui.btnResetCancel) {
+      ui.btnResetCancel.addEventListener("click", () => setResetConfirmOpen(false));
+    }
+    if (ui.btnResetConfirm) {
+      ui.btnResetConfirm.addEventListener("click", () => {
+        setResetConfirmOpen(false);
+        restartGate();
+      });
+    }
 
     ui.cmd.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
