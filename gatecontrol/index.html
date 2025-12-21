@@ -345,13 +345,28 @@
     }
     .help-body {
       display: grid;
-      gap: 10px;
+      gap: 12px;
       font-size: clamp(0.82rem, 1.8vmin, 0.96rem);
-      line-height: 1.55;
+      line-height: 1.6;
       overflow: auto;
       padding-right: 6px;
       font-family: var(--font-body);
       letter-spacing: 0.01em;
+    }
+    .help-section {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: rgba(0,0,0,0.22);
+      padding: 10px;
+      display: grid;
+      gap: 10px;
+    }
+    .help-section-title {
+      font-family: var(--font-title);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--signal);
+      font-size: clamp(0.62rem, 1.3vmin, 0.72rem);
     }
     .help-row {
       display: grid;
@@ -365,6 +380,16 @@
       text-transform: uppercase;
       color: var(--muted);
       font-size: clamp(0.62rem, 1.2vmin, 0.72rem);
+    }
+    .help-list {
+      margin: 0;
+      padding-left: 18px;
+      display: grid;
+      gap: 4px;
+    }
+    .help-list li { margin: 0; }
+    @media (max-width: 760px) {
+      .help-row { grid-template-columns: 1fr; }
     }
     .help-actions {
       display: flex;
@@ -1090,6 +1115,8 @@
           <button id="btn-share" aria-label="Share this session">SHARE</button>
           <button id="btn-export" aria-label="Export this session">EXPORT</button>
           <button id="btn-resume" aria-label="Resume from an exported save">RESUME</button>
+          <button id="btn-sfx" aria-label="Toggle sound effects" aria-pressed="true">SFX: ON</button>
+          <button id="btn-music" aria-label="Toggle background music" aria-pressed="true">MUSIC: ON</button>
           <button id="btn-help" aria-expanded="false" aria-controls="help-panel">HELP</button>
           <button id="btn-hard-reset" class="btn-danger" aria-label="Reset gate simulation">RESET</button>
         </div>
@@ -1101,85 +1128,126 @@
             <div class="help-sub">Local reference only</div>
           </div>
           <div class="help-body">
-            <div class="help-row">
-              <div class="help-key">What this is</div>
-              <div>This panel simulates a gate control terminal. You review inbound/outbound traffic, keep systems stable, and log actions in the console.</div>
-            </div>
-            <div class="help-row">
-              <div class="help-key">Display</div>
-              <div>Switches the display palette (Green/Red/Blue/Amber/Black). It does not affect the simulation.</div>
-            </div>
-            <div class="help-row">
-              <div class="help-key">Share / Export / Resume</div>
-              <div>SHARE copies a URL snapshot. EXPORT downloads a .tqegate save named after the active gate. RESUME loads a .tqegate file to restore a session.</div>
-            </div>
-            <div class="help-row">
-              <div class="help-key">Gate reset</div>
-              <div>RESET (top right) reboots the node, clears logs, starts a new shift, and assigns a fresh gate ID.</div>
-            </div>
-            <div class="help-row">
-              <div class="help-key">Top stats</div>
-              <div>Shift Time tracks how long the session has been running. Wage shows credits earned this shift. Alerts counts active issues on the display.</div>
-            </div>
-            <div class="help-row">
-              <div class="help-key">Traffic Queue</div>
-              <div>Inbound and outbound tables show ships waiting to pass. Each row has actions: Approve (allow), Hold (delay for review), Deny (reject). Some entries are priority or have transponder warnings.</div>
-            </div>
-            <div class="help-row">
-              <div class="help-key">Systems Panel</div>
-              <div>Shows gate health, beacon state, alignment, sync, corridors, and facility status. Degraded or offline systems can trigger alerts and slow traffic.</div>
-            </div>
-            <div class="help-row">
-              <div class="help-key">Sync State</div>
-              <div>Sync can slip to ASYNC or FAULT during drift, relay instability, or failed restores. RESET handshakes and healthy relays make it easier to return to SYNC.</div>
-            </div>
-            <div class="help-row">
-              <div class="help-key">Resources</div>
-              <div>Fuel drains over time. Supplies drain during work orders and decon. Order buttons appear when reserves drop to 25% and deliveries move through stages.</div>
-            </div>
-            <div class="help-row">
-              <div class="help-key">Maintenance</div>
-              <div>Realign improves alignment, Reset reestablishes handshake and can recover the beacon, Purge clears low-priority queue entries, Scan looks for anomalies and reveals hidden effects.</div>
-            </div>
-            <div class="help-row">
-              <div class="help-key">Event Log</div>
-              <div>Right-hand log shows automated activity and system changes. Use it to spot problems without opening each row.</div>
-            </div>
-            <div class="help-row">
-              <div class="help-key">Console</div>
-              <div>Type commands for deeper control. Start with HELP to list commands. STATUS shows node health, LINKS shows corridors, LIST INBOUND/OUTBOUND shows quick lists, THEME changes the display.</div>
-            </div>
-            <div class="help-row">
-              <div class="help-key">Quick keys</div>
-              <div>Enter submits a command. ArrowUp recalls the last command. Esc clears the input. Esc also dismisses this panel.</div>
-            </div>
-            <div class="help-row">
-              <div class="help-key">Ship detail</div>
-              <div>DETAIL &lt;ID&gt; reveals current state, ETA, dock slot, transponder, priority flag, effects, and notes. NOTE &lt;ID&gt; &lt;TEXT&gt; saves operator notes.</div>
-            </div>
-            <div class="help-row">
-              <div class="help-key">Decon</div>
-              <div>Use DECON START &lt;ID&gt; to begin decontamination. Ships in decon pause in place until the cycle completes.</div>
-            </div>
-            <div class="help-row">
-              <div class="help-key">Work orders</div>
-              <div>WORKORDER &lt;SYSTEM&gt; queues repairs on offline facility systems and consumes supplies until the work order resolves.</div>
-            </div>
+            <div class="help-section">
+              <div class="help-section-title">Quickstart</div>
               <div class="help-row">
-                <div class="help-key">Relays</div>
-                <div>RELAYS lists node relays. PING &lt;RELAY-ID&gt; checks status. ACK &lt;RELAY-ID&gt; clears pending acknowledgments before they expire. RESTORE &lt;RELAY-ID&gt; attempts to recover a FAULT or WEAK relay and can backfire.</div>
+                <div class="help-key">What this is</div>
+                <div>This panel simulates a gate control terminal. You review inbound/outbound traffic, keep systems stable, and log actions in the console.</div>
               </div>
-            <div class="help-row">
-              <div class="help-key">Orders</div>
-              <div>ORDER FUEL or ORDER SUPPLY queues resupply when levels drop. Use PACKETS to review recent transmission chatter.</div>
+              <div class="help-row">
+                <div class="help-key">Workflow</div>
+                <div>
+                  <ol class="help-list">
+                    <li>Check Alerts and Systems for instability.</li>
+                    <li>Review inbound/outbound queues for risky requests.</li>
+                    <li>Approve, Hold, or Deny ships as needed.</li>
+                    <li>Run maintenance when alignment or sync drifts.</li>
+                  </ol>
+                </div>
+              </div>
             </div>
-            <div class="help-row">
-              <div class="help-key">Logs</div>
-              <div>CLEAR wipes the console output. CLEAR EVENTS wipes the event log.</div>
+            <div class="help-section">
+              <div class="help-section-title">Navigation and UI</div>
+              <div class="help-row">
+                <div class="help-key">Display</div>
+                <div>Switches the palette (Green/Red/Blue/Amber/Black). It does not affect the simulation.</div>
+              </div>
+              <div class="help-row">
+                <div class="help-key">Share / Export / Resume</div>
+                <div>SHARE copies a URL snapshot. EXPORT downloads a .tqegate save named after the active gate. RESUME loads a .tqegate file to restore a session.</div>
+              </div>
+              <div class="help-row">
+                <div class="help-key">Audio toggles</div>
+                <div>SFX and MUSIC toggle sound effects and background audio for this terminal.</div>
+              </div>
+              <div class="help-row">
+                <div class="help-key">Hard reset</div>
+                <div>RESET (top right) reboots the node, clears logs, starts a new shift, and assigns a fresh gate ID.</div>
+              </div>
+              <div class="help-row">
+                <div class="help-key">Top stats</div>
+                <div>Shift Time tracks how long the session has been running. Wage shows credits earned this shift. Alerts counts active issues.</div>
+              </div>
+              <div class="help-row">
+                <div class="help-key">Quick keys</div>
+                <div>Enter submits a command. ArrowUp recalls the last command. Esc clears the input. Esc also dismisses this panel.</div>
+              </div>
             </div>
-            <div class="help-row">
-              <div class="help-key">Workflow</div>
-              <div>1) Check Alerts and Systems. 2) Review queues. 3) Approve/Hold/Deny. 4) Run maintenance if stability drops.</div>
+            <div class="help-section">
+              <div class="help-section-title">Traffic Control</div>
+              <div class="help-row">
+                <div class="help-key">Traffic queue</div>
+                <div>Inbound and outbound tables show ships waiting to pass. Each row has actions: Approve (allow), Hold (delay for review), Deny (reject).</div>
+              </div>
+              <div class="help-row">
+                <div class="help-key">Ship detail</div>
+                <div>DETAIL &lt;ID&gt; reveals state, ETA, dock slot, transponder, priority flag, effects, and notes. NOTE &lt;ID&gt; &lt;TEXT&gt; saves operator notes.</div>
+              </div>
+              <div class="help-row">
+                <div class="help-key">Decon</div>
+                <div>DECON START &lt;ID&gt; begins decontamination. Ships in decon pause in place until the cycle completes.</div>
+              </div>
+              <div class="help-row">
+                <div class="help-key">Manual actions</div>
+                <div>APPROVE &lt;ID&gt; / HOLD &lt;ID&gt; / DENY &lt;ID&gt; mirror the row buttons when you want to stay in the console.</div>
+              </div>
+            </div>
+            <div class="help-section">
+              <div class="help-section-title">Systems and Maintenance</div>
+              <div class="help-row">
+                <div class="help-key">Systems panel</div>
+                <div>Shows gate health, beacon state, alignment, sync, corridors, and facility status. Degraded or offline systems can trigger alerts and slow traffic.</div>
+              </div>
+              <div class="help-row">
+                <div class="help-key">Sync state</div>
+                <div>Sync can slip to ASYNC or FAULT during drift, relay instability, or failed restores. Maintenance Reset and healthy relays help return to SYNC.</div>
+              </div>
+              <div class="help-row">
+                <div class="help-key">Maintenance</div>
+                <div>Realign improves alignment, Reset reestablishes handshake and can recover the beacon, Purge clears low-priority queue entries, Scan looks for anomalies and reveals hidden effects.</div>
+              </div>
+              <div class="help-row">
+                <div class="help-key">Resources</div>
+                <div>Fuel drains over time. Supplies drain during work orders and decon. Use ORDER FUEL or ORDER SUPPLY when reserves drop near 25%.</div>
+              </div>
+            </div>
+            <div class="help-section">
+              <div class="help-section-title">Console Commands</div>
+              <div class="help-row">
+                <div class="help-key">Status views</div>
+                <div>STATUS shows node health. LINKS lists corridor links. LIST INBOUND/OUTBOUND prints quick ship lists. RELAYS shows repeater status and ACK timers.</div>
+              </div>
+              <div class="help-row">
+                <div class="help-key">Diagnostics</div>
+                <div>PING &lt;RELAY-ID&gt; checks a relay. ACK &lt;RELAY-ID&gt; clears pending acknowledgments before they expire. RESTORE &lt;RELAY-ID&gt; can recover a FAULT or WEAK relay but may backfire.</div>
+              </div>
+              <div class="help-row">
+                <div class="help-key">Work orders</div>
+                <div>WORKORDER &lt;SYSTEM&gt; queues repairs on offline facility systems and consumes supplies until the work order resolves.</div>
+              </div>
+              <div class="help-row">
+                <div class="help-key">Packets + orders</div>
+                <div>PACKETS shows recent transmission chatter. ORDER FUEL or ORDER SUPPLY queues resupply when levels drop.</div>
+              </div>
+              <div class="help-row">
+                <div class="help-key">Audio</div>
+                <div>SFX ON|OFF|TOGGLE and MUSIC ON|OFF|TOGGLE control sound effects and background music.</div>
+              </div>
+              <div class="help-row">
+                <div class="help-key">Theme + help</div>
+                <div>THEME GREEN|RED|BLUE|AMBER|BLACK swaps the display. HELP or ? lists all commands.</div>
+              </div>
+            </div>
+            <div class="help-section">
+              <div class="help-section-title">Logs and Cleanup</div>
+              <div class="help-row">
+                <div class="help-key">Event log</div>
+                <div>Right-hand log shows automated activity and system changes. Use it to spot problems without opening each row.</div>
+              </div>
+              <div class="help-row">
+                <div class="help-key">Clear logs</div>
+                <div>CLEAR wipes the console output. CLEAR EVENTS wipes the event log.</div>
+              </div>
             </div>
           </div>
           <div class="help-actions">
@@ -1501,7 +1569,9 @@
       theme: "tqe_gate_terminal_theme",
       gateList: "tqe_gate_terminal_gate_list",
       gateCurrent: "tqe_gate_terminal_gate_current",
-      gateStatePrefix: "tqe_gate_terminal_gate_state::"
+      gateStatePrefix: "tqe_gate_terminal_gate_state::",
+      sfxEnabled: "tqe_gate_terminal_sfx_enabled",
+      musicEnabled: "tqe_gate_terminal_music_enabled"
     };
 
 	function buildGateList(count = 1) {
@@ -2179,6 +2249,8 @@
       btnExport: document.getElementById("btn-export"),
       btnResume: document.getElementById("btn-resume"),
       resumeInput: document.getElementById("resume-file"),
+      btnSfx: document.getElementById("btn-sfx"),
+      btnMusic: document.getElementById("btn-music"),
       btnHelp: document.getElementById("btn-help"),
       btnHardReset: document.getElementById("btn-hard-reset"),
       helpPanel: document.getElementById("help-panel"),
@@ -2254,6 +2326,170 @@
       resumeShiftMs: null,
       skipHashLoad: false
     };
+
+    // ---------------------------
+    // Audio
+    // ---------------------------
+    function loadStoredBool(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (raw === "true") return true;
+        if (raw === "false") return false;
+      } catch (_) {}
+      return fallback;
+    }
+
+    function storeBool(key, value) {
+      try { localStorage.setItem(key, value ? "true" : "false"); } catch (_) {}
+    }
+
+    function makeAudioPool(src, count, volume = 0.8) {
+      const pool = Array.from({ length: count }, () => {
+        const audio = new Audio(src);
+        audio.preload = "auto";
+        audio.volume = volume;
+        return audio;
+      });
+      return { pool, index: 0 };
+    }
+
+    function playAudioPool(group) {
+      if (!group?.pool?.length) return;
+      const audio = group.pool[group.index];
+      group.index = (group.index + 1) % group.pool.length;
+      audio.currentTime = 0;
+      const promise = audio.play();
+      if (promise?.catch) promise.catch(() => {});
+    }
+
+    const audioState = {
+      sfxEnabled: loadStoredBool(LS.sfxEnabled, true),
+      musicEnabled: loadStoredBool(LS.musicEnabled, true),
+      unlocked: false,
+      pendingStartup: false,
+      ackAlarmOn: false
+    };
+
+    const audio = {
+      click: makeAudioPool("click.ogg", 5, 0.35),
+      beep: makeAudioPool("beep.ogg", 4, 0.55),
+      blip: makeAudioPool("blip.ogg", 4, 0.4),
+      startup: makeAudioPool("startup.ogg", 1, 0.65),
+      offline: makeAudioPool("offline.ogg", 2, 0.65),
+      error: makeAudioPool("error.ogg", 2, 0.6),
+      ackalarm: (() => {
+        const a = new Audio("ackalarm.ogg");
+        a.preload = "auto";
+        a.loop = true;
+        a.volume = 0.65;
+        return a;
+      })(),
+      music: (() => {
+        const a = new Audio("bgaudio.ogg");
+        a.preload = "auto";
+        a.loop = true;
+        a.volume = 0.32;
+        return a;
+      })()
+    };
+
+    function updateAudioButtons() {
+      if (ui.btnSfx) {
+        ui.btnSfx.textContent = `SFX: ${audioState.sfxEnabled ? "ON" : "OFF"}`;
+        ui.btnSfx.setAttribute("aria-pressed", audioState.sfxEnabled ? "true" : "false");
+      }
+      if (ui.btnMusic) {
+        ui.btnMusic.textContent = `MUSIC: ${audioState.musicEnabled ? "ON" : "OFF"}`;
+        ui.btnMusic.setAttribute("aria-pressed", audioState.musicEnabled ? "true" : "false");
+      }
+    }
+
+    function playSfx(name) {
+      if (!audioState.sfxEnabled || !audioState.unlocked) return;
+      const group = audio[name];
+      if (!group) return;
+      if (group.pool) {
+        playAudioPool(group);
+        return;
+      }
+      const promise = group.play?.();
+      if (promise?.catch) promise.catch(() => {});
+    }
+
+    function updateMusicState() {
+      if (!audioState.musicEnabled || !audioState.unlocked) {
+        audio.music.pause();
+        return;
+      }
+      const promise = audio.music.play();
+      if (promise?.catch) promise.catch(() => {});
+    }
+
+    function setAckAlarm(active) {
+      audioState.ackAlarmOn = active;
+      if (!audioState.sfxEnabled || !audioState.unlocked) {
+        audio.ackalarm.pause();
+        audio.ackalarm.currentTime = 0;
+        return;
+      }
+      if (active) {
+        const promise = audio.ackalarm.play();
+        if (promise?.catch) promise.catch(() => {});
+      } else {
+        audio.ackalarm.pause();
+        audio.ackalarm.currentTime = 0;
+      }
+    }
+
+    function updateAckAlarm() {
+      const g = activeGate();
+      const hasAck = (g.relays || []).some(r => r.awaitingAck && !r.offline);
+      setAckAlarm(hasAck);
+    }
+
+    function setSfxEnabled(enabled) {
+      audioState.sfxEnabled = !!enabled;
+      storeBool(LS.sfxEnabled, audioState.sfxEnabled);
+      if (!audioState.sfxEnabled) {
+        setAckAlarm(false);
+      } else {
+        updateAckAlarm();
+      }
+      updateAudioButtons();
+    }
+
+    function setMusicEnabled(enabled) {
+      audioState.musicEnabled = !!enabled;
+      storeBool(LS.musicEnabled, audioState.musicEnabled);
+      updateAudioButtons();
+      updateMusicState();
+    }
+
+    function requestStartupSound() {
+      if (audioState.unlocked && audioState.sfxEnabled) {
+        playSfx("startup");
+      } else {
+        audioState.pendingStartup = true;
+      }
+    }
+
+    function unlockAudio() {
+      if (audioState.unlocked) return;
+      audioState.unlocked = true;
+      updateMusicState();
+      if (audioState.pendingStartup) {
+        audioState.pendingStartup = false;
+        playSfx("startup");
+      }
+      if (audioState.ackAlarmOn) {
+        setAckAlarm(true);
+      }
+    }
+
+    function isUiInteractionTarget(target) {
+      if (!(target instanceof Element)) return false;
+      return !!target.closest("#game-container, #severed-overlay, #confirm-reset-overlay, #help-panel");
+    }
 
     function getGate(gateId) {
       if (runtime.gates.has(gateId)) return runtime.gates.get(gateId);
@@ -2465,6 +2701,7 @@
       randomizeTheme();
       eventLine("EVENT LOG: ACTIVE", "dim");
       consoleLine(`NODE RESET: ${newId}`, "warn");
+      requestStartupSound();
     }
 
     function pillForHealth(health) {
@@ -2929,6 +3166,7 @@
           const resId = btn.getAttribute("data-resource");
           if (!startResourceOrder(g, resId)) {
             consoleLine(`ORDER REFUSED: ${resId}`, "warn");
+            playSfx("error");
             return;
           }
           consoleLine(`ORDER PLACED: ${resId}`, "good");
@@ -3139,6 +3377,7 @@
         order.stage = "INBOUND";
         order.shipmentId = shipment.id;
         order.stageEndsAt = 0;
+        if (g.id === runtime.activeGateId) playSfx("beep");
         if (g.id === runtime.activeGateId) {
           eventLine(`ORDER INBOUND: ${r.id} // ${shipment.id}`, "warn");
         }
@@ -3224,19 +3463,23 @@
       const facility = getFacility(g, "DECON");
       if (!facility || facility.status !== "ONLINE") {
         consoleLine("DECON START REFUSED: DECON BAY OFFLINE", "warn");
+        playSfx("error");
         return false;
       }
       if (shipHasEffect(s, "VACUUM BLOOM")) {
         consoleLine(`DECON REFUSED: ${s.id} VACUUM BLOOM`, "warn");
+        playSfx("error");
         return false;
       }
       if (s.state !== "WAITING DECON") {
         consoleLine(`DECON START REFUSED: ${s.id} NOT READY`, "warn");
+        playSfx("error");
         return false;
       }
       const slot = (g.dockSlots || []).find(x => x.id === s.slotId);
       if (!slot) {
         consoleLine(`DECON START FAILED: SLOT NOT FOUND`, "warn");
+        playSfx("error");
         return false;
       }
       const duration = randRange(3 * 60, 6 * 60);
@@ -3371,6 +3614,7 @@
 
       if (["WAITING TO DOCK","WAITING DECON","DECON","SERVICING","CLEARING","COMPLETE"].includes(s.state)) {
         consoleLine(`ACTION REFUSED: ${s.id} DOCKED`, "warn");
+        playSfx("error");
         return;
       }
 
@@ -3433,6 +3677,7 @@
       const rng = mulberry32(strHash(`${g.id}::${Date.now()}::${dir}`));
       const s = makeShip(rng, dir);
       list.unshift(s);
+      if (g.id === runtime.activeGateId) playSfx("beep");
 
       const msg = dir === "IN"
         ? `INBOUND REQUEST: ${s.id} // ${shipDisplayRequest(s)} // ETA ${formatMMSS(s.eta)}`
@@ -3464,6 +3709,7 @@
       if (g.beacon !== "OFFLINE") {
         g.beacon = "OFFLINE";
         if (g.id === runtime.activeGateId) {
+          playSfx("offline");
           eventLine("BEACON ARRAY: OFFLINE (AMPLIFIER OFFLINE)", "bad");
         }
       }
@@ -3546,6 +3792,7 @@
         g.corridors[idx].lastChange = Date.now();
 
         if (g.id === runtime.activeGateId) {
+          if (next === "OFFLINE") playSfx("offline");
           eventLine(`LINK ${g.corridors[idx].link}: ${next}`, next === "OFFLINE" ? "bad" : (next === "STABLE" ? "good" : "warn"));
         }
       }
@@ -3560,11 +3807,17 @@
         if (f.status === "ONLINE" && now > (f.stableUntil || 0) && Math.random() < RATES.facilityFaultChance) {
           f.status = Math.random() < 0.75 ? "DEGRADED" : "OFFLINE";
           f.lastChange = now;
-          if (g.id === runtime.activeGateId) eventLine(`FACILITY: ${f.name} ${f.status}`, f.status === "OFFLINE" ? "bad" : "warn");
+          if (g.id === runtime.activeGateId) {
+            if (f.status === "OFFLINE") playSfx("offline");
+            eventLine(`FACILITY: ${f.name} ${f.status}`, f.status === "OFFLINE" ? "bad" : "warn");
+          }
         } else if (f.status === "DEGRADED" && Math.random() < RATES.facilityWorsenChance) {
           f.status = "OFFLINE";
           f.lastChange = now;
-          if (g.id === runtime.activeGateId) eventLine(`FACILITY: ${f.name} OFFLINE`, "bad");
+          if (g.id === runtime.activeGateId) {
+            playSfx("offline");
+            eventLine(`FACILITY: ${f.name} OFFLINE`, "bad");
+          }
         }
       }
     }
@@ -3639,6 +3892,7 @@
       if (shipHasDangerEffect(s)) {
         s.hazardDeadline = Date.now() + randRange(4 * 60, 7 * 60) * 1000;
       }
+      if (g.id === runtime.activeGateId) playSfx("beep");
       return true;
     }
 
@@ -3745,7 +3999,10 @@
           r.offlineSince = now;
           r.status = "OFFLINE";
           r.lastChange = now;
-          if (g.id === runtime.activeGateId) eventLine(`RELAY ${r.id}: OFFLINE (ACK TIMEOUT)`, "bad");
+          if (g.id === runtime.activeGateId) {
+            playSfx("offline");
+            eventLine(`RELAY ${r.id}: OFFLINE (ACK TIMEOUT)`, "bad");
+          }
           continue;
         }
 
@@ -3788,12 +4045,14 @@
           r.lastPacketAt = now;
         }
       }
+      if (g.id === runtime.activeGateId) updateAckAlarm();
     }
 
     function pushPacket(g, text) {
       g.packets ||= [];
       g.packets.push({ ts: Date.now(), text });
       g.packets = g.packets.slice(-8);
+      if (g.id === runtime.activeGateId) playSfx("blip");
     }
 
     function resolveTraffic(g) {
@@ -3942,6 +4201,7 @@
       c.status = next;
       c.cls = CORRIDOR_STATES.find(x => x.key === next)?.cls || "warn";
       c.lastChange = Date.now();
+      if (next === "OFFLINE" && g.id === runtime.activeGateId) playSfx("offline");
       return c;
     }
 
@@ -4038,6 +4298,7 @@
         const now = Date.now();
         if (now - g.lastScanAt < 12_000) {
           consoleLine("SCAN: COOLDOWN", "warn");
+          playSfx("error");
           return;
         }
         g.lastScanAt = now;
@@ -4088,14 +4349,17 @@
         const relay = findRelay(g, relayId);
         if (!relay) {
           consoleLine(`RELAY NOT FOUND: ${relayId}`, "bad");
+          playSfx("error");
           return;
         }
         if (!relayIsDown(relay)) {
           consoleLine(`WORKORDER REFUSED: ${relay.id} ONLINE`, "dim");
+          playSfx("error");
           return;
         }
         if (hasActiveWorkOrder(g, relay.id)) {
           consoleLine(`WORKORDER EXISTS: ${relay.id}`, "warn");
+          playSfx("error");
           return;
         }
         const phase = WORKORDER_PHASES[0];
@@ -4119,19 +4383,23 @@
       const sysId = resolveFacility(systemText);
       if (!sysId) {
         consoleLine("USAGE: WORKORDER <SYSTEM>", "warn");
+        playSfx("error");
         return;
       }
       const sys = getFacility(g, sysId);
       if (!sys) {
         consoleLine(`UNKNOWN SYSTEM: ${systemText}`, "bad");
+        playSfx("error");
         return;
       }
       if (sys.status === "ONLINE") {
         consoleLine(`WORKORDER REFUSED: ${sys.name} ONLINE`, "dim");
+        playSfx("error");
         return;
       }
       if (hasActiveWorkOrder(g, sysId)) {
         consoleLine(`WORKORDER EXISTS: ${sys.name}`, "warn");
+        playSfx("error");
         return;
       }
       const phase = WORKORDER_PHASES[0];
@@ -4164,14 +4432,17 @@
       const relay = findRelay(g, id);
       if (!relay) {
         consoleLine(`RELAY NOT FOUND: ${id}`, "bad");
+        playSfx("error");
         return;
       }
       if (relay.offline) {
         consoleLine(`RESTORE REFUSED: ${relay.id} OFFLINE`, "warn");
+        playSfx("error");
         return;
       }
       if (!["FAULT", "WEAK"].includes(relay.status)) {
         consoleLine(`RESTORE REFUSED: ${relay.id} NOT FAULT/WEAK`, "dim");
+        playSfx("error");
         return;
       }
 
@@ -4208,6 +4479,7 @@
           relay.ackDueAt = 0;
           relay.status = "OFFLINE";
           relay.lastChange = now;
+          if (g.id === runtime.activeGateId) playSfx("offline");
           consoleLine(`RESTORE FAILED: ${relay.id} OFFLINE`, "bad");
           if (g.id === runtime.activeGateId) eventLine(`RELAY ${relay.id}: OFFLINE (RESTORE SPIKE)`, "bad");
         } else if (backlash < 0.88) {
@@ -4217,14 +4489,15 @@
             g.beacon = "OFFLINE";
           }
           const beaconCls = g.beacon === "OFFLINE" ? "bad" : "warn";
+          if (g.beacon === "OFFLINE" && g.id === runtime.activeGateId) playSfx("offline");
           consoleLine(`RESTORE FAILED: BEACON ${g.beacon}`, beaconCls);
           if (g.id === runtime.activeGateId) {
             eventLine(`BEACON ARRAY: ${g.beacon} (RELAY RESTORE)`, beaconCls);
           }
           relay.lastChange = now;
-        } else {
-          const other = (g.relays || []).find(r => r.id !== relay.id && !r.offline);
-          if (other) {
+      } else {
+        const other = (g.relays || []).find(r => r.id !== relay.id && !r.offline);
+        if (other) {
             other.status = "FAULT";
             other.lastChange = now;
             consoleLine(`RESTORE FAILED: ${other.id} FAULT`, "warn");
@@ -4237,6 +4510,7 @@
           relay.lastChange = now;
         }
       }
+      if (g.id === runtime.activeGateId) updateAckAlarm();
       g.lastRefresh = now;
       renderAll();
     }
@@ -4270,11 +4544,13 @@
       const relay = findRelay(g, id);
       if (!relay) {
         consoleLine(`RELAY NOT FOUND: ${id}`, "bad");
+        playSfx("error");
         return;
       }
       const now = Date.now();
       const hbAgeSec = relayHeartbeatAgeSec(relay, now);
       const hbBand = relayHeartbeatBand(hbAgeSec);
+      if (relay.offline && !relay.hiddenOffline) playSfx("error");
       consoleLine(`PING SENT: ${relay.id}`, "dim");
       pushPacket(g, `PING ${relay.id}`);
       pulseRelayPanel(g, relay);
@@ -4303,11 +4579,13 @@
           relay.hiccupRecoverable = false;
           relay.status = "OFFLINE";
           relay.lastChange = now;
+          if (g.id === runtime.activeGateId) playSfx("offline");
         } else if (relay.hiddenOffline) {
           relay.hiddenOffline = false;
           relay.hiccupRecoverable = false;
           relay.status = "OFFLINE";
           relay.lastChange = now;
+          if (g.id === runtime.activeGateId) playSfx("offline");
         }
         consoleLine(`PING TIMEOUT: ${relay.id}`, "warn");
         if (g.id === runtime.activeGateId) eventLine(`RELAY ${relay.id}: NO RESPONSE`, "bad");
@@ -4323,6 +4601,7 @@
             relay.hiddenOffline = false;
             relay.hiccupRecoverable = false;
             relay.lastChange = Date.now();
+            if (g.id === runtime.activeGateId) playSfx("offline");
           }
           consoleLine(`PING TIMEOUT: ${relay.id}`, "warn");
           if (g.id === runtime.activeGateId) eventLine(`RELAY ${relay.id}: NO RESPONSE`, "bad");
@@ -4345,11 +4624,13 @@
       const relay = findRelay(g, id);
       if (!relay) {
         consoleLine(`RELAY NOT FOUND: ${id}`, "bad");
+        playSfx("error");
         return;
       }
       const now = Date.now();
       if (relay.awaitingAck && now > relay.ackDueAt) {
         consoleLine(`ACK LATE: ${relay.id}`, "warn");
+        playSfx("error");
         return;
       }
       if (relay.awaitingAck) {
@@ -4360,6 +4641,7 @@
       }
       consoleLine(`ACK SENT: ${relay.id}`, "dim");
       pushPacket(g, `ACK ${relay.id}`);
+      if (g.id === runtime.activeGateId) updateAckAlarm();
       g.lastRefresh = now;
       renderAll();
     }
@@ -4377,6 +4659,7 @@
       const resId = resolveResource(resourceText);
       if (!resId) {
         consoleLine("USAGE: ORDER FUEL | ORDER SUPPLY", "warn");
+        playSfx("error");
         return;
       }
       const g = activeGate();
@@ -4384,10 +4667,12 @@
       const res = g.resources[resId];
       if (res.order) {
         consoleLine(`ORDER PENDING: ${resId}`, "warn");
+        playSfx("error");
         return;
       }
       if (res.level > RESOURCE_ORDER_THRESHOLD) {
         consoleLine(`ORDER REFUSED: ${resId} ABOVE 25%`, "dim");
+        playSfx("error");
         return;
       }
       if (startResourceOrder(g, resId)) {
@@ -4429,6 +4714,8 @@
       consoleLine("  RELAYS | PING <RELAY-ID> | ACK <RELAY-ID> | RESTORE <RELAY-ID>", "dim");
       consoleLine("  PACKETS", "dim");
       consoleLine("  ORDER FUEL | ORDER SUPPLY", "dim");
+      consoleLine("  SFX ON|OFF|TOGGLE", "dim");
+      consoleLine("  MUSIC ON|OFF|TOGGLE", "dim");
       consoleLine("  THEME GREEN|RED|BLUE|AMBER|BLACK", "dim");
       consoleLine("  CLEAR (console)", "dim");
       consoleLine("  CLEAR EVENTS", "dim");
@@ -4591,6 +4878,40 @@
       if (cmd === "PACKETS") return cmdPackets();
       if (cmd === "ORDER") return cmdOrder(parts.slice(1).join(" "));
 
+      if (cmd === "SFX") {
+        const arg = (parts[1] || "").toUpperCase();
+        if (!arg || arg === "STATUS") {
+          consoleLine(`SFX ${audioState.sfxEnabled ? "ON" : "OFF"}`, "dim");
+          return;
+        }
+        if (!["ON", "OFF", "TOGGLE"].includes(arg)) {
+          consoleLine("USAGE: SFX ON|OFF|TOGGLE", "warn");
+          playSfx("error");
+          return;
+        }
+        const next = arg === "ON" ? true : (arg === "OFF" ? false : !audioState.sfxEnabled);
+        setSfxEnabled(next);
+        consoleLine(`SFX ${next ? "ON" : "OFF"}`, "dim");
+        return;
+      }
+
+      if (cmd === "MUSIC") {
+        const arg = (parts[1] || "").toUpperCase();
+        if (!arg || arg === "STATUS") {
+          consoleLine(`MUSIC ${audioState.musicEnabled ? "ON" : "OFF"}`, "dim");
+          return;
+        }
+        if (!["ON", "OFF", "TOGGLE"].includes(arg)) {
+          consoleLine("USAGE: MUSIC ON|OFF|TOGGLE", "warn");
+          playSfx("error");
+          return;
+        }
+        const next = arg === "ON" ? true : (arg === "OFF" ? false : !audioState.musicEnabled);
+        setMusicEnabled(next);
+        consoleLine(`MUSIC ${next ? "ON" : "OFF"}`, "dim");
+        return;
+      }
+
       if (cmd === "THEME") {
         const t = (parts[1] || "").toLowerCase();
         if (!["green","red","blue","amber","black"].includes(t)) {
@@ -4613,11 +4934,33 @@
       }
 
       consoleLine("UNKNOWN COMMAND. TYPE HELP.", "warn");
+      playSfx("error");
     }
 
     // ---------------------------
     // Wire up UI
     // ---------------------------
+    updateAudioButtons();
+
+    if (ui.btnSfx) {
+      ui.btnSfx.addEventListener("click", () => setSfxEnabled(!audioState.sfxEnabled));
+    }
+    if (ui.btnMusic) {
+      ui.btnMusic.addEventListener("click", () => setMusicEnabled(!audioState.musicEnabled));
+    }
+
+    document.addEventListener("click", (e) => {
+      if (!isUiInteractionTarget(e.target)) return;
+      unlockAudio();
+      playSfx("click");
+    }, true);
+
+    document.addEventListener("change", (e) => {
+      if (!isUiInteractionTarget(e.target)) return;
+      unlockAudio();
+      playSfx("click");
+    }, true);
+
     ui.themeSelect.addEventListener("change", () => setTheme(ui.themeSelect.value));
     if (ui.btnShare) {
       ui.btnShare.addEventListener("click", async () => {
@@ -4657,7 +5000,10 @@
 
     function queueMaintenance(kind, btn) {
       if (!btn) return;
-      if (btn.dataset.busy === "true") return;
+      if (btn.dataset.busy === "true") {
+        playSfx("error");
+        return;
+      }
       const label = btn.dataset.label || btn.textContent.trim();
       btn.dataset.label = label;
       btn.dataset.busy = "true";
@@ -4749,6 +5095,8 @@
 
     ui.cmd.addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
+        unlockAudio();
+        playSfx("click");
         const v = ui.cmd.value;
         ui.cmd.value = "";
         runtime.cmdHistory.push(v);
@@ -4770,9 +5118,8 @@
       await loadSaveFromHash();
       loadTheme();
       runtime.catalog = loadGateCatalog();
-      runtime.shiftStart = (typeof runtime.resumeShiftMs === "number")
-        ? Date.now() - runtime.resumeShiftMs
-        : Date.now();
+      const resumeBoot = typeof runtime.resumeShiftMs === "number";
+      runtime.shiftStart = resumeBoot ? Date.now() - runtime.resumeShiftMs : Date.now();
       runtime.resumeShiftMs = null;
       const lastGate = localStorage.getItem(LS.gateCurrent);
       const initialGate = (lastGate && runtime.catalog.includes(lastGate)) ? lastGate : runtime.catalog[0];
@@ -4785,6 +5132,8 @@
 
       setGateById(initialGate, true);
       eventLine("EVENT LOG: ACTIVE", "dim");
+      if (!resumeBoot) requestStartupSound();
+      updateMusicState();
       if (runtime.severed && runtime.lastSevered) {
         updateSeveredOverlay(runtime.lastSevered);
         document.body.classList.add("severed");
