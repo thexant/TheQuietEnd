@@ -1925,8 +1925,8 @@
 
     // Sparse rates (per second tick)
     const RATES = {
-      maxIn: 2,
-      maxOut: 2,
+      maxIn: 3,
+      maxOut: 3,
       spawnInChance: 0.0058,   // ~1 every 2.7 min
       spawnOutChance: 0.0051,  // ~1 every 3.3 min
       reportChance: 0.018,    // sparse ambient chatter
@@ -2009,7 +2009,7 @@
 
     function makeShip(rng, dir) {
       let type = dir === "IN" ? pick(rng, TYPES_IN) : pick(rng, TYPES_OUT);
-      const priority = rng() < 0.2; // rarer
+      const priority = rng() < 0.25; // rarer
       let transponder = rng() < 0.90 ? "VALID" : (rng() < 0.60 ? "MISMATCH" : "UNKNOWN");
       const obscured = rng() < 0.10;
       if (obscured) {
