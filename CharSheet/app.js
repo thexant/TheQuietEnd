@@ -1,5 +1,7 @@
 const CHARACTER_STORAGE_KEY = "tqe-character-sheet";
 const SHIP_STORAGE_KEY = "tqe-ship-sheet";
+const CHARACTER_FILE_EXTENSION = ".tqechar";
+const SHIP_FILE_EXTENSION = ".tqeship";
 
 const form = document.getElementById("sheet-form");
 const characterFields = Array.from(
@@ -1102,14 +1104,16 @@ const resetSheet = (sheetType = activeSheet) => {
 const exportSheet = (sheetType = activeSheet) => {
   const targetSheet = sheetType === "ship" ? "ship" : "character";
   const data = targetSheet === "ship" ? serializeShip() : serialize();
+  const fileExtension =
+    targetSheet === "ship" ? SHIP_FILE_EXTENSION : CHARACTER_FILE_EXTENSION;
   const filename =
     targetSheet === "ship"
-      ? "tqe-ship.json"
+      ? `tqe-ship${fileExtension}`
       : `tqe-${(data["identity.name"] || "character")
           .toString()
           .trim()
           .replace(/[^a-z0-9-_]+/gi, "-")
-          .toLowerCase()}.json`;
+          .toLowerCase()}${fileExtension}`;
   const blob = new Blob([JSON.stringify(data, null, 2)], {
     type: "application/json",
   });
@@ -1124,7 +1128,14 @@ const exportSheet = (sheetType = activeSheet) => {
 };
 
 const importSheet = (file, sheetType = activeSheet) => {
-  const targetSheet = sheetType === "ship" ? "ship" : "character";
+  const filename = file?.name?.toLowerCase() || "";
+  const targetSheet = filename.endsWith(CHARACTER_FILE_EXTENSION)
+    ? "character"
+    : filename.endsWith(SHIP_FILE_EXTENSION)
+      ? "ship"
+      : sheetType === "ship"
+        ? "ship"
+        : "character";
   const reader = new FileReader();
   reader.onload = () => {
     try {
