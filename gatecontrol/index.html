@@ -883,8 +883,6 @@
       white-space: nowrap;
       text-align: right;
     }
-	.status-meta.bad { color: var(--alert); }
-	.status-meta .bad { color: var(--alert); }
     .relay-row .status-name {
       display: flex;
       align-items: center;
@@ -3320,16 +3318,10 @@
       const remaining = Math.max(0, Math.ceil((s.deconEndsAt - Date.now()) / 1000));
       return formatMMSS(remaining);
     }
-	function deconBreachCountdown(s) {
-	  // Countdown until failure ONLY while awaiting DECON
-	  if (!s || s.state !== "WAITING DECON" || !s.hazardDeadline) return "";
-	  const remaining = Math.max(0, Math.ceil((s.hazardDeadline - Date.now()) / 1000));
-	  return formatMMSS(remaining);
-	}
+
     function shipRow(s) {
       const g = activeGate();
       const [pText, pCls] = shipStatusPill(s);
-	  const breachTime = hazardCountdown(s);
       const deconTime = deconCountdown(s);
       const eta = (["DENIED","ARRIVED","DEPARTED","WAITING TO DOCK","WAITING DECON","DECON","SERVICING","CLEARING","COMPLETE"].includes(s.state)) ? "—" : formatMMSS(s.eta);
       const prio = shipDisplayPriority(s) ? " ★" : "";
@@ -3346,7 +3338,6 @@
             <td data-label="Status">
               <span class="pill ${pCls}">${escapeText(pText)}</span>
               ${deconTime ? `<div class="status-meta">T-${escapeText(deconTime)}</div>` : ""}
-			  ${breachTime ? `<div class="status-meta bad">EXPOSURE IN T-${escapeText(breachTime)}</div>` : ""}
             </td>
             <td data-label="Action" class="action-cell" style="text-align:right;">
               <div class="row-actions">
@@ -3497,42 +3488,23 @@
       ui.concoursePill.textContent = concourse.text;
       ui.concourseStatus.textContent = `${concourse.text} (${Math.round(g.concourseLevel || 0)})`;
 
-			const deconOnline = getFacility(g, "DECON")?.status === "ONLINE";
-			ui.dockList.innerHTML = (g.dockSlots || []).map(slot => {
-				const ship = slot.shipId ? findShipById(g, slot.shipId) : null;
-
-				const shipName = ship ? ship.id : "--";
-				const dockState = ship?.dockState || slot.state;
-				const deconTime = deconCountdown(ship);
+      ui.dockList.innerHTML = (g.dockSlots || []).map(slot => {
+        const ship = slot.shipId ? findShipById(g, slot.shipId) : null;
+        const shipName = ship ? ship.id : "--";
+        const dockState = ship?.dockState || slot.state;
+        const deconTime = deconCountdown(ship);
         const dockMeta = `${shipName} / ${dockState}${deconTime ? ` / T-${deconTime}` : ""}`;
-				// BREACH countdown should ONLY show while awaiting DECON
-				const breachT = deconBreachCountdown(ship);
-
-				const metaParts = [shipName, dockState];
-				if (ship && ship.state === "WAITING DECON" && breachT) {
-					metaParts.push(`EXPOSURE IN T-${breachT}`);
-				}
-
-				const canDecon = !!(
-					ship &&
-					ship.state === "WAITING DECON" &&
-					deconOnline &&
-					!shipHasEffect(ship, "VACUUM BLOOM")
-				);
-
-				return `
-					<div class="status-row">
-						<div class="status-name">
-							${escapeText(slot.id)}
-							<span class="status-meta">${escapeText(dockMeta)}</span>
-						</div>
-						<div class="status-right">
-							${ship ? `<button class="btn-mini" data-action="detail" data-id="${escapeText(ship.id)}">DTL</button>` : ""}
-							${canDecon ? `<button class="btn-mini approve" data-action="decon" data-id="${escapeText(ship.id)}">DECON</button>` : ""}
-						</div>
-					</div>
-				`;
-			}).join("");
+          const canDecon = ship && ship.state === "WAITING DECON" && getFacility(g, "DECON")?.status === "ONLINE" && !shipHasEffect(ship, "VACUUM BLOOM");
+        return `
+          <div class="status-row">
+            <div class="status-name">${escapeText(slot.id)} <span class="status-meta">${escapeText(dockMeta)}</span></div>
+            <div class="status-right">
+              ${ship ? `<button class="btn-mini" data-action="detail" data-id="${escapeText(ship.id)}">DTL</button>` : ""}
+              ${canDecon ? `<button class="btn-mini approve" data-action="decon" data-id="${escapeText(ship.id)}">DECON</button>` : ""}
+            </div>
+          </div>
+        `;
+      }).join("");
 
         ui.relayList.innerHTML = (g.relays || []).map(r => {
           const displayStatus = (r.offline && !r.hiddenOffline) ? "OFFLINE" : r.status;
@@ -4423,7 +4395,7 @@
       }
       if (s.shipmentType) applyShipmentDelivery(g, s);
       if (shipHasDangerEffect(s)) {
-        s.hazardDeadline = Date.now() + randRange(1 * 60, 3 * 60) * 1000;
+        s.hazardDeadline = Date.now() + randRange(4 * 60, 7 * 60) * 1000;
       }
       if (g.id === runtime.activeGateId) playSfx("beep");
       return true;
