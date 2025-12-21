@@ -1,0 +1,671 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <title>Juniper Shipping Co. // Gate-to-Gate Logistics</title>
+  <style>
+    :root{
+      --bg:#f4f1ec;
+      --panel:#ffffff;
+      --panel2:#f7f3ed;
+      --edge:#d6cfc4;
+      --txt:#1f2b2f;
+      --muted:#526066;
+      --faint:#7a877f;
+
+      --accent:#2f7f6b;
+      --accent2:#c77f2a;
+      --accent3:#2c5f79;
+
+      --sans:"Trebuchet MS","Tahoma","Verdana",sans-serif;
+      --serif:"Georgia","Times New Roman",serif;
+      --mono:"Courier New",Courier,monospace;
+
+      --radius: 18px;
+      --shadow: 0 18px 40px rgba(23,32,36,.12);
+    }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family:var(--sans);
+      color:var(--txt);
+      background:
+        radial-gradient(1200px 700px at 10% -10%, rgba(47,127,107,.12), rgba(0,0,0,0)),
+        radial-gradient(900px 500px at 95% 0%, rgba(199,127,42,.12), rgba(0,0,0,0)),
+        linear-gradient(135deg, rgba(31,43,47,.04), rgba(31,43,47,0)),
+        var(--bg);
+    }
+    a{ color:inherit; }
+    .wrap{
+      width:min(1120px, 100%);
+      margin:0 auto;
+      padding:22px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      min-height:100%;
+    }
+
+    /* Header */
+    header{
+      border:1px solid var(--edge);
+      border-radius:var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(247,243,237,.92));
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:14px 14px 10px 14px;
+    }
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      min-width:0;
+    }
+    .mark{
+      width:36px; height:36px;
+      border-radius:12px;
+      border:1px solid rgba(47,127,107,.28);
+      background:
+        radial-gradient(circle at 30% 30%, rgba(47,127,107,.25), rgba(0,0,0,0)),
+        linear-gradient(180deg, rgba(255,255,255,.9), rgba(247,243,237,.9));
+      position:relative;
+      flex:0 0 auto;
+    }
+    .mark:before{
+      content:"";
+      position:absolute; inset:7px 8px;
+      border:1px solid rgba(47,127,107,.28);
+      border-radius:8px;
+      box-shadow: inset 0 0 14px rgba(47,127,107,.08);
+    }
+    .brand h1{
+      margin:0;
+      font-family:var(--serif);
+      font-size:18px;
+      letter-spacing:.02em;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .brand .sub{
+      margin:2px 0 0 0;
+      font-size:12px;
+      color:var(--muted);
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 10px;
+      border-radius:999px;
+      border:1px solid rgba(82,96,102,.18);
+      background: rgba(255,255,255,.8);
+      color:var(--muted);
+      font-size:11px;
+      white-space:nowrap;
+    }
+    .dot{
+      width:8px; height:8px; border-radius:50%;
+      background:var(--accent);
+      box-shadow:0 0 12px rgba(47,127,107,.2);
+    }
+
+    nav{
+      display:flex;
+      gap:8px;
+      padding:0 12px 12px 12px;
+      flex-wrap:wrap;
+    }
+    nav a{
+      text-decoration:none;
+      color:var(--muted);
+      border:1px solid rgba(82,96,102,.18);
+      background: rgba(255,255,255,.7);
+      padding:9px 10px;
+      border-radius:12px;
+      font-size:12px;
+      letter-spacing:.02em;
+      transition: border-color .12s ease, color .12s ease, transform .06s ease;
+    }
+    nav a:hover{ color:var(--txt); border-color: rgba(47,127,107,.35); }
+    nav a:active{ transform: translateY(1px); }
+
+    /* Layout blocks */
+    .panel{
+      border:1px solid var(--edge);
+      border-radius:var(--radius);
+      background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(247,243,237,.92));
+      box-shadow:var(--shadow);
+      padding:16px;
+    }
+    .hero{
+      display:grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap:16px;
+      align-items:start;
+    }
+    @media (max-width: 980px){
+      .hero{ grid-template-columns: 1fr; }
+    }
+    .kicker{
+      font-family:var(--sans);
+      font-size:11px;
+      color:var(--faint);
+      letter-spacing:.10em;
+      text-transform:uppercase;
+      margin-bottom:8px;
+    }
+    .headline{
+      margin:0 0 10px 0;
+      font-family:var(--serif);
+      font-size:30px;
+      line-height:1.1;
+      letter-spacing:.01em;
+    }
+    .lead{
+      margin:0;
+      color:var(--muted);
+      font-size:15px;
+      line-height:1.6;
+      max-width: 74ch;
+    }
+    .ctaRow{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      border-radius:12px;
+      padding:10px 12px;
+      font-size:12px;
+      letter-spacing:.02em;
+      cursor:pointer;
+      user-select:none;
+      text-decoration:none;
+      border:1px solid rgba(47,127,107,.40);
+      background: linear-gradient(180deg, rgba(47,127,107,.12), rgba(255,255,255,.9));
+      color:var(--txt);
+      transition: transform .06s ease, filter .12s ease, border-color .12s ease;
+    }
+    .btn.secondary{
+      border-color: rgba(82,96,102,.22);
+      background: rgba(255,255,255,.7);
+      color:var(--muted);
+    }
+    .btn:hover{ filter:brightness(1.05); border-color: rgba(47,127,107,.60); }
+    .btn.secondary:hover{ border-color: rgba(82,96,102,.38); color: var(--txt); }
+    .btn:active{ transform: translateY(1px); }
+
+    .card{
+      border-radius:14px;
+      border:1px solid rgba(82,96,102,.16);
+      background: rgba(255,255,255,.78);
+      padding:12px;
+    }
+    .card h3{
+      margin:0 0 8px 0;
+      font-family:var(--serif);
+      font-size:14px;
+      letter-spacing:.02em;
+    }
+    .mono{ font-family:var(--mono); }
+    .muted{ color:var(--muted); }
+    .faint{ color:var(--faint); }
+
+    .hr{
+      height:1px;
+      background: linear-gradient(90deg, rgba(82,96,102,0), rgba(82,96,102,.22), rgba(82,96,102,0));
+      margin:12px 0;
+    }
+
+    .grid3{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:14px;
+    }
+    @media (max-width: 980px){
+      .grid3{ grid-template-columns: 1fr; }
+    }
+
+    .list{
+      margin:0;
+      padding-left:18px;
+      color:var(--muted);
+      line-height:1.65;
+      font-size:14px;
+    }
+
+    .table{
+      width:100%;
+      border-collapse: collapse;
+      overflow:hidden;
+      border-radius:14px;
+      border:1px solid rgba(82,96,102,.14);
+      background: rgba(255,255,255,.75);
+      font-size:12px;
+    }
+    .table th,.table td{
+      padding:10px 10px;
+      border-bottom:1px solid rgba(82,96,102,.10);
+      text-align:left;
+      vertical-align:top;
+    }
+    .table th{
+      font-size:11px;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:var(--faint);
+      background: rgba(247,243,237,.9);
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:6px 9px;
+      border-radius:999px;
+      border:1px solid rgba(82,96,102,.16);
+      background: rgba(255,255,255,.76);
+      color:var(--muted);
+      white-space:nowrap;
+      font-size:11px;
+    }
+    .pill b{ color:var(--txt); font-weight:650; }
+
+    .heroVisual{
+      border-radius:16px;
+      border:1px solid rgba(47,127,107,.22);
+      background:
+        radial-gradient(220px 180px at 80% 20%, rgba(199,127,42,.14), rgba(0,0,0,0)),
+        linear-gradient(180deg, rgba(47,127,107,.08), rgba(255,255,255,.9));
+      padding:14px;
+      position:relative;
+      overflow:hidden;
+    }
+    .heroVisual:before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        repeating-linear-gradient(120deg, rgba(44,95,121,.10), rgba(44,95,121,.10) 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0) 26px),
+        repeating-linear-gradient(0deg, rgba(47,127,107,.08), rgba(47,127,107,.08) 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0) 18px);
+      opacity:.45;
+      pointer-events:none;
+    }
+    .heroVisual > *{
+      position:relative;
+      z-index:1;
+    }
+    .statGrid{
+      display:grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap:10px;
+      margin-top:10px;
+    }
+    .stat{
+      border-radius:12px;
+      border:1px solid rgba(82,96,102,.16);
+      background: rgba(255,255,255,.8);
+      padding:10px;
+    }
+    .statValue{
+      font-family:var(--serif);
+      font-size:20px;
+      color:var(--txt);
+    }
+    .statLabel{
+      font-size:12px;
+      color:var(--muted);
+    }
+
+    footer{
+      margin-top:auto;
+      padding:10px 6px 2px 6px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      font-size:11px;
+      color:var(--faint);
+      opacity:.9;
+    }
+    footer a{
+      color:var(--muted);
+      text-decoration:none;
+      border-bottom: 1px dashed rgba(82,96,102,.22);
+    }
+    footer a:hover{
+      color:var(--txt);
+      border-bottom-color: rgba(47,127,107,.35);
+    }
+
+    /* tiny toast */
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:22px;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,.95);
+      border:1px solid rgba(82,96,102,.22);
+      color: var(--txt);
+      padding:10px 12px;
+      border-radius: 999px;
+      font-size:12px;
+      box-shadow: var(--shadow);
+      opacity:0;
+      pointer-events:none;
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .toast.show{
+      opacity:1;
+      transform: translateX(-50%) translateY(-4px);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+
+    <header>
+      <div class="topbar">
+        <div class="brand">
+          <div class="mark" aria-hidden="true"></div>
+          <div style="min-width:0">
+            <h1>Juniper Shipping Co.</h1>
+            <div class="sub">Parcel | Freight | Cold-Chain | Gate Concourse Pickup</div>
+          </div>
+        </div>
+
+        <div class="badge" aria-label="Service tagline">
+          <span class="dot" aria-hidden="true"></span>
+          <span>Gate-to-Gate shipping for everyday life</span>
+        </div>
+      </div>
+
+      <nav aria-label="Primary navigation">
+        <a href="#services">Services</a>
+        <a href="#how">How it works</a>
+        <a href="#lanes">Coverage</a>
+        <a href="#faq">FAQ</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </header>
+
+    <section class="panel hero" aria-label="Hero">
+      <div>
+        <div class="kicker">Civilian carrier | Licensed handling | Concourse desk service</div>
+        <h2 class="headline">Everyday shipping for life between gates.</h2>
+        <p class="lead">
+          Juniper Shipping is a civilian carrier for parcels and freight moving through Gate concourses.
+          From care packages and household parts to clinic supplies and temperature-sensitive goods, we keep it simple:
+          clear intake, clean seals, and a straightforward handoff.
+        </p>
+
+        <div class="ctaRow">
+          <a class="btn" href="#contact">Get a quote</a>
+          <a class="btn secondary" href="#how">How shipping works</a>
+        </div>
+
+        <div class="hr"></div>
+
+        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+          <span class="pill"><b>Pickup</b> at Gate concourse desks</span>
+          <span class="pill"><b>Delivery</b> to concourse lockers / desk hold</span>
+          <span class="pill"><b>Seals</b> verified at handoff</span>
+          <span class="pill"><b>Scheduling</b> follows posted windows</span>
+        </div>
+      </div>
+
+      <div class="heroVisual">
+        <div class="kicker">Service highlights</div>
+        <div class="muted" style="font-size:14px; line-height:1.6;">
+          <div><span class="mono faint">Focus:</span> households, small shops, clinic partners</div>
+          <div><span class="mono faint">Handoff:</span> desk hold, lockers, local carrier handoff</div>
+          <div><span class="mono faint">Care:</span> clear seals, documented intake, gentle handling</div>
+        </div>
+
+        <div class="statGrid">
+          <div class="stat">
+            <div class="statValue">3-6</div>
+            <div class="statLabel">gate windows per cycle</div>
+          </div>
+          <div class="stat">
+            <div class="statValue">24</div>
+            <div class="statLabel">desk hours posted weekly</div>
+          </div>
+          <div class="stat">
+            <div class="statValue">Cold</div>
+            <div class="statLabel">chain slots by request</div>
+          </div>
+          <div class="stat">
+            <div class="statValue">ID</div>
+            <div class="statLabel">required at pickup</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="services" class="panel" aria-label="Services">
+      <div class="kicker">Services</div>
+      <div class="grid3">
+        <div class="card">
+          <h3>Parcel</h3>
+          <div class="muted" style="font-size:14px; line-height:1.6;">
+            Personal packages, shop orders, care kits.
+            Concourse pickup and desk-hold options.
+          </div>
+        </div>
+        <div class="card">
+          <h3>Freight</h3>
+          <div class="muted" style="font-size:14px; line-height:1.6;">
+            Crates and pallets for shops and habitats.
+            Clear labeling and seal integrity required.
+          </div>
+        </div>
+        <div class="card">
+          <h3>Cold-Chain</h3>
+          <div class="muted" style="font-size:14px; line-height:1.6;">
+            Temperature-sensitive goods (food, reagents, meds).
+            Validated containers only.
+          </div>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <ul class="list">
+        <li><span class="mono">Sealed Medical</span> available for clinics and authorized customers.</li>
+        <li><span class="mono">Desk Hold</span> for recipients without reliable local delivery access.</li>
+        <li><span class="mono">Returns</span> supported when lanes and windows permit.</li>
+      </ul>
+    </section>
+
+    <section id="how" class="panel" aria-label="How it works">
+      <div class="kicker">How it works</div>
+      <div class="grid3">
+        <div class="card">
+          <h3>1) Drop off</h3>
+          <div class="muted" style="font-size:14px; line-height:1.6;">
+            Bring your parcel to the Juniper concourse desk. We verify label and seal and issue a receipt slip.
+          </div>
+        </div>
+        <div class="card">
+          <h3>2) Transfer</h3>
+          <div class="muted" style="font-size:14px; line-height:1.6;">
+            Shipments move on posted Gate windows and available carrier capacity.
+            Some routes may be quiet between windows.
+          </div>
+        </div>
+        <div class="card">
+          <h3>3) Pickup</h3>
+          <div class="muted" style="font-size:14px; line-height:1.6;">
+            Recipient collects from desk hold or lockers (where supported). A receipt slip is your proof of pickup.
+          </div>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="muted" style="font-size:14px; line-height:1.65;">
+        We keep our public info simple because it should be. If you need detailed chain-of-custody or special handling,
+        we will tell you what paperwork to bring to the desk.
+      </div>
+    </section>
+
+    <section id="lanes" class="panel" aria-label="Coverage">
+      <div class="kicker">Coverage</div>
+      <div class="muted" style="font-size:14px; line-height:1.65; margin-bottom:10px;">
+        Example lanes shown below. Availability depends on posted Gate windows and local handling load.
+      </div>
+
+      <table class="table" aria-label="Coverage table">
+        <thead>
+          <tr>
+            <th>Lane</th>
+            <th>Service</th>
+            <th>Typical handling</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Frame Station -> Harmony</td>
+            <td class="muted">Parcel / Freight</td>
+            <td class="muted">Desk hold / lockers</td>
+            <td class="muted">High-volume; expect queue at intake</td>
+          </tr>
+          <tr>
+            <td>Splendor -> H-8 Reclaim</td>
+            <td class="muted">Parcel / Cold-chain</td>
+            <td class="muted">Desk hold</td>
+            <td class="muted">Cold-chain slots limited per window</td>
+          </tr>
+          <tr>
+            <td>Calder Outpost -> Mesa Station</td>
+            <td class="muted">Parcel</td>
+            <td class="muted">Desk pickup</td>
+            <td class="muted">Quiet between windows</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="hr"></div>
+
+      <div style="display:flex; flex-wrap:wrap; gap:8px;">
+        <span class="pill"><b>Standard</b> household goods</span>
+        <span class="pill"><b>Tracked</b> via receipt slip</span>
+        <span class="pill"><b>Cold-chain</b> validated containers</span>
+        <span class="pill"><b>Medical</b> authorized intake</span>
+      </div>
+    </section>
+
+    <section id="faq" class="panel" aria-label="FAQ">
+      <div class="kicker">FAQ</div>
+      <div class="grid3">
+        <div class="card">
+          <h3>Do you deliver door-to-door?</h3>
+          <div class="muted" style="font-size:14px; line-height:1.6;">
+            Where local carriers exist, we can hand off to them. Otherwise we use desk hold and lockers.
+          </div>
+        </div>
+        <div class="card">
+          <h3>What do I need for pickup?</h3>
+          <div class="muted" style="font-size:14px; line-height:1.6;">
+            Your receipt slip (or recipient token, where supported) and basic ID check at the concourse desk.
+          </div>
+        </div>
+        <div class="card">
+          <h3>Why do ETAs change?</h3>
+          <div class="muted" style="font-size:14px; line-height:1.6;">
+            Gate windows vary and handling load changes. We cannot guarantee arrival times will be exact.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact" class="panel" aria-label="Contact">
+      <div class="kicker">Contact</div>
+
+      <div class="grid3">
+        <div class="card">
+          <h3>Concourse Desk</h3>
+          <div class="muted" style="font-size:14px; line-height:1.6;">
+            Desk channel: <span class="mono">JUNIPER-DESK / PUBLIC</span><br/>
+            Hours: posted desk schedule
+          </div>
+          <div class="ctaRow" style="margin-top:10px;">
+            <a class="btn secondary" href="#" id="copyDesk">Copy desk channel</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Quote request</h3>
+          <div class="muted" style="font-size:14px; line-height:1.6;">
+            Send: origin, destination, size/weight, and service (parcel/freight/cold-chain).
+          </div>
+          <div class="hr"></div>
+          <div class="muted" style="font-size:13px; line-height:1.6;">
+            For cold-chain: include container type and temperature band.
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Claims</h3>
+          <div class="muted" style="font-size:14px; line-height:1.6;">
+            Claims require a receipt slip and desk receipt. Ask the concourse desk for the packet.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      <div>Juniper Shipping Co. - civilian carrier registry JSC-27</div>
+      <div><a href="#faq">help</a> | <a href="#contact">contact</a> | <a href="#services">services</a></div>
+    </footer>
+
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">Copied.</div>
+
+  <script>
+    (() => {
+      const toast = document.getElementById("toast");
+      function showToast(msg){
+        toast.textContent = msg;
+        toast.classList.add("show");
+        clearTimeout(showToast._t);
+        showToast._t = setTimeout(() => toast.classList.remove("show"), 1100);
+      }
+
+      document.getElementById("copyDesk").addEventListener("click", async (e) => {
+        e.preventDefault();
+        const text = "JUNIPER-DESK / PUBLIC";
+        try{
+          await navigator.clipboard.writeText(text);
+          showToast("Desk channel copied.");
+        }catch{
+          showToast("Clipboard unavailable.");
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
+

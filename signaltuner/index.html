@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Signal Tuner // The Quiet End</title>
+    <meta property="og:title" content="Signal Tuner // The Quiet End" />
+    <meta
+      property="og:description"
+      content="Mini-game to align azimuth and frequency to lock onto a gate beacon signal."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://thequietend.com/SignalTuner/" />
+    <meta property="og:image" content="https://thequietend.com/SignalTuner/embed.png" />
+    <meta property="og:image:alt" content="Signal Tuner" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Signal Tuner // The Quiet End" />
+    <meta
+      name="twitter:description"
+      content="Mini-game to align azimuth and frequency to lock onto a gate beacon signal."
+    />
+    <meta name="twitter:image" content="https://thequietend.com/SignalTuner/embed.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=B612+Mono:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: dark;
+            /* Purple Theme Conversion */
+            --ink: #d8b9d6;          /* Light Lavender */
+            --muted: #8f6f88;        /* Muted Purple-Grey */
+            --metal: #0d0a0d;        /* Dark background base */
+            --deep: #050406;         /* Deepest background */
+            --rust: #c54b8a;         /* Pinkish accent for errors/details */
+            --signal: #be76e2;       /* Main Neon Purple */
+            --amber: #d2a95a;        /* Gold (kept for contrast) */
+            --alert: #e16464;        /* Red */
+            
+            --line: rgba(190, 118, 226, 0.18);
+            --grid: rgba(190, 118, 226, 0.05);
+            --glow: rgba(190, 118, 226, 0.35);
+            --radius: 3px;
+            
+            --font-title: "B612 Mono", "Courier New", monospace;
+            --font-body: "Share Tech Mono", "Courier New", monospace;
+
+            --dial-size: clamp(110px, 26vmin, 180px);
+            --slider-height: clamp(110px, 26vmin, 180px);
+            --slider-width: clamp(44px, 10vmin, 60px);
+            --btn-size: clamp(34px, 9vmin, 48px);
+            --hud-gap: clamp(6px, 2vmin, 10px);
+            --lock-height: clamp(16px, 3vmin, 24px);
+            --interface-gap: clamp(8px, 2vmin, 16px);
+            --frame-pad: clamp(8px, 2.4vmin, 16px);
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            min-height: 100dvh;
+            font-family: var(--font-body);
+            color: var(--ink);
+            background: radial-gradient(circle at center, #1a1221 0%, #050406 100%);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 0 0 10px rgba(190, 118, 226, 0.2), 1px 0 0 rgba(190, 118, 226, 0.12);
+        }
+
+        .page-shell {
+            position: relative;
+            width: 100vw;
+            max-width: 100%;
+            display: grid;
+            gap: var(--interface-gap);
+        }
+
+        .page-header {
+            display: none;
+            border: 1px solid var(--line);
+            background: rgba(13, 10, 13, 0.78);
+            border-radius: var(--radius);
+            padding: clamp(14px, 2.4vmin, 20px);
+            box-shadow: 0 0 20px rgba(0,0,0,0.7), inset 0 0 0 1px rgba(190, 118, 226, 0.12);
+        }
+
+        .page-brand {
+            display: grid;
+            gap: 10px;
+            max-width: 760px;
+        }
+
+        .signal-tag {
+            font-size: 0.7rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--signal);
+            border: 1px solid var(--line);
+            padding: 8px 10px;
+            border-radius: var(--radius);
+            width: fit-content;
+            background: rgba(13, 10, 13, 0.85);
+            box-shadow: inset 0 0 10px rgba(190, 118, 226, 0.12);
+        }
+
+        .page-header h1 {
+            margin: 0;
+            font-family: var(--font-title);
+            font-size: clamp(1.6rem, 3.4vw, 2.4rem);
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            color: var(--signal);
+            text-shadow: 0 0 16px var(--glow);
+        }
+
+        .page-header .intro {
+            margin: 0;
+            color: var(--muted);
+            font-size: 0.92rem;
+            line-height: 1.6;
+        }
+
+        /* Scanline Overlay */
+        .crt-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* UI Structure */
+        #game-container {
+            position: relative;
+            width: min(800px, 95vw);
+            height: min(700px, 100dvh);
+            max-height: 100dvh;
+            border: 1px solid var(--line);
+            background: rgba(13, 10, 13, 0.85);
+            border-radius: var(--radius);
+            box-shadow: 0 0 20px rgba(0,0,0,0.8), inset 0 0 0 1px rgba(190, 118, 226, 0.1);
+            display: grid;
+            grid-template-rows: auto minmax(0, 1fr) auto;
+            padding: var(--frame-pad);
+            gap: var(--interface-gap);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 1px solid var(--line);
+            padding-bottom: 12px;
+        }
+
+        .brand {
+            display: grid;
+            gap: 6px;
+        }
+
+        .breadcrumbs {
+            font-size: clamp(0.6rem, 1.6vmin, 0.72rem);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--muted);
+            border: 1px solid var(--line);
+            padding: clamp(4px, 1.2vmin, 6px) clamp(6px, 2vmin, 10px);
+            border-radius: var(--radius);
+            width: fit-content;
+            background: rgba(13, 10, 13, 0.75);
+            box-shadow: inset 0 0 12px rgba(190, 118, 226, 0.12);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .breadcrumbs a {
+            color: var(--signal);
+            text-decoration: none;
+        }
+
+        .breadcrumbs a:hover {
+            text-decoration: underline;
+        }
+
+        h1 {
+            font-family: var(--font-title);
+            margin: 0;
+            color: var(--signal);
+            text-transform: uppercase;
+            font-size: clamp(1.05rem, 2.6vmin, 1.5rem);
+            letter-spacing: 0.1em;
+            text-shadow: 0 0 12px var(--glow);
+        }
+
+        .stats {
+            text-align: right;
+            font-size: clamp(0.7rem, 1.8vmin, 0.9rem);
+            color: var(--muted);
+        }
+
+        .stat-value {
+            color: var(--amber);
+            font-weight: bold;
+            font-size: clamp(0.95rem, 2.2vmin, 1.2rem);
+        }
+
+        /* Main Game Area */
+        .interface {
+            display: grid;
+            grid-template-columns: 1fr 120px 1fr;
+            grid-template-areas: "azimuth hud freq";
+            gap: var(--interface-gap);
+            align-items: start;
+            justify-items: center;
+            position: relative;
+            height: 100%;
+            min-height: 0;
+        }
+
+        /* Labels & Common */
+        .label {
+            font-size: clamp(0.65rem, 1.7vmin, 0.8rem);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--muted);
+            margin-bottom: 8px;
+            text-align: center;
+        }
+
+        /* --- Left: The Rotator (Azimuth) --- */
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            grid-area: azimuth;
+        }
+
+        .circle-container {
+            width: var(--dial-size);
+            height: var(--dial-size);
+            border-radius: 50%;
+            border: 1px dashed var(--line);
+            position: relative;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            margin-bottom: clamp(4px, 1.6vmin, 10px);
+        }
+
+        /* Target Indicator (The Slot) */
+        .target-angle {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            transform: rotate(0deg);
+            pointer-events: none;
+        }
+        
+        .target-angle::after {
+            content: '▽'; /* Hollow triangle pointing down */
+            font-size: 20px;
+            font-weight: bold;
+            position: absolute;
+            top: -16px; /* Position at 12 o'clock outside ring */
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--rust);
+            text-shadow: 0 0 8px var(--rust);
+        }
+
+        /* Player Indicator (The Key) */
+        .player-angle {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 2px solid var(--signal);
+            border-left-color: transparent;
+            border-bottom-color: transparent;
+            border-right-color: transparent;
+            transform: rotate(0deg);
+            transition: border-color 0.1s;
+            box-shadow: 0 0 15px var(--glow);
+        }
+        
+        .player-angle::before {
+            content: "▲";
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: var(--signal);
+            font-size: 14px;
+        }
+
+        /* --- Right: The Slider (Frequency) --- */
+        .slider-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            justify-content: flex-start;
+            grid-area: freq;
+        }
+
+        .slider-container {
+            width: var(--slider-width);
+            height: var(--slider-height);
+            border: 1px solid var(--line);
+            position: relative;
+            background: rgba(0,0,0,0.3);
+            margin-bottom: clamp(4px, 1.6vmin, 10px);
+        }
+
+        .target-height {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 4px; 
+            background: var(--rust);
+            box-shadow: 0 0 8px var(--rust);
+            z-index: 1;
+        }
+        /* Arrow indicating target zone */
+        .target-height::before {
+            content: "▶";
+            position: absolute;
+            left: -15px;
+            top: -6px;
+            color: var(--rust);
+            font-size: 10px;
+        }
+
+        .player-height {
+            position: absolute;
+            left: -5px;
+            bottom: 0; 
+            width: calc(100% + 10px);
+            height: 4px;
+            background: var(--signal);
+            box-shadow: 0 0 10px var(--signal);
+            z-index: 2;
+        }
+
+        /* --- Mobile / On-Screen Controls --- */
+        .touch-controls-row {
+            display: flex;
+            gap: var(--hud-gap);
+            justify-content: center;
+            margin-top: auto; /* Push to bottom of container if space permits */
+        }
+        
+        .touch-controls-col {
+            display: flex;
+            flex-direction: column;
+            gap: var(--hud-gap);
+            align-items: center;
+            margin-top: auto;
+        }
+
+        .btn-ctrl {
+            width: var(--btn-size);
+            height: var(--btn-size);
+            border: 1px solid var(--signal);
+            background: rgba(190, 118, 226, 0.05);
+            color: var(--signal);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(0.9rem, 2.4vmin, 1.2rem);
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.1s;
+            user-select: none;
+        }
+
+        .btn-ctrl:active, .btn-ctrl.active {
+            background: var(--signal);
+            color: #000;
+            box-shadow: 0 0 15px var(--signal);
+        }
+
+
+        /* --- Center: Lock Progress --- */
+        .center-hud {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--hud-gap);
+            width: 100%;
+            margin-top: clamp(0px, 6vmin, 40px);
+            grid-area: hud;
+        }
+
+        .lock-text {
+            color: var(--signal);
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+
+        .lock-bar-bg {
+            width: 100%;
+            height: var(--lock-height);
+            background: #111;
+            border: 1px solid var(--muted);
+            border-radius: var(--radius);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lock-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: repeating-linear-gradient(
+                45deg,
+                var(--signal),
+                var(--signal) 10px,
+                #9a5bc0 10px,
+                #9a5bc0 20px
+            );
+            box-shadow: 0 0 15px var(--signal);
+            transition: width 0.1s linear;
+        }
+
+        /* Footer: Timer */
+        .timer-section {
+            display: grid;
+            gap: 5px;
+        }
+        .timer-bar-bg {
+            width: 100%;
+            height: 8px;
+            background: #111;
+            border: 1px solid var(--alert);
+        }
+        .timer-bar-fill {
+            height: 100%;
+            width: 100%;
+            background: var(--alert);
+            box-shadow: 0 0 10px var(--alert);
+            transition: width 0.1s linear;
+        }
+
+        /* States */
+        .match-active .player-angle { border-top-color: #fff; box-shadow: 0 0 20px #fff; }
+        .match-active .player-angle::before { color: #fff; }
+        .match-active .player-height { background: #fff; box-shadow: 0 0 20px #fff; }
+        .match-active .player-height::after { color: #fff; }
+
+        /* Screens */
+        .screen {
+            position: absolute;
+            inset: 0;
+            background: rgba(5, 4, 6, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            backdrop-filter: blur(4px);
+            padding: 20px;
+        }
+
+        .hidden { display: none; }
+
+        button.main-btn {
+            background: transparent;
+            color: var(--signal);
+            border: 1px solid var(--signal);
+            padding: 16px 32px;
+            font-family: var(--font-title);
+            font-size: 1.2rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            margin-top: 24px;
+            transition: all 0.2s;
+            box-shadow: 0 0 15px rgba(190, 118, 226, 0.1);
+        }
+
+        button.main-btn:hover {
+            background: var(--signal);
+            color: #000;
+            box-shadow: 0 0 25px var(--signal);
+        }
+
+        .message {
+            max-width: 400px;
+            text-align: center;
+            line-height: 1.6;
+            color: var(--muted);
+            margin-bottom: 20px;
+        }
+
+        .controls-hint {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+            font-size: 0.8rem;
+            color: var(--muted);
+        }
+        .key {
+            border: 1px solid var(--muted);
+            padding: 4px 8px;
+            border-radius: 4px;
+            color: var(--ink);
+        }
+
+        /* Mobile layout: keep all HUD elements visible */
+        @media (max-width: 720px), (max-height: 700px) {
+            #game-container {
+                height: 100svh;
+                width: 100vw;
+                max-height: 100svh;
+                padding-bottom: calc(var(--frame-pad) + env(safe-area-inset-bottom));
+            }
+
+            header {
+                padding-bottom: 8px;
+            }
+
+            .interface {
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: auto auto;
+                grid-template-areas:
+                    "azimuth freq"
+                    "hud hud";
+                align-items: center;
+            }
+
+            .center-hud {
+                grid-column: 1 / -1;
+                margin-top: 0;
+            }
+
+            .control-group,
+            .slider-wrapper {
+                height: auto;
+            }
+
+            :root {
+                --dial-size: clamp(90px, 22vmin, 160px);
+                --slider-height: clamp(90px, 22vmin, 160px);
+                --slider-width: clamp(40px, 9vmin, 56px);
+                --btn-size: clamp(30px, 7.5vmin, 44px);
+                --hud-gap: clamp(4px, 1.2vmin, 8px);
+                --lock-height: clamp(14px, 2.4vmin, 22px);
+                --interface-gap: clamp(6px, 1.6vmin, 12px);
+                --frame-pad: clamp(6px, 1.8vmin, 12px);
+            }
+        }
+
+        @media (min-width: 721px) and (min-height: 701px) {
+            body {
+                justify-content: flex-start;
+                padding: clamp(18px, 3.2vmin, 32px) 0;
+            }
+
+            .page-shell {
+                width: min(1100px, 94vw);
+            }
+
+            .page-header {
+                display: block;
+            }
+
+            #game-container {
+                width: 100%;
+                height: min(720px, 72vh);
+                max-height: none;
+            }
+
+            .game-title {
+                display: none;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="crt-overlay"></div>
+
+    <div class="page-shell">
+        <div class="page-header">
+            <div class="page-brand">
+                <div class="signal-tag"><a href="../">Homepage</a> // Signal Tuner Console</div>
+                <h1>Signal Tuner</h1>
+                <p class="intro">
+                    Mini-game to align azimuth and frequency to lock onto a gate beacon signal.
+                </p>
+            </div>
+        </div>
+
+        <div id="game-container">
+        <header>
+            <div class="brand">
+                <div class="breadcrumbs"><a href="../">Homepage</a> // Signal Tuner</div>
+                <h1 class="game-title">Signal Tuner</h1>
+                <div style="font-size: 0.75rem; color: var(--muted);">v.0.95 // RESTRICTED ACCESS</div>
+            </div>
+            <div class="stats">
+                <div>STAGES CLEARED</div>
+                <div id="score-display" class="stat-value">0</div>
+            </div>
+        </header>
+
+        <div class="interface">
+            <div class="control-group">
+                <div class="label">Azimuth</div>
+                <div class="circle-container">
+                    <div id="target-angle" class="target-angle"></div>
+                    <div id="player-angle" class="player-angle"></div>
+                </div>
+                <div class="touch-controls-row">
+                    <div class="btn-ctrl" data-key="ArrowLeft">◀</div>
+                    <div class="btn-ctrl" data-key="ArrowRight">▶</div>
+                </div>
+            </div>
+
+            <div class="center-hud">
+                <div class="lock-text">SIGNAL LOCK</div>
+                <div class="lock-bar-bg">
+                    <div id="lock-fill" class="lock-bar-fill"></div>
+                </div>
+                <div id="status-text" class="label" style="margin-top: 10px; color: var(--rust);">NO SIGNAL</div>
+            </div>
+
+            <div class="slider-wrapper">
+                <div class="label">Freq</div>
+                <div class="slider-container">
+                    <div id="target-height" class="target-height" style="bottom: 50%;"></div>
+                    <div id="player-height" class="player-height" style="bottom: 20%;"></div>
+                </div>
+                 <div class="touch-controls-col">
+                    <div class="btn-ctrl" data-key="ArrowUp">▲</div>
+                    <div class="btn-ctrl" data-key="ArrowDown">▼</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="timer-section">
+            <div style="display:flex; justify-content:space-between;">
+                <span class="label">DECAY TIMER</span>
+                <span id="timer-text" class="label" style="color:var(--alert)">10.0s</span>
+            </div>
+            <div class="timer-bar-bg">
+                <div id="timer-fill" class="timer-bar-fill"></div>
+            </div>
+        </div>
+
+        <div id="start-screen" class="screen">
+            <h1>Initialize Signal</h1>
+            <p class="message">
+                The Corridors are shifting. You must manually align the your nav computer with the Gate's beacon signal.
+                <br><br>
+                Align the <strong>Azimuth (Triangle)</strong> and <strong>Frequency (Bar)</strong> to the target zones to build a signal lock.
+            </p>
+            <button class="main-btn" onclick="startGame()">Connect</button>
+            <div class="controls-hint">
+                <span>KEYBOARD OR SCREEN BUTTONS</span>
+            </div>
+        </div>
+
+        <div id="game-over-screen" class="screen hidden">
+            <h1 style="color: var(--alert);">SIGNAL LOST</h1>
+            <p class="message">
+                Connection lost. The Gate Beacon has been lost and your ship must now emergency drop.
+            </p>
+            <div style="font-size: 2rem; color: var(--signal); margin: 20px 0;">
+                SCORE: <span id="final-score">0</span>
+            </div>
+            <button class="main-btn" onclick="startGame()">Re-Initialize</button>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        // Game State
+        const state = {
+            isPlaying: false,
+            score: 0,
+            maxTime: 15000, 
+            currentTime: 15000,
+            lastFrame: 0,
+            
+            // Values
+            playerRot: 0,
+            targetRot: 0,
+            playerH: 50, // Percent 0-100
+            targetH: 50, // Percent 0-100
+            
+            // Progress
+            lockValue: 0, // 0 to 100
+            
+            // Controls
+            keys: {
+                ArrowLeft: false,
+                ArrowRight: false,
+                ArrowUp: false,
+                ArrowDown: false
+            }
+        };
+
+        // Configuration
+        const CONFIG = {
+            rotSpeed: 0.25, // Slightly faster for touch responsiveness
+            slideSpeed: 0.1, 
+            toleranceRot: 15, 
+            toleranceH: 8, 
+            lockSpeed: 0.08, 
+            decaySpeed: 0.05, 
+            timeReduction: 0.90 
+        };
+
+        // DOM Elements
+        const ui = {
+            playerRot: document.getElementById('player-angle'),
+            targetRot: document.getElementById('target-angle'),
+            playerH: document.getElementById('player-height'),
+            targetH: document.getElementById('target-height'),
+            lockFill: document.getElementById('lock-fill'),
+            timerFill: document.getElementById('timer-fill'),
+            timerText: document.getElementById('timer-text'),
+            score: document.getElementById('score-display'),
+            finalScore: document.getElementById('final-score'),
+            status: document.getElementById('status-text'),
+            container: document.getElementById('game-container'),
+            startScreen: document.getElementById('start-screen'),
+            endScreen: document.getElementById('game-over-screen')
+        };
+
+        const sfx = {
+            stageClear: new Audio('blip.ogg')
+        };
+        sfx.stageClear.preload = 'auto';
+
+        function playStageClearSfx() {
+            const audio = sfx.stageClear;
+            audio.currentTime = 0;
+            audio.play().catch(() => {});
+        }
+
+        // Keyboard Handling
+        window.addEventListener('keydown', (e) => {
+            if(state.keys.hasOwnProperty(e.code)) {
+                state.keys[e.code] = true;
+                if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].indexOf(e.code) > -1) {
+                    e.preventDefault();
+                }
+            }
+        });
+
+        window.addEventListener('keyup', (e) => {
+            if(state.keys.hasOwnProperty(e.code)) {
+                state.keys[e.code] = false;
+            }
+        });
+
+        // Touch/Mouse Button Handling
+        const buttons = document.querySelectorAll('.btn-ctrl');
+        
+        // Prevent context menu on long press
+        buttons.forEach(btn => {
+            btn.addEventListener('contextmenu', e => {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            });
+        });
+
+        const handleInputStart = (e) => {
+            e.preventDefault(); // Stop mouse emulation
+            const key = e.currentTarget.getAttribute('data-key');
+            if (key) {
+                state.keys[key] = true;
+                e.currentTarget.classList.add('active');
+            }
+        };
+
+        const handleInputEnd = (e) => {
+            e.preventDefault();
+            const key = e.currentTarget.getAttribute('data-key');
+            if (key) {
+                state.keys[key] = false;
+                e.currentTarget.classList.remove('active');
+            }
+        };
+
+        buttons.forEach(btn => {
+            // Mouse
+            btn.addEventListener('mousedown', handleInputStart);
+            btn.addEventListener('mouseup', handleInputEnd);
+            btn.addEventListener('mouseleave', handleInputEnd);
+            
+            // Touch
+            btn.addEventListener('touchstart', handleInputStart, {passive: false});
+            btn.addEventListener('touchend', handleInputEnd, {passive: false});
+            btn.addEventListener('touchcancel', handleInputEnd, {passive: false});
+        });
+
+        function startGame() {
+            state.score = 0;
+            state.maxTime = 15000;
+            ui.score.innerText = "0";
+            ui.startScreen.classList.add('hidden');
+            ui.endScreen.classList.add('hidden');
+            
+            startStage();
+            
+            state.isPlaying = true;
+            state.lastFrame = performance.now();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function startStage() {
+            // Randomize Targets
+            state.targetRot = Math.floor(Math.random() * 360);
+            state.targetH = 10 + Math.floor(Math.random() * 80);
+            
+            // Reset Progress
+            state.lockValue = 0;
+            state.currentTime = state.maxTime;
+            
+            updateVisuals();
+        }
+
+        function gameOver() {
+            state.isPlaying = false;
+            ui.finalScore.innerText = state.score;
+            ui.endScreen.classList.remove('hidden');
+        }
+
+        function gameLoop(timestamp) {
+            if (!state.isPlaying) return;
+
+            const delta = timestamp - state.lastFrame;
+            state.lastFrame = timestamp;
+
+            // 1. Update Timer
+            state.currentTime -= delta;
+            state.currentTime = Math.max(0, state.currentTime);
+
+            // 2. Handle Inputs
+            if (state.keys.ArrowLeft) state.playerRot -= CONFIG.rotSpeed * delta;
+            if (state.keys.ArrowRight) state.playerRot += CONFIG.rotSpeed * delta;
+            if (state.keys.ArrowUp) state.playerH += CONFIG.slideSpeed * delta;
+            if (state.keys.ArrowDown) state.playerH -= CONFIG.slideSpeed * delta;
+
+            // Normalize values
+            state.playerRot = (state.playerRot + 360) % 360;
+            state.playerH = Math.max(0, Math.min(100, state.playerH));
+
+            // 3. Check Alignment
+            // Calculate shortest angular distance
+            let rotDiff = Math.abs(state.playerRot - state.targetRot);
+            if (rotDiff > 180) rotDiff = 360 - rotDiff;
+
+            let heightDiff = Math.abs(state.playerH - state.targetH);
+
+            const isRotAligned = rotDiff <= CONFIG.toleranceRot;
+            const isHeightAligned = heightDiff <= CONFIG.toleranceH;
+
+            // 4. Update Lock Logic
+            if (isRotAligned && isHeightAligned) {
+                const remainingLock = Math.max(0, 100 - state.lockValue);
+                const remainingTime = Math.max(1, state.currentTime);
+                const minSpeedToFinish = remainingLock / remainingTime;
+                const effectiveLockSpeed = Math.max(CONFIG.lockSpeed, minSpeedToFinish);
+                state.lockValue += effectiveLockSpeed * delta;
+                ui.container.classList.add('match-active');
+                ui.status.innerText = "ACQUIRING SIGNAL...";
+                ui.status.style.color = "#fff";
+            } else {
+                state.lockValue -= CONFIG.decaySpeed * delta;
+                ui.container.classList.remove('match-active');
+                
+                // Detailed Status
+                if (!isRotAligned && !isHeightAligned) ui.status.innerText = "ALIGN AZIMUTH & FREQ";
+                else if (!isRotAligned) ui.status.innerText = "ALIGN AZIMUTH (TRIANGLE)";
+                else if (!isHeightAligned) ui.status.innerText = "ALIGN FREQUENCY (BAR)";
+                
+                ui.status.style.color = "var(--rust)";
+            }
+
+            // Clamp lock value
+            state.lockValue = Math.max(0, Math.min(100, state.lockValue));
+
+            // 5. Check Success / Failure
+            if (state.lockValue >= 100) {
+                // Stage Clear
+                state.score++;
+                ui.score.innerText = state.score;
+                playStageClearSfx();
+                
+                // Increase Difficulty
+                state.maxTime = Math.max(3000, state.maxTime * CONFIG.timeReduction);
+                
+                startStage();
+            } else if (state.currentTime <= 0) {
+                gameOver();
+                return;
+            }
+
+            updateVisuals();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function updateVisuals() {
+            // Rotate Elements
+            ui.playerRot.style.transform = `rotate(${state.playerRot}deg)`;
+            ui.targetRot.style.transform = `rotate(${state.targetRot}deg)`;
+
+            // Move Slider
+            ui.playerH.style.bottom = `${state.playerH}%`;
+            ui.targetH.style.bottom = `${state.targetH}%`;
+
+            // Update Bars
+            ui.lockFill.style.width = `${state.lockValue}%`;
+            
+            const timePct = (state.currentTime / state.maxTime) * 100;
+            ui.timerFill.style.width = `${timePct}%`;
+            ui.timerText.innerText = (state.currentTime / 1000).toFixed(1) + "s";
+            
+            // Dynamic Color for Timer
+            if(timePct < 25) ui.timerFill.style.background = "#fff";
+            else ui.timerFill.style.background = "var(--alert)";
+        }
+
+    </script>
+</body>
+</html>
