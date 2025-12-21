@@ -440,6 +440,18 @@
       background: rgba(210,169,90,0.08);
       box-shadow: 0 0 12px rgba(210,169,90,0.2);
     }
+    button.btn-error {
+      animation: btnErrorFlash 0.45s ease-out;
+      color: #ffe6e6;
+      border-color: rgba(225,100,100,0.75);
+      background: rgba(225,100,100,0.28);
+      box-shadow: 0 0 18px rgba(225,100,100,0.45);
+    }
+    @keyframes btnErrorFlash {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
     button.btn-danger {
       color: #ffe6e6;
       border-color: rgba(225,100,100,0.55);
@@ -465,6 +477,36 @@
     }
     .stat-row { display: flex; gap: 10px; justify-content: flex-end; align-items: baseline; flex-wrap: wrap; }
     .stat-label { letter-spacing: 0.14em; text-transform: uppercase; font-size: 0.72rem; }
+    .operator-slot { display: inline-flex; align-items: baseline; gap: 8px; }
+    .operator-label { cursor: pointer; }
+    .operator-slot.editing .operator-label { display: none; }
+    .operator-callsign {
+      display: inline-block;
+      margin-left: 4px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--line);
+      color: var(--signal);
+      background: rgba(0,0,0,0.35);
+      box-shadow: 0 0 12px var(--glow);
+      letter-spacing: 0.16em;
+      font-weight: 700;
+      text-shadow: 0 0 12px var(--glow);
+    }
+    .operator-input {
+      display: none;
+      min-width: 130px;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: var(--muted);
+      padding: 4px 6px;
+      border-radius: 6px;
+      outline: none;
+    }
+    .operator-slot.editing .operator-input { display: inline-block; }
     .stat-value {
       color: var(--stat);
       font-weight: bold;
@@ -676,6 +718,9 @@
       color: var(--muted);
       letter-spacing: 0.12em;
       text-transform: uppercase;
+    }
+    .stat-summary {
+      margin-top: 0;
     }
 
     .kv {
@@ -1257,6 +1302,11 @@
 
         <div class="stats">
           <div class="stat-row">
+            <span id="operator-slot" class="operator-slot">
+              <span id="operator-label" class="stat-label operator-label" role="button" tabindex="0">Operator</span>
+              <input id="operator-input" class="operator-input" type="text" maxlength="24" aria-label="Operator callsign" />
+            </span>
+            <span class="stat-divider">/</span>
             <span class="stat-label">Shift Time</span>
             <span id="shift-time" class="stat-value">00:00:00</span>
             <span class="stat-divider">/</span>
@@ -1266,7 +1316,11 @@
           <div class="stat-row">
             <span class="stat-label">Alerts</span>
             <span id="alert-count" class="stat-value">0</span>
+            <span class="stat-divider">/</span>
+            <span class="stat-label">Overall Status</span>
+            <span id="overall-systems-pill" class="pill ok">ALL SYSTEMS NOMINAL</span>
           </div>
+          <div id="overall-systems-detail" class="overall-summary stat-summary">NO ACTIVE ISSUES</div>
         </div>
       </div>
     </header>
@@ -1328,14 +1382,6 @@
         <div class="label">Systems</div>
 
         <div class="sys-grid">
-          <div class="sys-block">
-            <div class="queue-head">
-              <div class="queue-title">Overall Systems</div>
-              <div id="overall-systems-pill" class="pill ok">ALL SYSTEMS NOMINAL</div>
-            </div>
-            <div id="overall-systems-detail" class="overall-summary">NO ACTIVE ISSUES</div>
-          </div>
-
           <div class="sys-block">
             <div class="queue-head">
               <div class="queue-title">Gate Systems</div>
@@ -1571,7 +1617,8 @@
       gateCurrent: "tqe_gate_terminal_gate_current",
       gateStatePrefix: "tqe_gate_terminal_gate_state::",
       sfxEnabled: "tqe_gate_terminal_sfx_enabled",
-      musicEnabled: "tqe_gate_terminal_music_enabled"
+      musicEnabled: "tqe_gate_terminal_music_enabled",
+      operatorCallsign: "tqe_gate_terminal_operator_callsign"
     };
 
 	function buildGateList(count = 1) {
@@ -2125,6 +2172,7 @@
         gateList,
         activeGateId,
         shiftMs,
+        operatorCallsign: runtime.operatorCallsign || "",
         gates,
         severed: !!runtime.severed,
         lastSevered: runtime.lastSevered || null
@@ -2146,6 +2194,9 @@
       runtime.severed = !!save.severed;
       runtime.lastSevered = save.lastSevered || null;
       runtime.resumeShiftMs = typeof save.shiftMs === "number" ? save.shiftMs : 0;
+      runtime.operatorCallsign = typeof save.operatorCallsign === "string" ? save.operatorCallsign : "";
+      safeStorageSet(LS.operatorCallsign, runtime.operatorCallsign);
+      updateOperatorLabel();
       return true;
     }
 
@@ -2259,6 +2310,10 @@
       btnResetCancel: document.getElementById("btn-reset-cancel"),
       btnResetConfirm: document.getElementById("btn-reset-confirm"),
 
+      operatorSlot: document.getElementById("operator-slot"),
+      operatorLabel: document.getElementById("operator-label"),
+      operatorInput: document.getElementById("operator-input"),
+
       shiftTime: document.getElementById("shift-time"),
       shiftWage: document.getElementById("shift-wage"),
       alertCount: document.getElementById("alert-count"),
@@ -2323,9 +2378,55 @@
       severed: false,
       lastSevered: null,
       maintenance: {},
+      processingCount: 0,
       resumeShiftMs: null,
-      skipHashLoad: false
+      skipHashLoad: false,
+      operatorCallsign: ""
     };
+
+    function updateOperatorLabel() {
+      if (!ui.operatorLabel) return;
+      const trimmed = String(runtime.operatorCallsign || "").trim();
+      ui.operatorLabel.textContent = "";
+      if (!trimmed) {
+        ui.operatorLabel.textContent = "Operator";
+        ui.operatorSlot?.classList.remove("has-callsign");
+      } else {
+        ui.operatorLabel.append("Operator:");
+        const callsignNode = document.createElement("span");
+        callsignNode.className = "operator-callsign";
+        callsignNode.textContent = trimmed;
+        ui.operatorLabel.append(callsignNode);
+        ui.operatorSlot?.classList.add("has-callsign");
+      }
+      if (ui.operatorInput && !ui.operatorSlot?.classList.contains("editing")) {
+        ui.operatorInput.value = runtime.operatorCallsign || "";
+      }
+    }
+
+    function setOperatorCallsign(value) {
+      runtime.operatorCallsign = String(value || "").trim().slice(0, 24);
+      safeStorageSet(LS.operatorCallsign, runtime.operatorCallsign);
+      updateOperatorLabel();
+    }
+
+    function startOperatorEdit() {
+      if (!ui.operatorSlot || !ui.operatorInput) return;
+      ui.operatorSlot.classList.add("editing");
+      ui.operatorInput.value = runtime.operatorCallsign || "";
+      ui.operatorInput.focus();
+      ui.operatorInput.select();
+    }
+
+    function finishOperatorEdit(save) {
+      if (!ui.operatorSlot || !ui.operatorInput) return;
+      if (save) {
+        setOperatorCallsign(ui.operatorInput.value);
+      } else {
+        ui.operatorInput.value = runtime.operatorCallsign || "";
+      }
+      ui.operatorSlot.classList.remove("editing");
+    }
 
     // ---------------------------
     // Audio
@@ -2374,9 +2475,17 @@
       click: makeAudioPool("click.ogg", 5, 0.35),
       beep: makeAudioPool("beep.ogg", 4, 0.55),
       blip: makeAudioPool("blip.ogg", 4, 0.4),
+      restore: makeAudioPool("restore.ogg", 3, 0.5),
       startup: makeAudioPool("startup.ogg", 1, 0.65),
       offline: makeAudioPool("offline.ogg", 2, 0.65),
       error: makeAudioPool("error.ogg", 2, 0.6),
+      processing: (() => {
+        const a = new Audio("processing.ogg");
+        a.preload = "auto";
+        a.loop = true;
+        a.volume = 0.5;
+        return a;
+      })(),
       ackalarm: (() => {
         const a = new Audio("ackalarm.ogg");
         a.preload = "auto";
@@ -2425,6 +2534,22 @@
       if (promise?.catch) promise.catch(() => {});
     }
 
+    function updateProcessingSound() {
+      if (!audio.processing) return;
+      if (!audioState.sfxEnabled || !audioState.unlocked || runtime.processingCount <= 0) {
+        audio.processing.pause();
+        audio.processing.currentTime = 0;
+        return;
+      }
+      const promise = audio.processing.play();
+      if (promise?.catch) promise.catch(() => {});
+    }
+
+    function bumpProcessingSound(delta) {
+      runtime.processingCount = Math.max(0, (runtime.processingCount || 0) + delta);
+      updateProcessingSound();
+    }
+
     function setAckAlarm(active) {
       audioState.ackAlarmOn = active;
       if (!audioState.sfxEnabled || !audioState.unlocked) {
@@ -2456,6 +2581,7 @@
         updateAckAlarm();
       }
       updateAudioButtons();
+      updateProcessingSound();
     }
 
     function setMusicEnabled(enabled) {
@@ -2484,6 +2610,7 @@
       if (audioState.ackAlarmOn) {
         setAckAlarm(true);
       }
+      updateProcessingSound();
     }
 
     function isUiInteractionTarget(target) {
@@ -2580,8 +2707,25 @@
       el.scrollTop = el.scrollHeight;
     }
 
+    function logProgressLine(el, text, cls = "dim") {
+      const div = document.createElement("div");
+      div.className = `terminal-line ${cls}`;
+      div.textContent = text;
+      el.appendChild(div);
+      el.scrollTop = el.scrollHeight;
+      return div;
+    }
+
     function consoleLine(text, cls = "dim") { logLine(ui.console, text, cls); }
     function eventLine(text, cls = "dim") { logLine(ui.events, text, cls); }
+
+    function flashErrorButton(btn) {
+      if (!btn) return;
+      btn.classList.remove("btn-error");
+      void btn.offsetWidth;
+      btn.classList.add("btn-error");
+      setTimeout(() => btn.classList.remove("btn-error"), 500);
+    }
 
     const THEME_OPTIONS = ["green", "red", "blue", "amber", "black"];
 
@@ -3792,6 +3936,10 @@
         g.corridors[idx].lastChange = Date.now();
 
         if (g.id === runtime.activeGateId) {
+          const rank = { STABLE: 0, DEGRADED: 1, INTERMITTENT: 2, OFFLINE: 3 };
+          if (rank[next] > rank[current] && next !== "OFFLINE") {
+            playSfx("restore");
+          }
           if (next === "OFFLINE") playSfx("offline");
           eventLine(`LINK ${g.corridors[idx].link}: ${next}`, next === "OFFLINE" ? "bad" : (next === "STABLE" ? "good" : "warn"));
         }
@@ -4032,11 +4180,17 @@
         }
 
         if (Math.random() < RATES.relayShiftChance) {
+          const prevStatus = r.status;
           if (r.status === "ONLINE" && Math.random() < 0.55) r.status = "WEAK";
           else if (r.status === "WEAK" && Math.random() < 0.4) r.status = "FAULT";
           else if (r.status !== "ONLINE" && Math.random() < 0.5) r.status = "ONLINE";
           r.lastChange = now;
-          if (g.id === runtime.activeGateId) eventLine(`RELAY ${r.id}: ${r.status}`, r.status === "FAULT" ? "bad" : "warn");
+          if (g.id === runtime.activeGateId) {
+            if (["WEAK", "FAULT"].includes(r.status) && r.status !== prevStatus) {
+              playSfx("restore");
+            }
+            eventLine(`RELAY ${r.id}: ${r.status}`, r.status === "FAULT" ? "bad" : "warn");
+          }
         }
         if (Math.random() < RATES.relayPacketChance) {
           const msg = Math.random() < 0.7 ? "HANDSHAKE" : "TELEMETRY BURST";
@@ -4201,14 +4355,43 @@
       c.status = next;
       c.cls = CORRIDOR_STATES.find(x => x.key === next)?.cls || "warn";
       c.lastChange = Date.now();
-      if (next === "OFFLINE" && g.id === runtime.activeGateId) playSfx("offline");
+      if (g.id === runtime.activeGateId) {
+        if (next !== "OFFLINE") playSfx("restore");
+        else playSfx("offline");
+      }
       return c;
+    }
+
+    function hasRealignNeed(g) {
+      if (g.alignment !== "WITHIN TOLERANCE") return true;
+      return (g.corridors || []).some(c => c.status !== "STABLE");
+    }
+
+    function hasResetNeed(g) {
+      return g.sync !== "SYNC" || g.beacon !== "ONLINE";
+    }
+
+    function hasPurgeNeed(g) {
+      const allShips = [...g.inbound, ...g.outbound];
+      const hasPending = g.inbound.some(s => s.state === "PENDING" && !s.priority)
+        || g.outbound.some(s => (s.state === "PENDING" || s.state === "PENDING AUTH") && !s.priority);
+      const hasHold = allShips.some(s => s.state === "HOLD");
+      const hasAuth = allShips.some(s => s.state === "PENDING AUTH");
+      return hasPending || hasHold || hasAuth;
+    }
+
+    function hasScanNeed(g) {
+      const allShips = [...g.inbound, ...g.outbound];
+      const hasAnomaly = allShips.some(s => s.transponder !== "VALID");
+      const hasHiddenEffect = allShips.some(s => (s.effects || []).some(ef => ef.hidden && !ef.revealed));
+      return hasAnomaly || hasHiddenEffect;
     }
 
     function doMaintenance(kind) {
       const g = activeGate();
 
       if (kind === "realign") {
+        const shouldAward = hasRealignNeed(g);
         consoleLine("MAINT: REALIGN (IN PROGRESS)...", "dim");
         setTimeout(() => {
           g.alignment = "WITHIN TOLERANCE";
@@ -4224,13 +4407,14 @@
           }
 
           g.lastRefresh = Date.now();
-          bumpStat(g, "maintenanceOps");
+          if (shouldAward) bumpStat(g, "maintenanceOps");
           renderAll();
         }, 950);
         return;
       }
 
         if (kind === "reset") {
+          const shouldAward = hasResetNeed(g);
           consoleLine("MAINT: RESET HANDSHAKE (IN PROGRESS)...", "dim");
           setTimeout(() => {
           // fix sync most of the time
@@ -4249,13 +4433,14 @@
           consoleLine("MAINT: LINK WOBBLE SUPPRESSED (TEMP)", "dim");
 
           g.lastRefresh = Date.now();
-          bumpStat(g, "maintenanceOps");
+          if (shouldAward) bumpStat(g, "maintenanceOps");
           renderAll();
         }, 800);
         return;
       }
 
       if (kind === "purge") {
+        const shouldAward = hasPurgeNeed(g);
         consoleLine("MAINT: PURGE QUEUE (LOCAL)", "warn");
         let removed = 0;
         let released = 0;
@@ -4289,7 +4474,7 @@
         if (released) consoleLine(`MAINT: RELEASED ${released} HOLDS`, "dim");
         if (authReset) consoleLine(`MAINT: AUTH RESET ${authReset}`, "dim");
         g.lastRefresh = Date.now();
-        bumpStat(g, "maintenanceOps");
+        if (shouldAward) bumpStat(g, "maintenanceOps");
         renderAll();
         return;
       }
@@ -4302,7 +4487,7 @@
           return;
         }
         g.lastScanAt = now;
-        bumpStat(g, "maintenanceOps");
+        const shouldAward = hasScanNeed(g);
         consoleLine("SCAN: ACTIVE SWEEP...", "dim");
 
         setTimeout(() => {
@@ -4337,6 +4522,7 @@
           }
 
           g.lastRefresh = Date.now();
+          if (shouldAward) bumpStat(g, "maintenanceOps");
           renderAll();
         }, 700);
       }
@@ -4501,7 +4687,10 @@
             other.status = "FAULT";
             other.lastChange = now;
             consoleLine(`RESTORE FAILED: ${other.id} FAULT`, "warn");
-            if (g.id === runtime.activeGateId) eventLine(`RELAY ${other.id}: FAULT (BACKLASH)`, "warn");
+            if (g.id === runtime.activeGateId) {
+              playSfx("restore");
+              eventLine(`RELAY ${other.id}: FAULT (BACKLASH)`, "warn");
+            }
           } else {
             g.sync = "FAULT";
             consoleLine("RESTORE FAILED: SYNC FAULT", "bad");
@@ -4714,6 +4903,7 @@
       consoleLine("  RELAYS | PING <RELAY-ID> | ACK <RELAY-ID> | RESTORE <RELAY-ID>", "dim");
       consoleLine("  PACKETS", "dim");
       consoleLine("  ORDER FUEL | ORDER SUPPLY", "dim");
+      consoleLine("  CALLSIGN <NAME> | CALLSIGN CLEAR", "dim");
       consoleLine("  SFX ON|OFF|TOGGLE", "dim");
       consoleLine("  MUSIC ON|OFF|TOGGLE", "dim");
       consoleLine("  THEME GREEN|RED|BLUE|AMBER|BLACK", "dim");
@@ -4846,6 +5036,22 @@
         return cmdNote(id, note);
       }
 
+      if (cmd === "CALLSIGN" || cmd === "OPERATOR") {
+        const callsign = parts.slice(1).join(" ").trim();
+        if (!callsign) {
+          consoleLine(`OPERATOR ${runtime.operatorCallsign || "UNSET"}`, "dim");
+          return;
+        }
+        if (callsign.toUpperCase() === "CLEAR") {
+          setOperatorCallsign("");
+          consoleLine("OPERATOR CLEARED", "dim");
+          return;
+        }
+        setOperatorCallsign(callsign);
+        consoleLine(`OPERATOR SET: ${runtime.operatorCallsign || "UNSET"}`, "dim");
+        return;
+      }
+
       if (cmd === "APPROVE" || cmd === "HOLD" || cmd === "DENY") {
         const id = (parts[1] || "").toUpperCase();
         if (!id) return consoleLine(`USAGE: ${cmd} <ID>`, "warn");
@@ -4853,10 +5059,10 @@
         return;
       }
 
-      if (cmd === "REALIGN") return doMaintenance("realign");
-      if (cmd === "RESET") return doMaintenance("reset");
-      if (cmd === "PURGE") return doMaintenance("purge");
-      if (cmd === "SCAN") return doMaintenance("scan");
+      if (cmd === "REALIGN") return queueMaintenance("realign", ui.btnRealign, { showConsole: true });
+      if (cmd === "RESET") return queueMaintenance("reset", ui.btnReset, { showConsole: true });
+      if (cmd === "PURGE") return queueMaintenance("purge", ui.btnPurge, { showConsole: true });
+      if (cmd === "SCAN") return queueMaintenance("scan", ui.btnScan, { showConsole: true });
 
       if (cmd === "WORKORDER") return issueWorkOrder(parts.slice(1).join(" "));
       if (cmd === "RELAYS") return cmdRelays();
@@ -4998,38 +5204,93 @@
       });
     }
 
-    function queueMaintenance(kind, btn) {
-      if (!btn) return;
-      if (btn.dataset.busy === "true") {
+    if (ui.operatorLabel && ui.operatorInput && ui.operatorSlot) {
+      ui.operatorLabel.addEventListener("click", () => startOperatorEdit());
+      ui.operatorLabel.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          startOperatorEdit();
+        }
+      });
+      ui.operatorInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          finishOperatorEdit(true);
+        } else if (e.key === "Escape") {
+          e.preventDefault();
+          finishOperatorEdit(false);
+        }
+      });
+      ui.operatorInput.addEventListener("blur", () => finishOperatorEdit(true));
+    }
+
+    function queueMaintenance(kind, btn, options = {}) {
+      if (runtime.maintenance[kind]) {
         playSfx("error");
+        flashErrorButton(btn);
         return;
       }
-      const label = btn.dataset.label || btn.textContent.trim();
-      btn.dataset.label = label;
-      btn.dataset.busy = "true";
-      btn.disabled = true;
-      btn.classList.add("btn-busy");
+      if (btn && btn.dataset.busy === "true") {
+        playSfx("error");
+        flashErrorButton(btn);
+        return;
+      }
+      const label = btn?.dataset.label || btn?.textContent.trim() || kind.toUpperCase();
+      if (btn) {
+        btn.dataset.label = label;
+        btn.dataset.busy = "true";
+        btn.classList.add("btn-busy");
+      }
 
-      const delaySec = randRange(3, 5);
+      const delaySec = randRange(1, 3);
       const endAt = Date.now() + delaySec * 1000;
+      const dotTotal = 4;
 
-      btn.textContent = `${label} (IN PROCESS ${delaySec}s)`;
-      const tick = setInterval(() => {
+      let progressLine = null;
+      let progressTick = null;
+      let progressLabel = label.toUpperCase();
+      let dots = 0;
+      if (options.showConsole) {
+        dots = 1;
+        progressLine = logProgressLine(ui.console, `MAINT: ${progressLabel} .`, "dim");
+        progressTick = setInterval(() => {
+          const remaining = Math.max(0, endAt - Date.now());
+          const progress = Math.min(1, Math.max(0, 1 - (remaining / (delaySec * 1000))));
+          const nextDots = Math.max(1, Math.ceil(progress * dotTotal));
+          if (nextDots !== dots && progressLine) {
+            dots = nextDots;
+            progressLine.textContent = `MAINT: ${progressLabel} ${".".repeat(dots)}`;
+          }
+        }, 120);
+      }
+
+      if (btn) {
+        btn.textContent = `${label} (IN PROCESS ${delaySec}s)`;
+      }
+      const tick = btn ? setInterval(() => {
         const remaining = Math.max(0, Math.ceil((endAt - Date.now()) / 1000));
         btn.textContent = `${label} (IN PROCESS ${remaining}s)`;
-      }, 250);
+      }, 250) : null;
+
+      bumpProcessingSound(1);
 
       const timer = setTimeout(() => {
-        clearInterval(tick);
-        btn.disabled = false;
-        btn.classList.remove("btn-busy");
-        btn.dataset.busy = "false";
-        btn.textContent = label;
+        if (tick) clearInterval(tick);
+        if (progressTick) clearInterval(progressTick);
+        if (progressLine) {
+          progressLine.textContent = `MAINT: ${progressLabel} ${".".repeat(dotTotal)}`;
+        }
+        if (btn) {
+          btn.classList.remove("btn-busy");
+          btn.dataset.busy = "false";
+          btn.textContent = label;
+        }
+        bumpProcessingSound(-1);
         doMaintenance(kind);
         delete runtime.maintenance[kind];
       }, delaySec * 1000);
 
-      runtime.maintenance[kind] = { timer, tick };
+      runtime.maintenance[kind] = { timer, tick, progressTick };
     }
 
     ui.btnRealign.addEventListener("click", () => queueMaintenance("realign", ui.btnRealign));
@@ -5117,6 +5378,8 @@
     async function boot() {
       await loadSaveFromHash();
       loadTheme();
+      runtime.operatorCallsign = safeStorageGet(LS.operatorCallsign) || "";
+      updateOperatorLabel();
       runtime.catalog = loadGateCatalog();
       const resumeBoot = typeof runtime.resumeShiftMs === "number";
       runtime.shiftStart = resumeBoot ? Date.now() - runtime.resumeShiftMs : Date.now();
