@@ -3497,7 +3497,7 @@
       ui.concoursePill.textContent = concourse.text;
       ui.concourseStatus.textContent = `${concourse.text} (${Math.round(g.concourseLevel || 0)})`;
 
-
+			const deconOnline = getFacility(g, "DECON")?.status === "ONLINE";
 			ui.dockList.innerHTML = (g.dockSlots || []).map(slot => {
 				const ship = slot.shipId ? findShipById(g, slot.shipId) : null;
 
@@ -3512,7 +3512,6 @@
 				if (ship && ship.state === "WAITING DECON" && breachT) {
 					metaParts.push(`EXPOSURE IN T-${breachT}`);
 				}
-				const dockMeta = metaParts.join(" / ");
 
 				const canDecon = !!(
 					ship &&
