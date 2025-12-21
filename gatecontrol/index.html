@@ -1895,10 +1895,10 @@
 
     const WORKORDER_PHASES = [
       { key: "QUEUED", min: 20, max: 45 },
-      { key: "DISPATCHED", min: 2 * 60, max: 4 * 60 },
-      { key: "ON SITE", min: 40, max: 90 },
-      { key: "REPAIRING", min: 90, max: 8 * 60 },
-      { key: "COMPLETE", min: 30, max: 45 }
+      { key: "DISPATCHED", min: 60, max: 2 * 60 },
+      { key: "ON SITE", min: 20, max: 60 },
+      { key: "REPAIRING", min: 90, max: 5 * 60 },
+      { key: "COMPLETE", min: 20, max: 45 }
     ];
 
     const DOCK_STATES = ["EMPTY", "RESERVED", "DOCKED", "DECON", "SERVICING", "CLEARING"];
@@ -1910,8 +1910,8 @@
     ];
 
     const RESOURCE_TYPES = [
-      { id: "FUEL", name: "FUEL", startMin: 70, startMax: 92, restockMin: 35, restockMax: 55, request: "REFUEL", pricePerUnit: 1 },
-      { id: "SUPPLY", name: "SUPPLY", startMin: 65, startMax: 88, restockMin: 30, restockMax: 50, request: "RESUPPLY", pricePerUnit: 1 }
+      { id: "FUEL", name: "FUEL", startMin: 75, startMax: 95, restockMin: 35, restockMax: 55, request: "REFUEL", pricePerUnit: 1 },
+      { id: "SUPPLY", name: "SUPPLY", startMin: 75, startMax: 95, restockMin: 30, restockMax: 50, request: "RESUPPLY", pricePerUnit: 1 }
     ];
     const RESOURCE_ORDER_THRESHOLD = 25;
     const RESOURCE_CRITICAL_THRESHOLD = 10;
@@ -1939,7 +1939,7 @@
       facilityWorsenChance: 0.00015,
       relayPacketChance: 0.0045,
       relayShiftChance: 0.0012,
-      relayPingChance: 0.0008,
+      relayPingChance: 0.0010,
       relayDropChance: 0.00035,
       concourseFade: 0.03,
       fuelDrain: 0.020,
@@ -1983,7 +1983,7 @@
     }
 
     // ETA ranges in seconds (slow but not ridiculous)
-    const ETA = { min: 45, max: 900 }; // 0:45-15:00 minutes
+    const ETA = { min: 30, max: 600 }; // 0:45-15:00 minutes
     const RELAY_ACK_WINDOW_MS = 30_000;
     const RELAY_HEARTBEAT_MIN_MS = 1_200;
     const RELAY_HEARTBEAT_MAX_MS = 3_200;
