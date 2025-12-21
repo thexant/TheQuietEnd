@@ -1378,6 +1378,22 @@
     const SAVE_HASH_KEY = "save";
     const CLEAR_HASH_AFTER_LOAD = true;
 
+    function safeStorageGet(key) {
+      try { return localStorage.getItem(key); } catch (_) { return null; }
+    }
+    function safeStorageSet(key, value) {
+      try { localStorage.setItem(key, value); return true; } catch (_) { return false; }
+    }
+
+    function safeReplaceState(url) {
+      try {
+        history.replaceState(null, "", url);
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+
     function bytesToBase64Url(bytes) {
       let binary = "";
       for (let i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
@@ -1448,27 +1464,30 @@
 	  return Array.from(set).sort();
 	}
 
-	function loadGateCatalog() {
-	  const GATE_COUNT = 1;
+    function loadGateCatalog() {
+      const GATE_COUNT = 1;
 
-	  try {
-		const raw = localStorage.getItem(LS.gateList);
-		if (raw) {
-		  const parsed = JSON.parse(raw);
-		  if (Array.isArray(parsed) && parsed.length >= 1) {
-        const current = localStorage.getItem(LS.gateCurrent);
-        const chosen = (current && parsed.includes(current)) ? current : parsed[0];
-        const list = [chosen];
-        localStorage.setItem(LS.gateList, JSON.stringify(list));
-        return list;
+      let raw = null;
+      try {
+        raw = localStorage.getItem(LS.gateList);
+      } catch (_) {}
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length >= 1) {
+            const current = localStorage.getItem(LS.gateCurrent);
+            const chosen = (current && parsed.includes(current)) ? current : parsed[0];
+            const list = [chosen];
+            try { localStorage.setItem(LS.gateList, JSON.stringify(list)); } catch (_) {}
+            return list;
+          }
+        } catch (_) {}
       }
-		}
-	  } catch (_) {}
 
-	  const list = buildGateList(GATE_COUNT);
-	  localStorage.setItem(LS.gateList, JSON.stringify(list));
-	  return list;
-	}
+      const list = buildGateList(GATE_COUNT);
+      try { localStorage.setItem(LS.gateList, JSON.stringify(list)); } catch (_) {}
+      return list;
+    }
 
     // ---------------------------
     // State Model (lonelier / slower)
@@ -2007,7 +2026,7 @@
         const save = await decompressJsonFromUrl(data);
         const applied = applySaveState(save);
         if (applied && CLEAR_HASH_AFTER_LOAD) {
-          history.replaceState(null, "", location.pathname + location.search);
+          safeReplaceState(location.pathname + location.search);
         }
         return applied;
       } catch (_) {
@@ -2019,7 +2038,7 @@
       const save = buildSaveState();
       const payload = await compressJsonToUrl(save);
       const hashValue = `${SAVE_VERSION}:${payload}`;
-      history.replaceState(null, "", `#${SAVE_HASH_KEY}=${hashValue}`);
+      safeReplaceState(`#${SAVE_HASH_KEY}=${hashValue}`);
       return location.href;
     }
 
@@ -2055,7 +2074,7 @@
       const applied = applySaveState(save);
       if (!applied) return false;
       runtime.skipHashLoad = true;
-      history.replaceState(null, "", location.pathname + location.search);
+      safeReplaceState(location.pathname + location.search);
       await boot();
       return true;
     }
@@ -2266,25 +2285,25 @@
     function setTheme(theme, silent = false) {
       document.documentElement.dataset.theme = theme;
       ui.themeSelect.value = theme;
-      localStorage.setItem(LS.theme, theme);
+      safeStorageSet(LS.theme, theme);
       if (!silent) consoleLine(`DISPLAY SET: ${theme.toUpperCase()}`, "dim");
     }
 
     function randomizeTheme(silent = false) {
-      const current = document.documentElement.dataset.theme || localStorage.getItem(LS.theme);
+      const current = document.documentElement.dataset.theme || safeStorageGet(LS.theme);
       const next = pickRandomTheme(current);
       setTheme(next, silent);
       return next;
     }
 
     function loadTheme() {
-      const stored = localStorage.getItem(LS.theme);
+      const stored = safeStorageGet(LS.theme);
       if (stored) {
         document.documentElement.dataset.theme = stored;
         ui.themeSelect.value = stored;
         return;
       }
-      const hasGateList = !!localStorage.getItem(LS.gateList);
+      const hasGateList = !!safeStorageGet(LS.gateList);
       const initial = hasGateList ? "green" : pickRandomTheme();
       setTheme(initial, true);
     }
@@ -2297,7 +2316,7 @@
       if (ui.gateDisplay) {
         ui.gateDisplay.textContent = runtime.activeGateId;
       }
-      localStorage.setItem(LS.gateCurrent, runtime.activeGateId);
+      safeStorageSet(LS.gateCurrent, runtime.activeGateId);
 
       ui.ps1.textContent = `${runtime.activeGateId}>`;
 
@@ -4057,7 +4076,9 @@
         if (g.id === runtime.activeGateId) eventLine(`RELAY ${relay.id}: ONLINE (RESTORE)`, "good");
       } else {
         const backlash = Math.random();
-        if (backlash < 0.4) {
+        if (backlash < 0.55) {
+          consoleLine(`RESTORE FAILED: ${relay.id} NO CHANGE`, "dim");
+        } else if (backlash < 0.7) {
           relay.offline = true;
           relay.hiddenOffline = false;
           relay.offlineReason = "RESTORE_SPIKE";
@@ -4068,7 +4089,7 @@
           relay.lastChange = now;
           consoleLine(`RESTORE FAILED: ${relay.id} OFFLINE`, "bad");
           if (g.id === runtime.activeGateId) eventLine(`RELAY ${relay.id}: OFFLINE (RESTORE SPIKE)`, "bad");
-        } else if (backlash < 0.75) {
+        } else if (backlash < 0.88) {
           if (g.beacon === "ONLINE") {
             g.beacon = Math.random() < 0.55 ? "FAULT" : "OFFLINE";
           } else if (g.beacon === "FAULT" && Math.random() < 0.6) {
