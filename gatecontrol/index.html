@@ -4337,7 +4337,10 @@
         const phase = WORKORDER_PHASES[w.phaseIndex];
         w.state = phase.key;
         w.phaseEndsAt = now + randRange(phase.min, phase.max) * 1000;
-        if (g.id === runtime.activeGateId) eventLine(`WORKORDER ${w.state}: ${w.systemName}`, "dim");
+        if (g.id === runtime.activeGateId) {
+          const cls = w.state === "COMPLETE" ? "good" : "dim";
+          eventLine(`WORKORDER ${w.state}: ${w.systemName}`, cls);
+        }
         if (w.state === "COMPLETE") {
           bumpStat(g, "workOrdersCompleted");
           const sys = getFacility(g, w.systemId);
@@ -4752,6 +4755,7 @@
           g.alignment = "WITHIN TOLERANCE";
           g.tech.driftSuppressedUntil = Date.now() + 150_000; // calmer for 2.5 min
           consoleLine("MAINT: ALIGNMENT WITHIN TOLERANCE", "good");
+          if (g.id === runtime.activeGateId) eventLine("MAINT: ALIGNMENT WITHIN TOLERANCE", "good");
 
           // realign can also stabilize one link (often), with a small chance to steady another
           let improvedAny = false;
@@ -4760,6 +4764,9 @@
             if (improved) {
               improvedAny = true;
               consoleLine(`MAINT: LINK ${improved.link} -> ${improved.status}`, improved.status === "STABLE" ? "good" : "warn");
+              if (g.id === runtime.activeGateId) {
+                eventLine(`MAINT: LINK ${improved.link} -> ${improved.status}`, improved.status === "STABLE" ? "good" : "warn");
+              }
             }
           }
           if (Math.random() < 0.25 && hasRealignNeed(g)) {
@@ -4767,9 +4774,15 @@
             if (improved) {
               improvedAny = true;
               consoleLine(`MAINT: LINK ${improved.link} -> ${improved.status}`, improved.status === "STABLE" ? "good" : "warn");
+              if (g.id === runtime.activeGateId) {
+                eventLine(`MAINT: LINK ${improved.link} -> ${improved.status}`, improved.status === "STABLE" ? "good" : "warn");
+              }
             }
           }
-          if (!improvedAny) consoleLine("MAINT: LINK STATE UNCHANGED", "dim");
+          if (!improvedAny) {
+            consoleLine("MAINT: LINK STATE UNCHANGED", "dim");
+            if (g.id === runtime.activeGateId) eventLine("MAINT: LINK STATE UNCHANGED", "dim");
+          }
 
           g.lastRefresh = Date.now();
           if (shouldAward) bumpStat(g, "maintenanceOps");
@@ -4800,6 +4813,11 @@
             consoleLine(`MAINT: SYNC ${g.sync}`, g.sync === "SYNC" ? "good" : (g.sync === "FAULT" ? "bad" : "warn"));
             consoleLine(`MAINT: BEACON ${g.beacon}`, g.beacon === "ONLINE" ? "good" : "bad");
             consoleLine("MAINT: LINK WOBBLE SUPPRESSED (TEMP)", "dim");
+            if (g.id === runtime.activeGateId) {
+              eventLine(`MAINT: SYNC ${g.sync}`, g.sync === "SYNC" ? "good" : (g.sync === "FAULT" ? "bad" : "warn"));
+              eventLine(`MAINT: BEACON ${g.beacon}`, g.beacon === "ONLINE" ? "good" : "bad");
+              eventLine("MAINT: LINK WOBBLE SUPPRESSED (TEMP)", "dim");
+            }
 
             g.lastRefresh = Date.now();
             if (shouldAward) bumpStat(g, "maintenanceOps");
