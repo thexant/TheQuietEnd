@@ -286,7 +286,7 @@ ________________
 
 
 6.1 Playbooks
-The Navigator
+# The Navigator
 You keep the crew alive between stars. You read the Corridors like the weather.
 Recommended Stat Build: 
 
@@ -312,7 +312,7 @@ Bond prompts (choose 2):
 ________________
 
 
-The Engineer
+# The Engineer
 You keep the ship running with spit, wire, and stubbornness.
 Recommended Stat Build:
 TECH +2, GRIT +1, WITS +1, TACT 0, FACE −1
@@ -337,7 +337,7 @@ Bond prompts (choose 2):
 ________________
 
 
-The Medic
+# The Medic
 You keep bodies functional in places bodies were never meant to go.
 Recommended Stat Build:
 TECH +2, WITS +1, FACE +1, GRIT 0, TACT −1
@@ -364,7 +364,7 @@ Bond prompts (choose 2):
 ________________
 
 
-The Quartermaster
+# The Quartermaster
 You keep the ship fed, fueled, and profitable—and you know what to hide.
 Recommended Stat Build:
 FACE +2, WITS +1, TECH +1, GRIT 0, TACT −1
@@ -389,7 +389,7 @@ Bond prompts (choose 2):
 ________________
 
 
-The Captain
+# The Captain
 You make the calls people hate—and you carry the consequences.
 Recommended Stat Build:
 FACE +2, GRIT +1, TACT +1, WITS 0, TECH −1
@@ -411,7 +411,7 @@ ________________
 
 
 
-The Security Officer
+# The Security Officer
 You keep people in line, keep boards from happening, and make sure the ship isn’t “easy prey.”
 Recommended Stat Build:
 
@@ -438,7 +438,7 @@ Bond prompts (choose 2):
 ________________
 
 
-The Broker
+# The Broker
 You don’t fix engines, you fix problems. Contacts, papers, favors, black-market logistics.
 
 Recommended Stat Build:
@@ -467,8 +467,8 @@ Bond prompts (choose 2):
 ________________
 
 
-The Reclaimer
-Derelicts, ghost colonies, dead stations — you go where the profit still has teeth.
+# The Reclaimer
+Derelicts, ghost colonies, dead stations: you go where the profit still has teeth.
 Recommended Stat Build:
 WITS +2, TECH +1, GRIT +1, TACT 0, FACE −1
 
@@ -495,7 +495,7 @@ Bond prompts (choose 2):
 ________________
 
 
-The Cipher
+# The Cipher
 You don’t chart stars — you validate truth, crack systems, scrub trails, and turn raw signals into decisions.
 Recommended Stat Build:
 WITS +2, TECH +1, FACE +1, GRIT 0, TACT −1
