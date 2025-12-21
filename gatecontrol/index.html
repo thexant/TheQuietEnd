@@ -115,6 +115,82 @@
       display: none;
     }
 
+    #start-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 220;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, var(--bg-hi) 0%, var(--deep) 100%);
+      text-align: center;
+    }
+    .start-card {
+      width: min(420px, 82vw);
+      display: grid;
+      gap: 18px;
+      padding: 28px 24px;
+      border: 1px solid var(--line);
+      background: rgba(6, 10, 8, 0.65);
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255,255,255,0.04);
+    }
+    .start-sub {
+      font-family: var(--font-title);
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+    #btn-start {
+      font-size: 1.05rem;
+      letter-spacing: 0.3em;
+      padding: 14px 16px;
+    }
+    .start-status {
+      display: none;
+      font-size: 1.05rem;
+      letter-spacing: 0.3em;
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      color: var(--signal);
+    }
+    .start-progress {
+      width: 100%;
+      height: 8px;
+      border: 1px solid var(--line);
+      background: rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .start-progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, transparent 0%, var(--signal) 45%, rgba(255,255,255,0.6) 70%, var(--signal) 100%);
+      box-shadow: 0 0 12px var(--glow);
+    }
+    body.start-loading .start-progress {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    body.start-loading #btn-start {
+      display: none;
+    }
+    body.start-loading .start-status {
+      display: block;
+    }
+    body.start-loading .start-progress-fill {
+      animation: startFill 8s linear forwards;
+    }
+    @keyframes startFill {
+      0% { width: 0%; }
+      100% { width: 100%; }
+    }
+    body.started #start-overlay {
+      display: none;
+    }
+
     #severed-overlay {
       position: fixed;
       inset: 0;
@@ -1080,6 +1156,16 @@
 
 <body>
   <div class="crt-overlay"></div>
+  <div id="start-overlay" aria-hidden="false">
+    <div class="start-card">
+      <div class="start-sub">Awaiting Operator Input</div>
+      <button id="btn-start">START</button>
+      <div class="start-status" aria-live="polite">INITIALIZING...</div>
+      <div class="start-progress" aria-hidden="true">
+        <div class="start-progress-fill"></div>
+      </div>
+    </div>
+  </div>
   <div id="severed-overlay">
     <div class="severed-card">
       <div class="severed-title">Gate Connection Severed</div>
@@ -1541,7 +1627,7 @@
       return `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
     }
 
-    const SAVE_VERSION = "v1";
+    const SAVE_VERSION = "v2";
     const SAVE_HASH_KEY = "save";
     const CLEAR_HASH_AFTER_LOAD = true;
 
@@ -1576,6 +1662,81 @@
       return bytes;
     }
 
+    const BASE91_ALPHABET = (() => {
+      let chars = "";
+      for (let i = 33; i <= 126; i++) {
+        const ch = String.fromCharCode(i);
+        if (ch === "#" || ch === "%" || ch === "\"") continue;
+        chars += ch;
+      }
+      return chars;
+    })();
+
+    const BASE91_TABLE = (() => {
+      const table = new Int16Array(128).fill(-1);
+      for (let i = 0; i < BASE91_ALPHABET.length; i++) {
+        table[BASE91_ALPHABET.charCodeAt(i)] = i;
+      }
+      return table;
+    })();
+
+    function bytesToBase91(bytes) {
+      let b = 0;
+      let n = 0;
+      let out = "";
+      for (let i = 0; i < bytes.length; i++) {
+        b |= bytes[i] << n;
+        n += 8;
+        if (n > 13) {
+          let v = b & 8191;
+          if (v > 88) {
+            b >>= 13;
+            n -= 13;
+          } else {
+            v = b & 16383;
+            b >>= 14;
+            n -= 14;
+          }
+          out += BASE91_ALPHABET[v % 91] + BASE91_ALPHABET[Math.floor(v / 91)];
+        }
+      }
+      if (n) {
+        out += BASE91_ALPHABET[b % 91];
+        if (n > 7 || b > 90) out += BASE91_ALPHABET[Math.floor(b / 91)];
+      }
+      return out;
+    }
+
+    function base91ToBytes(str) {
+      let b = 0;
+      let n = 0;
+      let v = -1;
+      const out = [];
+      for (let i = 0; i < str.length; i++) {
+        const code = str.charCodeAt(i);
+        if (code >= BASE91_TABLE.length) return null;
+        const val = BASE91_TABLE[code];
+        if (val === -1) return null;
+        if (v < 0) {
+          v = val;
+        } else {
+          v += val * 91;
+          b |= v << n;
+          n += (v & 8191) > 88 ? 13 : 14;
+          while (n >= 8) {
+            out.push(b & 255);
+            b >>= 8;
+            n -= 8;
+          }
+          v = -1;
+        }
+      }
+      if (v > -1) {
+        out.push((b | (v << n)) & 255);
+      }
+      return new Uint8Array(out);
+    }
+
     async function compressBytes(bytes) {
       if (typeof CompressionStream !== "function") {
         return bytes;
@@ -1594,15 +1755,16 @@
       return new Uint8Array(buffer);
     }
 
-    async function compressJsonToUrl(data) {
+    async function compressJsonToUrl(data, version = SAVE_VERSION) {
       const json = JSON.stringify(data);
       const bytes = new TextEncoder().encode(json);
       const compressed = await compressBytes(bytes);
-      return bytesToBase64Url(compressed);
+      return version === "v2" ? bytesToBase91(compressed) : bytesToBase64Url(compressed);
     }
 
-    async function decompressJsonFromUrl(str) {
-      const bytes = base64UrlToBytes(str);
+    async function decompressJsonFromUrl(str, version = SAVE_VERSION) {
+      const bytes = version === "v2" ? base91ToBytes(str) : base64UrlToBytes(str);
+      if (!bytes) throw new Error("Invalid share payload");
       const decompressed = await decompressBytes(bytes);
       const json = new TextDecoder().decode(decompressed);
       return JSON.parse(json);
@@ -2203,8 +2365,15 @@
     function getHashSaveValue() {
       const hash = location.hash.startsWith("#") ? location.hash.slice(1) : "";
       if (!hash) return null;
+      if (hash.startsWith("v2")) {
+        return { version: "v2", payload: hash.slice(2) };
+      }
       const params = new URLSearchParams(hash);
-      return params.get(SAVE_HASH_KEY);
+      const value = params.get(SAVE_HASH_KEY);
+      if (!value) return null;
+      const [prefix, data] = value.split(":");
+      if (!prefix || !data) return null;
+      return { version: prefix, payload: data };
     }
 
     async function loadSaveFromHash() {
@@ -2214,10 +2383,10 @@
       }
       const value = getHashSaveValue();
       if (!value) return false;
-      const [prefix, data] = value.split(":");
-      if (prefix !== SAVE_VERSION || !data) return false;
+      const { version, payload } = value;
+      if (!payload || (version !== "v1" && version !== "v2")) return false;
       try {
-        const save = await decompressJsonFromUrl(data);
+        const save = await decompressJsonFromUrl(payload, version);
         const applied = applySaveState(save);
         if (applied && CLEAR_HASH_AFTER_LOAD) {
           safeReplaceState(location.pathname + location.search);
@@ -2230,9 +2399,9 @@
 
     async function writeShareHash() {
       const save = buildSaveState();
-      const payload = await compressJsonToUrl(save);
-      const hashValue = `${SAVE_VERSION}:${payload}`;
-      safeReplaceState(`#${SAVE_HASH_KEY}=${hashValue}`);
+      const payload = await compressJsonToUrl(save, SAVE_VERSION);
+      const hashValue = `#${SAVE_VERSION}${payload}`;
+      safeReplaceState(hashValue);
       return location.href;
     }
 
@@ -2294,6 +2463,8 @@
     // UI + Runtime
     // ---------------------------
     const ui = {
+      startOverlay: document.getElementById("start-overlay"),
+      btnStart: document.getElementById("btn-start"),
       gateDisplay: document.getElementById("gate-display"),
       themeSelect: document.getElementById("theme-select"),
       btnShare: document.getElementById("btn-share"),
@@ -5302,6 +5473,33 @@
     }
     if (ui.btnRestart) ui.btnRestart.addEventListener("click", restartGate);
 
+    loadTheme();
+
+    let didBoot = false;
+    let startInProgress = false;
+    function beginSession() {
+      if (didBoot || startInProgress) return;
+      startInProgress = true;
+      document.body.classList.add("start-loading");
+      ui.btnStart?.setAttribute("disabled", "true");
+      ui.startOverlay?.setAttribute("aria-hidden", "false");
+      unlockAudio();
+      requestStartupSound();
+      playSfx("click");
+      setTimeout(() => {
+        didBoot = true;
+        document.body.classList.remove("start-loading");
+        document.body.classList.add("started");
+        ui.startOverlay?.setAttribute("aria-hidden", "true");
+        boot();
+      }, 8000);
+    }
+
+    if (ui.btnStart) {
+      ui.btnStart.addEventListener("click", beginSession);
+      ui.btnStart.focus();
+    }
+
     function setHelpOpen(open) {
       if (!ui.helpPanel || !ui.btnHelp) return;
       ui.helpPanel.classList.toggle("open", open);
@@ -5395,7 +5593,6 @@
 
       setGateById(initialGate, true);
       eventLine("EVENT LOG: ACTIVE", "dim");
-      if (!resumeBoot) requestStartupSound();
       updateMusicState();
       if (runtime.severed && runtime.lastSevered) {
         updateSeveredOverlay(runtime.lastSevered);
@@ -5423,7 +5620,7 @@
       setTimeout(() => ui.cmd.focus(), 150);
     }
 
-    boot();
+    // Boot is deferred until the operator presses START.
   </script>
 </body>
 </html>
