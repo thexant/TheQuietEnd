@@ -1932,6 +1932,8 @@
       reportChance: 0.018,    // sparse ambient chatter
       flavorChance: 0.0022,   // rare ambient flavor text
       driftChance: 0.015,     // alignment drift
+      syncDriftChance: 0.006, // sync slips to ASYNC/FAULT
+      syncRecoverChance: 0.015, // sync recovers to SYNC (with healthy relays)
       wobbleChance: 0.010,    // corridor wobble
       facilityFaultChance: 0.00085, // rare subsystem faults
       facilityWorsenChance: 0.00015,
@@ -4259,7 +4261,7 @@
         }
       }
 
-      if (Math.random() < 0.015) {
+      if (Math.random() < RATES.syncDriftChance) {
         const prevSync = g.sync;
         g.sync = (Math.random() < 0.88) ? "ASYNC" : "FAULT";
         if (g.id === runtime.activeGateId) {
@@ -4268,7 +4270,7 @@
         }
       }
 
-      if (g.sync === "ASYNC" && relaysFunctional(g) && Math.random() < 0.04) {
+      if (g.sync === "ASYNC" && relaysFunctional(g) && Math.random() < RATES.syncRecoverChance) {
         g.sync = "SYNC";
         if (g.id === runtime.activeGateId) eventLine("SYSTEM: SYNC RESTORED", "good");
       }
