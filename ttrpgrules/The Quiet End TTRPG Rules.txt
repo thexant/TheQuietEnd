@@ -280,8 +280,7 @@ ________________
                                                                            2. Choose a Stats Array from your playbook.
                                                                            3. Pick 2 Playbook Moves (you start with those).
                                                                            4. Pick a Load (Light / Standard / Heavy) and choose your items.
-                                                                           5. Choose 1 Mod (optional at start; set to 0–1 depending on tone).
-                                                                           6. Create 2 Bonds (history questions) with other PCs.
+                                                                           5. Create 2 Bonds (history questions) with other PCs.
 
 ________________
 
