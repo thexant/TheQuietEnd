@@ -1918,9 +1918,9 @@
     const RESOURCE_ORDER_MIN = 1;
     const RESOURCE_ORDER_MAX = 100;
     const RESOURCE_ORDER_PHASES = [
-      { key: "PROCESSING ORDER", min: 90, max: 180 },
+      { key: "PROCESSING ORDER", min: 60, max: 120 },
       { key: "PREPARING ORDER", min: 120, max: 240 },
-      { key: "SHIPPING", min: 180, max: 360 }
+      { key: "SHIPPING", min: 120, max: 360 }
     ];
 
     // Sparse rates (per second tick)
@@ -2241,7 +2241,7 @@
           if (res.order.stage === "INBOUND" && !res.order.shipmentId) {
             res.order.stage = "SHIPPING";
             res.order.stageIndex = RESOURCE_ORDER_PHASES.length - 1;
-            res.order.stageEndsAt = Date.now() + randRange(90, 180) * 1000;
+            res.order.stageEndsAt = Date.now() + randRange(60, 120) * 1000;
           }
           if (res.order.stage === "DELIVERED") {
             res.order.completedAt ||= Date.now();
@@ -3826,7 +3826,7 @@
           if (!ship || ship.state === "DENIED") {
             order.stage = "SHIPPING";
             order.stageIndex = RESOURCE_ORDER_PHASES.length - 1;
-            order.stageEndsAt = now + randRange(90, 180) * 1000;
+            order.stageEndsAt = now + randRange(60, 120) * 1000;
             order.shipmentId = null;
             if (g.id === runtime.activeGateId) eventLine(`ORDER REQUEUED: ${r.id}`, "warn");
           }
