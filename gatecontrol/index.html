@@ -883,8 +883,6 @@
       white-space: nowrap;
       text-align: right;
     }
-	.status-meta.bad { color: var(--alert); }
-	.status-meta .bad { color: var(--alert); }
     .relay-row .status-name {
       display: flex;
       align-items: center;
@@ -1897,10 +1895,10 @@
 
     const WORKORDER_PHASES = [
       { key: "QUEUED", min: 20, max: 45 },
-      { key: "DISPATCHED", min: 2 * 60, max: 4 * 60 },
-      { key: "ON SITE", min: 40, max: 90 },
-      { key: "REPAIRING", min: 90, max: 8 * 60 },
-      { key: "COMPLETE", min: 30, max: 45 }
+      { key: "DISPATCHED", min: 60, max: 2 * 60 },
+      { key: "ON SITE", min: 20, max: 60 },
+      { key: "REPAIRING", min: 90, max: 5 * 60 },
+      { key: "COMPLETE", min: 20, max: 45 }
     ];
 
     const DOCK_STATES = ["EMPTY", "RESERVED", "DOCKED", "DECON", "SERVICING", "CLEARING"];
@@ -1912,8 +1910,8 @@
     ];
 
     const RESOURCE_TYPES = [
-      { id: "FUEL", name: "FUEL", startMin: 70, startMax: 92, restockMin: 35, restockMax: 55, request: "REFUEL", pricePerUnit: 1 },
-      { id: "SUPPLY", name: "SUPPLY", startMin: 65, startMax: 88, restockMin: 30, restockMax: 50, request: "RESUPPLY", pricePerUnit: 1 }
+      { id: "FUEL", name: "FUEL", startMin: 75, startMax: 95, restockMin: 35, restockMax: 55, request: "REFUEL", pricePerUnit: 1 },
+      { id: "SUPPLY", name: "SUPPLY", startMin: 75, startMax: 95, restockMin: 30, restockMax: 50, request: "RESUPPLY", pricePerUnit: 1 }
     ];
     const RESOURCE_ORDER_THRESHOLD = 25;
     const RESOURCE_CRITICAL_THRESHOLD = 10;
@@ -1941,7 +1939,7 @@
       facilityWorsenChance: 0.00015,
       relayPacketChance: 0.0045,
       relayShiftChance: 0.0012,
-      relayPingChance: 0.0008,
+      relayPingChance: 0.0010,
       relayDropChance: 0.00035,
       concourseFade: 0.03,
       fuelDrain: 0.015,
@@ -1985,7 +1983,7 @@
     }
 
     // ETA ranges in seconds (slow but not ridiculous)
-    const ETA = { min: 45, max: 900 }; // 0:45-15:00 minutes
+    const ETA = { min: 30, max: 600 }; // 0:45-15:00 minutes
     const RELAY_ACK_WINDOW_MS = 30_000;
     const RELAY_HEARTBEAT_MIN_MS = 1_200;
     const RELAY_HEARTBEAT_MAX_MS = 3_200;
@@ -3320,16 +3318,10 @@
       const remaining = Math.max(0, Math.ceil((s.deconEndsAt - Date.now()) / 1000));
       return formatMMSS(remaining);
     }
-	function deconBreachCountdown(s) {
-	  // Countdown until failure ONLY while awaiting DECON
-	  if (!s || s.state !== "WAITING DECON" || !s.hazardDeadline) return "";
-	  const remaining = Math.max(0, Math.ceil((s.hazardDeadline - Date.now()) / 1000));
-	  return formatMMSS(remaining);
-	}
+
     function shipRow(s) {
       const g = activeGate();
       const [pText, pCls] = shipStatusPill(s);
-	  const breachTime = hazardCountdown(s);
       const deconTime = deconCountdown(s);
       const eta = (["DENIED","ARRIVED","DEPARTED","WAITING TO DOCK","WAITING DECON","DECON","SERVICING","CLEARING","COMPLETE"].includes(s.state)) ? "—" : formatMMSS(s.eta);
       const prio = shipDisplayPriority(s) ? " ★" : "";
@@ -3346,7 +3338,6 @@
             <td data-label="Status">
               <span class="pill ${pCls}">${escapeText(pText)}</span>
               ${deconTime ? `<div class="status-meta">T-${escapeText(deconTime)}</div>` : ""}
-			  ${breachTime ? `<div class="status-meta bad">EXPOSURE IN T-${escapeText(breachTime)}</div>` : ""}
             </td>
             <td data-label="Action" class="action-cell" style="text-align:right;">
               <div class="row-actions">
@@ -3497,42 +3488,23 @@
       ui.concoursePill.textContent = concourse.text;
       ui.concourseStatus.textContent = `${concourse.text} (${Math.round(g.concourseLevel || 0)})`;
 
-			const deconOnline = getFacility(g, "DECON")?.status === "ONLINE";
-			ui.dockList.innerHTML = (g.dockSlots || []).map(slot => {
-				const ship = slot.shipId ? findShipById(g, slot.shipId) : null;
-
-				const shipName = ship ? ship.id : "--";
-				const dockState = ship?.dockState || slot.state;
-				const deconTime = deconCountdown(ship);
+      ui.dockList.innerHTML = (g.dockSlots || []).map(slot => {
+        const ship = slot.shipId ? findShipById(g, slot.shipId) : null;
+        const shipName = ship ? ship.id : "--";
+        const dockState = ship?.dockState || slot.state;
+        const deconTime = deconCountdown(ship);
         const dockMeta = `${shipName} / ${dockState}${deconTime ? ` / T-${deconTime}` : ""}`;
-				// BREACH countdown should ONLY show while awaiting DECON
-				const breachT = deconBreachCountdown(ship);
-
-				const metaParts = [shipName, dockState];
-				if (ship && ship.state === "WAITING DECON" && breachT) {
-					metaParts.push(`EXPOSURE IN T-${breachT}`);
-				}
-
-				const canDecon = !!(
-					ship &&
-					ship.state === "WAITING DECON" &&
-					deconOnline &&
-					!shipHasEffect(ship, "VACUUM BLOOM")
-				);
-
-				return `
-					<div class="status-row">
-						<div class="status-name">
-							${escapeText(slot.id)}
-							<span class="status-meta">${escapeText(dockMeta)}</span>
-						</div>
-						<div class="status-right">
-							${ship ? `<button class="btn-mini" data-action="detail" data-id="${escapeText(ship.id)}">DTL</button>` : ""}
-							${canDecon ? `<button class="btn-mini approve" data-action="decon" data-id="${escapeText(ship.id)}">DECON</button>` : ""}
-						</div>
-					</div>
-				`;
-			}).join("");
+          const canDecon = ship && ship.state === "WAITING DECON" && getFacility(g, "DECON")?.status === "ONLINE" && !shipHasEffect(ship, "VACUUM BLOOM");
+        return `
+          <div class="status-row">
+            <div class="status-name">${escapeText(slot.id)} <span class="status-meta">${escapeText(dockMeta)}</span></div>
+            <div class="status-right">
+              ${ship ? `<button class="btn-mini" data-action="detail" data-id="${escapeText(ship.id)}">DTL</button>` : ""}
+              ${canDecon ? `<button class="btn-mini approve" data-action="decon" data-id="${escapeText(ship.id)}">DECON</button>` : ""}
+            </div>
+          </div>
+        `;
+      }).join("");
 
         ui.relayList.innerHTML = (g.relays || []).map(r => {
           const displayStatus = (r.offline && !r.hiddenOffline) ? "OFFLINE" : r.status;
