@@ -4395,7 +4395,7 @@
       }
       if (s.shipmentType) applyShipmentDelivery(g, s);
       if (shipHasDangerEffect(s)) {
-        s.hazardDeadline = Date.now() + randRange(1 * 60, 3 * 60) * 1000;
+        s.hazardDeadline = Date.now() + randRange(30, 2 * 60) * 1000;
       }
       if (g.id === runtime.activeGateId) playSfx("beep");
       return true;
