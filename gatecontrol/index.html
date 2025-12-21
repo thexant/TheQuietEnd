@@ -1354,7 +1354,7 @@
               </div>
               <div class="help-row">
                 <div class="help-key">Decon</div>
-                <div>DECON START &lt;ID&gt; begins decontamination. Ships in decon pause in place until the cycle completes.</div>
+                <div>DECON START &lt;ID&gt; begins decontamination. Ships that dock will usually require DECON. If you do not within 1-3 minutes, exposure may occur.</div>
               </div>
               <div class="help-row">
                 <div class="help-key">Manual actions</div>
@@ -1929,10 +1929,10 @@
     const RATES = {
       maxIn: 2,
       maxOut: 2,
-      spawnInChance: 0.0055,   // ~1 every 2.7 min
-      spawnOutChance: 0.0055,  // ~1 every 3.3 min
+      spawnInChance: 0.0058,   // ~1 every 2.7 min
+      spawnOutChance: 0.0051,  // ~1 every 3.3 min
       reportChance: 0.018,    // sparse ambient chatter
-      flavorChance: 0.0022,   // rare ambient flavor text
+      flavorChance: 0.0025,   // rare ambient flavor text
       driftChance: 0.015,     // alignment drift
       syncDriftChance: 0.006, // sync slips to ASYNC/FAULT
       syncRecoverChance: 0.015, // sync recovers to SYNC (with healthy relays)
@@ -1944,22 +1944,22 @@
       relayPingChance: 0.0008,
       relayDropChance: 0.00035,
       concourseFade: 0.03,
-      fuelDrain: 0.020,
+      fuelDrain: 0.015,
       supplyDrainWorkOrder: 0.045,
       supplyDrainDecon: 0.025
     };
 
     const CORRIDOR_TRAFFIC_WEIGHTS = {
       STABLE: 1,
-      DEGRADED: 0.85,
-      INTERMITTENT: 0.6,
-      OFFLINE: 0.25
+      DEGRADED: 0.75,
+      INTERMITTENT: 0.45,
+      OFFLINE: 0.05
     };
 
     const SYNC_TRAFFIC_WEIGHTS = {
       SYNC: 1,
-      ASYNC: 0.8,
-      FAULT: 0.55
+      ASYNC: 0.75,
+      FAULT: 0.50
     };
 
     const GATE_ALIGNMENT_RANK = {
@@ -2011,9 +2011,9 @@
 
     function makeShip(rng, dir) {
       let type = dir === "IN" ? pick(rng, TYPES_IN) : pick(rng, TYPES_OUT);
-      const priority = rng() < 0.10; // rarer
+      const priority = rng() < 0.2; // rarer
       let transponder = rng() < 0.90 ? "VALID" : (rng() < 0.60 ? "MISMATCH" : "UNKNOWN");
-      const obscured = rng() < 0.05;
+      const obscured = rng() < 0.10;
       if (obscured) {
         type = "UNKNOWN";
         transponder = "UNKNOWN";
