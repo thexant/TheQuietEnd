@@ -4739,16 +4739,26 @@
         consoleLine("MAINT: REALIGN (IN PROGRESS)...", "dim");
         setTimeout(() => {
           g.alignment = "WITHIN TOLERANCE";
-          g.tech.driftSuppressedUntil = Date.now() + 120_000; // calmer for 2 min
+          g.tech.driftSuppressedUntil = Date.now() + 150_000; // calmer for 2.5 min
           consoleLine("MAINT: ALIGNMENT WITHIN TOLERANCE", "good");
 
-          // realign can also stabilize one link (sometimes)
-          if (Math.random() < 0.70) {
+          // realign can also stabilize one link (often), with a small chance to steady another
+          let improvedAny = false;
+          if (Math.random() < 0.78) {
             const improved = improveLinkOneStep(g);
-            if (improved) consoleLine(`MAINT: LINK ${improved.link} -> ${improved.status}`, improved.status === "STABLE" ? "good" : "warn");
-          } else {
-            consoleLine("MAINT: LINK STATE UNCHANGED", "dim");
+            if (improved) {
+              improvedAny = true;
+              consoleLine(`MAINT: LINK ${improved.link} -> ${improved.status}`, improved.status === "STABLE" ? "good" : "warn");
+            }
           }
+          if (Math.random() < 0.25 && hasRealignNeed(g)) {
+            const improved = improveLinkOneStep(g);
+            if (improved) {
+              improvedAny = true;
+              consoleLine(`MAINT: LINK ${improved.link} -> ${improved.status}`, improved.status === "STABLE" ? "good" : "warn");
+            }
+          }
+          if (!improvedAny) consoleLine("MAINT: LINK STATE UNCHANGED", "dim");
 
           g.lastRefresh = Date.now();
           if (shouldAward) bumpStat(g, "maintenanceOps");
@@ -5643,7 +5653,8 @@
         btn.textContent = `${label} (IN PROCESS ${remaining}s)`;
       }, 250) : null;
 
-      bumpProcessingSound(1);
+      const useProcessing = kind === "realign";
+      if (useProcessing) bumpProcessingSound(1);
 
       const timer = setTimeout(() => {
         if (tick) clearInterval(tick);
@@ -5659,7 +5670,7 @@
         if (kind === "purge") stopSfx("purge");
         if (kind === "reset") stopSfx("reset");
         if (kind === "scan") stopSfx("scan");
-        bumpProcessingSound(-1);
+        if (useProcessing) bumpProcessingSound(-1);
         doMaintenance(kind);
         delete runtime.maintenance[kind];
       }, delaySec * 1000);
