@@ -1061,7 +1061,15 @@
             </div>
             <div class="help-row">
               <div class="help-key">Display</div>
-              <div>Changes the color theme only. It does not affect the simulation.</div>
+              <div>Switches the display palette (Green/Red/Blue/Amber/Black). It does not affect the simulation.</div>
+            </div>
+            <div class="help-row">
+              <div class="help-key">Share / Export / Resume</div>
+              <div>SHARE copies a URL snapshot. EXPORT downloads a .tqe save named after the active gate. RESUME loads a .tqe file to restore a session.</div>
+            </div>
+            <div class="help-row">
+              <div class="help-key">Gate reset</div>
+              <div>RESET (top right) reboots the node, clears logs, starts a new shift, and assigns a fresh gate ID.</div>
             </div>
             <div class="help-row">
               <div class="help-key">Top stats</div>
@@ -1093,7 +1101,7 @@
             </div>
             <div class="help-row">
               <div class="help-key">Console</div>
-              <div>Type commands for deeper control. Start with HELP to list commands. STATUS shows node health, LINKS shows corridors, LIST INBOUND/OUTBOUND shows quick lists.</div>
+              <div>Type commands for deeper control. Start with HELP to list commands. STATUS shows node health, LINKS shows corridors, LIST INBOUND/OUTBOUND shows quick lists, THEME changes the display.</div>
             </div>
             <div class="help-row">
               <div class="help-key">Quick keys</div>
@@ -4243,7 +4251,7 @@
       consoleLine("  RELAYS | PING <RELAY-ID> | ACK <RELAY-ID> | RESTORE <RELAY-ID>", "dim");
       consoleLine("  PACKETS", "dim");
       consoleLine("  ORDER FUEL | ORDER SUPPLY", "dim");
-      consoleLine("  THEME GREEN|RED|BLUE|AMBER", "dim");
+      consoleLine("  THEME GREEN|RED|BLUE|AMBER|BLACK", "dim");
       consoleLine("  CLEAR (console)", "dim");
       consoleLine("  CLEAR EVENTS", "dim");
     }
@@ -4407,8 +4415,8 @@
 
       if (cmd === "THEME") {
         const t = (parts[1] || "").toLowerCase();
-        if (!["green","red","blue","amber"].includes(t)) {
-          consoleLine("USAGE: THEME GREEN|RED|BLUE|AMBER", "warn");
+        if (!["green","red","blue","amber","black"].includes(t)) {
+          consoleLine("USAGE: THEME GREEN|RED|BLUE|AMBER|BLACK", "warn");
           return;
         }
         setTheme(t);
