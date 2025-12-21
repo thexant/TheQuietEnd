@@ -3504,7 +3504,8 @@
 
 				const shipName = ship ? ship.id : "--";
 				const dockState = ship?.dockState || slot.state;
-
+				const deconTime = deconCountdown(ship);
+        const dockMeta = `${shipName} / ${dockState}${deconTime ? ` / T-${deconTime}` : ""}`;
 				// BREACH countdown should ONLY show while awaiting DECON
 				const breachT = deconBreachCountdown(ship);
 
