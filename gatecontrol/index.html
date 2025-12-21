@@ -2389,7 +2389,10 @@
         const save = await decompressJsonFromUrl(payload, version);
         const applied = applySaveState(save);
         if (applied && CLEAR_HASH_AFTER_LOAD) {
-          safeReplaceState(location.pathname + location.search);
+          const cleared = safeReplaceState(location.pathname + location.search);
+          if (!cleared) {
+            try { location.hash = ""; } catch (_) {}
+          }
         }
         return applied;
       } catch (_) {
