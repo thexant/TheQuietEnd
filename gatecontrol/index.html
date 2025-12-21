@@ -692,6 +692,29 @@
       gap: 8px;
       align-items: baseline;
     }
+    .status-row.relay-ping {
+      position: relative;
+    }
+    .status-row.relay-ping::after {
+      content: "";
+      position: absolute;
+      inset: -4px -6px;
+      border-radius: 6px;
+      border: 1px solid var(--signal);
+      box-shadow: 0 0 14px var(--signal);
+      opacity: 0.75;
+      pointer-events: none;
+      transform-origin: center;
+      animation: relayPingPulse 0.9s ease-out 1;
+    }
+    .status-row.relay-ping .status-name {
+      color: var(--signal);
+      text-shadow: 0 0 10px var(--signal);
+    }
+    @keyframes relayPingPulse {
+      0% { opacity: 0.8; transform: scale(0.98); }
+      100% { opacity: 0; transform: scale(1.03); }
+    }
     .status-name {
       font-family: var(--font-title);
       letter-spacing: 0.08em;
@@ -704,6 +727,36 @@
       font-size: 0.68rem;
       white-space: nowrap;
       text-align: right;
+    }
+    .relay-row .status-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .relay-hb {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .hb-indicator {
+      width: 8px;
+      height: 6px;
+      border-radius: 2px;
+      background: var(--signal);
+      box-shadow: 0 0 10px var(--glow);
+    }
+    .hb-indicator.hb-warn {
+      background: var(--stat);
+      box-shadow: 0 0 10px rgba(210, 169, 90, 0.35);
+    }
+    .hb-indicator.hb-bad {
+      background: var(--alert);
+      box-shadow: 0 0 12px rgba(225, 100, 100, 0.45);
     }
     .status-right {
       display: inline-flex;
@@ -1590,6 +1643,13 @@
     // ETA ranges in seconds (slow but not ridiculous)
     const ETA = { min: 45, max: 900 }; // 0:45-15:00 minutes
     const RELAY_ACK_WINDOW_MS = 30_000;
+    const RELAY_HEARTBEAT_MIN_MS = 1_200;
+    const RELAY_HEARTBEAT_MAX_MS = 3_200;
+    const RELAY_HEARTBEAT_STALE_WARN_SEC = 6;
+    const RELAY_HEARTBEAT_STALE_CRIT_SEC = 12;
+    const RELAY_HICCUP_RECOVERABLE_CHANCE = 0.55;
+    const RELAY_HICCUP_JOSTLE_DECAY_SEC = 18;
+    const RELAY_SEVER_GRACE_MS = 6_000;
 
     function dailySalt() {
       const d = new Date();
@@ -1712,11 +1772,14 @@
         lastChange: Date.now(),
         lastPacketAt: 0,
         lastRelayPingAt: 0,
+        lastHeartbeatAt: Date.now(),
+        nextHeartbeatAt: Date.now() + randRange(RELAY_HEARTBEAT_MIN_MS, RELAY_HEARTBEAT_MAX_MS),
         lastAckAt: 0,
         awaitingAck: false,
         ackDueAt: 0,
         offline: false,
         hiddenOffline: false,
+        hiccupRecoverable: false,
         offlineReason: null,
         offlineSince: 0
       }));
@@ -1726,6 +1789,7 @@
         createdAt: Date.now(),
         lastRefresh: Date.now(),
         lastScanAt: 0,
+        relayFailureSince: 0,
         beacon,
         alignment,
         sync,
@@ -1770,6 +1834,7 @@
       g.createdAt ||= Date.now();
       g.lastRefresh ||= Date.now();
       g.lastScanAt ||= 0;
+      g.relayFailureSince = typeof g.relayFailureSince === "number" ? g.relayFailureSince : 0;
       g.alerts ||= [];
       g.reports ||= [];
         g.stats ||= {
@@ -1886,11 +1951,14 @@
           lastChange: Date.now(),
           lastPacketAt: 0,
           lastRelayPingAt: 0,
+          lastHeartbeatAt: Date.now(),
+          nextHeartbeatAt: Date.now() + randRange(RELAY_HEARTBEAT_MIN_MS, RELAY_HEARTBEAT_MAX_MS),
           lastAckAt: 0,
           awaitingAck: false,
           ackDueAt: 0,
           offline: false,
           hiddenOffline: false,
+          hiccupRecoverable: false,
           offlineReason: null,
           offlineSince: 0
         });
@@ -1900,11 +1968,16 @@
         r.lastChange ||= Date.now();
         r.lastPacketAt ||= 0;
         r.lastRelayPingAt ||= 0;
+        r.lastHeartbeatAt = (typeof r.lastHeartbeatAt === "number" && r.lastHeartbeatAt > 0) ? r.lastHeartbeatAt : Date.now();
+        r.nextHeartbeatAt = (typeof r.nextHeartbeatAt === "number" && r.nextHeartbeatAt > 0)
+          ? r.nextHeartbeatAt
+          : (Date.now() + randRange(RELAY_HEARTBEAT_MIN_MS, RELAY_HEARTBEAT_MAX_MS));
         r.lastAckAt ||= 0;
         r.awaitingAck = typeof r.awaitingAck === "boolean" ? r.awaitingAck : false;
         r.ackDueAt = typeof r.ackDueAt === "number" ? r.ackDueAt : 0;
         r.offline = typeof r.offline === "boolean" ? r.offline : (r.status === "OFFLINE");
         r.hiddenOffline = typeof r.hiddenOffline === "boolean" ? r.hiddenOffline : (r.offline && r.status !== "OFFLINE");
+        r.hiccupRecoverable = typeof r.hiccupRecoverable === "boolean" ? r.hiccupRecoverable : false;
         r.offlineReason = r.offlineReason || null;
         r.offlineSince = typeof r.offlineSince === "number" ? r.offlineSince : 0;
         if (r.offline && !r.hiddenOffline) r.status = "OFFLINE";
@@ -2415,6 +2488,23 @@
       return (r.offline && !r.hiddenOffline) ? "OFFLINE" : r.status;
     }
 
+    function relayHeartbeatAgeSec(r, now) {
+      if (!r.lastHeartbeatAt) return null;
+      return Math.max(0, Math.floor((now - r.lastHeartbeatAt) / 1000));
+    }
+
+    function relayHeartbeatBand(ageSec) {
+      if (typeof ageSec !== "number") return { cls: "hb-bad", stale: true };
+      if (ageSec >= RELAY_HEARTBEAT_STALE_CRIT_SEC) return { cls: "hb-bad", stale: true };
+      if (ageSec >= RELAY_HEARTBEAT_STALE_WARN_SEC) return { cls: "hb-warn", stale: true };
+      return { cls: "hb-ok", stale: false };
+    }
+
+    function scheduleRelayHeartbeat(relay, now) {
+      relay.lastHeartbeatAt = now;
+      relay.nextHeartbeatAt = now + randRange(RELAY_HEARTBEAT_MIN_MS, RELAY_HEARTBEAT_MAX_MS);
+    }
+
     function computeHealth(g) {
       const resources = ensureResources(g);
       const fuelLevel = resources.FUEL?.level ?? 100;
@@ -2577,7 +2667,9 @@
     function gateSeverReason(g) {
       const fuelLevel = ensureResources(g).FUEL?.level ?? 100;
       if (fuelLevel <= 0) return "Gate Power Loss";
-      if (allRelaysDown(g) && !hasActiveRelayWorkOrders(g)) return "Gate Relay Disconnected";
+      if (g.relayFailureSince && (Date.now() - g.relayFailureSince) >= RELAY_SEVER_GRACE_MS) {
+        return "Gate Relay Disconnected";
+      }
       if (allCorridorsOffline(g)) return "Losing Connection to the Corridor Network";
       if (allFacilityOffline(g) && !hasActiveWorkOrders(g)) return "Gate System Failure";
       if (isGateSystemsFailed(g)) return "Gate Systems Failures";
@@ -2660,6 +2752,7 @@
 
     function renderSystems() {
       const g = activeGate();
+      const now = Date.now();
       const overall = computeOverallSystemsStatus(g);
       ui.overallSystemsPill.className = `pill ${overall.cls}`;
       ui.overallSystemsPill.textContent = overall.text;
@@ -2789,9 +2882,19 @@
           const ackClass = r.awaitingAck ? "attn" : "";
           const canRestore = displayStatus === "FAULT" || displayStatus === "WEAK";
           const needsRelayWO = relayIsDown(r) && !r.hiddenOffline && !hasActiveWorkOrder(g, r.id);
+          const pingPulse = r.pingPulseUntil && r.pingPulseUntil > now;
+          const hbAgeSec = relayHeartbeatAgeSec(r, now);
+          const hbBand = relayHeartbeatBand(hbAgeSec);
+          const hbValue = (typeof hbAgeSec === "number") ? `${hbAgeSec}s` : "--";
           return `
-            <div class="status-row">
-              <div class="status-name">${escapeText(r.id)}</div>
+            <div class="status-row relay-row${pingPulse ? " relay-ping" : ""}">
+              <div class="status-name">${escapeText(r.id)}
+                <span class="relay-hb">
+                  <span class="hb-indicator ${hbBand.cls}" aria-hidden="true"></span>
+                  <span>HB:</span>
+                  <span>${escapeText(hbValue)}</span>
+                </span>
+              </div>
               <div class="status-right">
                 <span class="pill ${pr.cls}">${escapeText(displayStatus)}</span>
                 ${ackMeta}
@@ -3495,6 +3598,8 @@
             relay.hiddenOffline = false;
             relay.status = "ONLINE";
             relay.lastChange = now;
+            relay.hiccupRecoverable = false;
+            scheduleRelayHeartbeat(relay, now);
             relay.awaitingAck = false;
             relay.ackDueAt = 0;
             relay.offlineReason = null;
@@ -3635,6 +3740,7 @@
           r.awaitingAck = false;
           r.offline = true;
           r.hiddenOffline = false;
+          r.hiccupRecoverable = false;
           r.offlineReason = "ACK_TIMEOUT";
           r.offlineSince = now;
           r.status = "OFFLINE";
@@ -3644,6 +3750,10 @@
         }
 
         if (r.offline) continue;
+
+        if (!r.nextHeartbeatAt || r.nextHeartbeatAt <= now) {
+          scheduleRelayHeartbeat(r, now);
+        }
 
         if (!r.awaitingAck && Math.random() < RATES.relayPingChance) {
           r.awaitingAck = true;
@@ -3656,6 +3766,7 @@
         if (Math.random() < RATES.relayDropChance) {
           r.offline = true;
           r.hiddenOffline = true;
+          r.hiccupRecoverable = Math.random() < RELAY_HICCUP_RECOVERABLE_CHANCE;
           r.offlineReason = "SILENT_DROP";
           r.offlineSince = now;
           r.awaitingAck = false;
@@ -3756,6 +3867,7 @@
     }
 
     function tickGate(g) {
+      const now = Date.now();
       resolveTraffic(g);
       tickDockSlots(g);
       driftSystems(g);
@@ -3767,6 +3879,12 @@
       tickResources(g);
       driftConcourse(g);
       driftRelays(g);
+      const relaysDown = allRelaysDown(g) && !hasActiveRelayWorkOrders(g);
+      if (relaysDown) {
+        if (!g.relayFailureSince) g.relayFailureSince = now;
+      } else {
+        g.relayFailureSince = 0;
+      }
       maybeGenerateReport(g);
       recomputeHealth(g);
       if (g.id === runtime.activeGateId) {
@@ -3778,7 +3896,7 @@
       }
       
 
-      g.lastRefresh = Date.now();
+      g.lastRefresh = now;
     }
 
     function tickAllGates() {
@@ -4069,6 +4187,8 @@
         relay.lastAckAt = now;
         relay.offline = false;
         relay.hiddenOffline = false;
+        relay.hiccupRecoverable = false;
+        scheduleRelayHeartbeat(relay, now);
         relay.offlineReason = null;
         relay.offlineSince = 0;
         bumpStat(g, "relayRepairs");
@@ -4081,6 +4201,7 @@
         } else if (backlash < 0.7) {
           relay.offline = true;
           relay.hiddenOffline = false;
+          relay.hiccupRecoverable = false;
           relay.offlineReason = "RESTORE_SPIKE";
           relay.offlineSince = now;
           relay.awaitingAck = false;
@@ -4131,6 +4252,19 @@
       }
     }
 
+    function pulseRelayPanel(g, relay) {
+      const now = Date.now();
+      relay.pingPulseUntil = now + 900;
+      g.lastRefresh = now;
+      renderAll();
+      setTimeout(() => {
+        if (relay.pingPulseUntil && relay.pingPulseUntil <= Date.now()) {
+          g.lastRefresh = Date.now();
+          renderAll();
+        }
+      }, 950);
+    }
+
     function cmdPingRelay(id) {
       const g = activeGate();
       const relay = findRelay(g, id);
@@ -4138,17 +4272,46 @@
         consoleLine(`RELAY NOT FOUND: ${id}`, "bad");
         return;
       }
+      const now = Date.now();
+      const hbAgeSec = relayHeartbeatAgeSec(relay, now);
+      const hbBand = relayHeartbeatBand(hbAgeSec);
       consoleLine(`PING SENT: ${relay.id}`, "dim");
       pushPacket(g, `PING ${relay.id}`);
+      pulseRelayPanel(g, relay);
       if (relay.offline) {
-        if (relay.hiddenOffline) {
-          relay.status = "OFFLINE";
+        if (relay.hiddenOffline && hbBand.stale) {
+          const decay = Math.min(1, (hbAgeSec || 0) / RELAY_HICCUP_JOSTLE_DECAY_SEC);
+          const jostleChance = relay.hiccupRecoverable ? Math.max(0.2, 1 - (decay * 0.7)) : 0;
+          if (relay.hiccupRecoverable && Math.random() < jostleChance) {
+            relay.offline = false;
+            relay.hiddenOffline = false;
+            relay.hiccupRecoverable = false;
+            relay.status = "ONLINE";
+            relay.lastChange = now;
+            relay.awaitingAck = false;
+            relay.ackDueAt = 0;
+            relay.offlineReason = null;
+            relay.offlineSince = 0;
+            scheduleRelayHeartbeat(relay, now);
+            consoleLine(`PING ACK: ${relay.id} (HEARTBEAT RESTORED)`, "good");
+            if (g.id === runtime.activeGateId) eventLine(`RELAY ${relay.id}: HEARTBEAT RESTORED`, "good");
+            g.lastRefresh = now;
+            renderAll();
+            return;
+          }
           relay.hiddenOffline = false;
-          relay.lastChange = Date.now();
+          relay.hiccupRecoverable = false;
+          relay.status = "OFFLINE";
+          relay.lastChange = now;
+        } else if (relay.hiddenOffline) {
+          relay.hiddenOffline = false;
+          relay.hiccupRecoverable = false;
+          relay.status = "OFFLINE";
+          relay.lastChange = now;
         }
         consoleLine(`PING TIMEOUT: ${relay.id}`, "warn");
         if (g.id === runtime.activeGateId) eventLine(`RELAY ${relay.id}: NO RESPONSE`, "bad");
-        g.lastRefresh = Date.now();
+        g.lastRefresh = now;
         renderAll();
         return;
       }
@@ -4158,6 +4321,7 @@
           if (relay.hiddenOffline) {
             relay.status = "OFFLINE";
             relay.hiddenOffline = false;
+            relay.hiccupRecoverable = false;
             relay.lastChange = Date.now();
           }
           consoleLine(`PING TIMEOUT: ${relay.id}`, "warn");
