@@ -2250,6 +2250,8 @@
         dockSlots,
         relays,
         packets: [],
+        inboundGatePings: [],
+        nextInboundGatePingAt: Date.now() + randRange(150 * 1000, 420 * 1000),
         resources: makeResources(rng),
         alerts: [],
         reports: [],
@@ -4780,7 +4782,44 @@
       g.outbound = g.outbound.filter(s => !(s.state === "DEPARTED" && s.doneAt && (now - s.doneAt) > keepMs) && !(s.state === "DENIED" && s.doneAt && (now - s.doneAt) > keepMs));
     }
 
-    function tickGate(g) {
+    
+    // ---------------------------
+    // Flavor: inbound gate pings (optional ACKNOWLEDGE, no gameplay effect)
+    // ---------------------------
+    function scheduleNextInboundGatePing(g, now) {
+      // "Occasional" = every ~2.5–7 minutes on average
+      g.nextInboundGatePingAt = now + randRange(150 * 1000, 420 * 1000);
+    }
+
+    function pickOtherGateId(excludeId) {
+      const pool = (runtime.catalog || []).filter(id => id && id !== excludeId);
+      if (pool.length) return pool[Math.floor(Math.random() * pool.length)];
+      // Fallback: generate a plausible id if we're in a weird state with a single-node catalog.
+      let id = generateGateId();
+      let tries = 0;
+      while (id === excludeId && tries < 5) { id = generateGateId(); tries++; }
+      return id;
+    }
+
+    function maybeInboundGatePing(g, now) {
+      // Only surface these on the currently viewed node to avoid spamming the shared event log.
+      if (g.id !== runtime.activeGateId) return;
+
+      if (!g.nextInboundGatePingAt) scheduleNextInboundGatePing(g, now);
+      if (now < g.nextInboundGatePingAt) return;
+
+      const fromId = pickOtherGateId(g.id);
+      (g.inboundGatePings ||= []).push({ from: fromId, at: now, acknowledged: false });
+      if (g.inboundGatePings.length > 12) g.inboundGatePings.splice(0, g.inboundGatePings.length - 12);
+
+      eventLine(`INBOUND PING: ${fromId} -> ${g.id}`, "dim");
+      pushPacket(g, `PING FROM ${fromId}`);
+      playSfx("beep");
+
+      scheduleNextInboundGatePing(g, now);
+    }
+
+function tickGate(g) {
       const now = Date.now();
       resolveTraffic(g);
       tickDockSlots(g);
@@ -4793,6 +4832,7 @@
       tickResources(g);
       driftConcourse(g);
       driftRelays(g);
+      maybeInboundGatePing(g, now);
       const relaysDown = allRelaysDown(g) && !hasActiveRelayWorkOrders(g);
       if (relaysDown) {
         if (!g.relayFailureSince) g.relayFailureSince = now;
@@ -5269,7 +5309,33 @@
       }, 950);
     }
 
-    function cmdPingRelay(id) {
+    
+    function cmdPingGate(gateIdRaw) {
+      const g = activeGate();
+      const gateId = (gateIdRaw || "").toUpperCase().trim();
+
+      // Accept the same general pattern your generator uses, plus common two-letter suffixes (e.g. GATE-1234-AA).
+      // Examples accepted: GATE-0420, GATE-0420-A, GATE-0420-ALPHA, GATE-0420-AA
+      const valid = /^GATE-\d{4}(?:-[A-Z]{1,8})?$/.test(gateId);
+      if (!valid) {
+        consoleLine(`INVALID GATE ID: ${gateIdRaw}`, "warn");
+        playSfx("error");
+        return;
+      }
+
+      // Gate pings simulate cross-corridor routing: much higher latency than local relay pings.
+      const latency = randRange(2400, 9800);
+
+      consoleLine(`PING SENT: ${gateId}`, "dim");
+      pushPacket(g, `PING GATE ${gateId}`);
+
+      setTimeout(() => {
+        consoleLine(`PING ACK: ${gateId} (${latency}ms)`, "good");
+        pushPacket(g, `ACK GATE ${gateId} ${latency}ms`);
+      }, latency);
+    }
+
+function cmdPingRelay(id) {
       const g = activeGate();
       const relay = findRelay(g, id);
       if (!relay) {
@@ -5453,7 +5519,7 @@
       consoleLine("  DECON START <ID>", "dim");
       consoleLine("  REALIGN | RESET | PURGE | SCAN", "dim");
       consoleLine("  WORKORDER <SYSTEM>", "dim");
-      consoleLine("  RELAYS | PING <RELAY-ID> | ACK <RELAY-ID> | RESTORE <RELAY-ID>", "dim");
+      consoleLine("  RELAYS | PING <RELAY-ID> | PING GATE <GATE-ID> | ACK <RELAY-ID> | RESTORE <RELAY-ID>", "dim");
       consoleLine("  PACKETS", "dim");
       consoleLine("  ORDER <AMOUNT> FUEL | ORDER <AMOUNT> SUPPLY", "dim");
       consoleLine("  CALLSIGN <NAME> | CALLSIGN CLEAR", "dim");
@@ -5620,10 +5686,55 @@
       if (cmd === "WORKORDER") return issueWorkOrder(parts.slice(1).join(" "));
       if (cmd === "RELAYS") return cmdRelays();
       if (cmd === "PING") {
-        const id = (parts[1] || "").toUpperCase();
-        if (!id) return consoleLine("USAGE: PING <RELAY-ID>", "warn");
-        return cmdPingRelay(id);
+        const arg1 = (parts[1] || "").toUpperCase();
+        const arg2 = (parts[2] || "").toUpperCase();
+
+        // Extension: PING GATE <GATE-ID>
+        if (arg1 === "GATE") {
+          if (!arg2) return consoleLine("USAGE: PING GATE <GATE-ID>", "warn");
+          return cmdPingGate(arg2);
+        }
+
+        // Default: PING <RELAY-ID>
+        if (!arg1) return consoleLine("USAGE: PING <RELAY-ID> | PING GATE <GATE-ID>", "warn");
+        return cmdPingRelay(arg1);
       }
+
+      if (cmd === "ACKNOWLEDGE") {
+        const arg1 = (parts[1] || "").toUpperCase();
+        const arg2 = (parts[2] || "").toUpperCase();
+        let gateId = "";
+        if (arg1 === "GATE") gateId = arg2;
+        else gateId = arg1;
+
+        const g = activeGate();
+
+        // If no gate id provided, ACK the most recent unacknowledged inbound ping (if any).
+        if (!gateId) {
+          const last = (g.inboundGatePings || []).slice().reverse().find(p => p && !p.acknowledged);
+          if (!last) return consoleLine("NO INBOUND GATE PINGS TO ACKNOWLEDGE", "dim");
+          gateId = String(last.from || "").toUpperCase();
+        }
+
+        const valid = /^GATE-\d{4}(?:-[A-Z]{1,8})?$/.test(gateId);
+        if (!valid) {
+          consoleLine(`INVALID GATE ID: ${gateId}`, "warn");
+          playSfx("error");
+          return;
+        }
+
+        // Mark it as acknowledged in the local flavor list (no gameplay effect).
+        const list = (g.inboundGatePings || []);
+        const hit = [...list].reverse().find(p => p && String(p.from || "").toUpperCase() === gateId && !p.acknowledged)
+                 || [...list].reverse().find(p => p && String(p.from || "").toUpperCase() === gateId);
+        if (hit) hit.acknowledged = true;
+
+        consoleLine(`ACKNOWLEDGED: ${gateId}`, "good");
+        eventLine(`ACKNOWLEDGED: ${gateId}`, "dim");
+        pushPacket(g, `ACKNOWLEDGE ${gateId}`);
+        return;
+      }
+
       if (cmd === "ACK") {
         const id = (parts[1] || "").toUpperCase();
         if (!id) return consoleLine("USAGE: ACK <RELAY-ID>", "warn");
