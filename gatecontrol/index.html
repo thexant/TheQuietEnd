@@ -1393,6 +1393,7 @@ button.btn-error {
       user-select: text;
       color: var(--ink);
       border-color: rgba(255,255,255,0.08);
+      text-transform: uppercase;
     }
 
     footer {
@@ -3569,7 +3570,7 @@ button.btn-error {
     const THEME_OPTIONS = ["green", "red", "blue", "purple", "amber", "cyan", "black", "light"];
 
     function pickRandomTheme(exclude) {
-      const options = THEME_OPTIONS.filter((t) => t !== exclude);
+      const options = THEME_OPTIONS.filter((t) => t !== exclude && t !== "light");
       const pool = options.length ? options : THEME_OPTIONS;
       return pool[Math.floor(Math.random() * pool.length)];
     }
@@ -4488,6 +4489,25 @@ button.btn-error {
 			if (trimmed === "R2") return "RELAY-2";
 			// CHANGE: Add R3 shortcut
 			if (trimmed === "R3") return "RELAY-3";
+			return null;
+		}
+
+		function resolveTargetId(input) {
+			const raw = String(input || "").toUpperCase().trim();
+
+			// Check if it's a gate ID pattern: GATE-1234, GATE-1234-A, etc.
+			const gatePattern = /^GATE-\d{4}(?:-[A-Z]{1,8})?$/;
+			if (gatePattern.test(raw)) {
+				return { type: "gate", id: raw };
+			}
+
+			// Try to resolve as relay: RELAY-1, R1, R2, R3, etc.
+			const relayId = resolveRelayId(raw);
+			if (relayId) {
+				return { type: "relay", id: relayId };
+			}
+
+			// Invalid/unknown ID
 			return null;
 		}
 
@@ -5471,7 +5491,7 @@ button.btn-error {
     }
 
     function checkOutboundDeadlines(g, s) {
-      if (s.dir !== "OUT" || !s.departureDeadline || s.penaltyApplied) return;
+      if (s.dir !== "OUT" || !s.departureDeadline || s.penaltyApplied || s.state === "CLEARED" || s.state === "DENIED" || s.state === "DEPARTED") return;
 
       const now = Date.now();
 
@@ -6499,6 +6519,35 @@ function tickGate(g) {
       }, latency);
     }
 
+    function cmdAckGate(gateId) {
+      const g = activeGate();
+
+      // Validate gate ID pattern
+      const valid = /^GATE-\d{4}(?:-[A-Z]{1,8})?$/.test(gateId);
+      if (!valid) {
+        consoleLine(`INVALID GATE ID: ${gateId}`, "warn");
+        playSfx("error");
+        return;
+      }
+
+      // Mark as acknowledged in inboundGatePings array
+      const list = (g.inboundGatePings || []);
+      const hit = [...list].reverse().find(p => p && String(p.from || "").toUpperCase() === gateId && !p.acknowledged)
+               || [...list].reverse().find(p => p && String(p.from || "").toUpperCase() === gateId);
+      if (hit) hit.acknowledged = true;
+
+      consoleLine(`ACKNOWLEDGED: ${gateId}`, "good");
+      eventLine(`ACKNOWLEDGED: ${gateId}`, "dim");
+      pushPacket(g, `ACKNOWLEDGE ${gateId}`);
+
+      // Simulate connection time response (2400-9800ms)
+      const connectionTime = randRange(2400, 9800);
+      setTimeout(() => {
+        consoleLine(`CONNECTION TIME RESPONSE: ${gateId} (${connectionTime}ms)`, "good");
+        pushPacket(g, `CONNECTION TIME ${gateId} ${connectionTime}ms`);
+      }, connectionTime);
+    }
+
 function cmdPingRelay(id) {
       const g = activeGate();
       const relay = findRelay(g, id);
@@ -6874,64 +6923,89 @@ function cmdPingRelay(id) {
         const arg1 = (parts[1] || "").toUpperCase();
         const arg2 = (parts[2] || "").toUpperCase();
 
-        // Extension: PING GATE <GATE-ID>
-        if (arg1 === "GATE") {
-          if (!arg2) return consoleLine("USAGE: PING GATE <GATE-ID>", "warn");
+        // Backward compatibility: PING GATE <GATE-ID> (deprecated syntax)
+        if (arg1 === "GATE" && arg2) {
+          consoleLine("NOTE: Use 'PING <GATE-ID>' instead of 'PING GATE <GATE-ID>'", "dim");
           return cmdPingGate(arg2);
         }
 
-        // Default: PING <RELAY-ID>
-        if (!arg1) return consoleLine("USAGE: PING <RELAY-ID> | PING GATE <GATE-ID>", "warn");
-        return cmdPingRelay(arg1);
+        // No argument provided
+        if (!arg1) {
+          return consoleLine("USAGE: PING <GATE-ID> | PING <RELAY-ID>", "warn");
+        }
+
+        // Resolve the target ID
+        const target = resolveTargetId(arg1);
+
+        if (!target) {
+          consoleLine(`INVALID TARGET ID: ${arg1}`, "warn");
+          playSfx("error");
+          return;
+        }
+
+        // Route to appropriate handler
+        if (target.type === "gate") {
+          return cmdPingGate(target.id);
+        } else {
+          return cmdPingRelay(target.id);
+        }
       }
 
       if (cmd === "ACKNOWLEDGE") {
         const arg1 = (parts[1] || "").toUpperCase();
         const arg2 = (parts[2] || "").toUpperCase();
-        let gateId = "";
-        if (arg1 === "GATE") gateId = arg2;
-        else gateId = arg1;
 
-        const g = activeGate();
-
-        // If no gate id provided, ACK the most recent unacknowledged inbound ping (if any).
-        if (!gateId) {
-          const last = (g.inboundGatePings || []).slice().reverse().find(p => p && !p.acknowledged);
-          if (!last) return consoleLine("NO INBOUND GATE PINGS TO ACKNOWLEDGE", "dim");
-          gateId = String(last.from || "").toUpperCase();
+        // Remove "GATE" keyword if present for backward compatibility
+        let targetId = arg1;
+        if (arg1 === "GATE" && arg2) {
+          targetId = arg2;
         }
 
-        const valid = /^GATE-\d{4}(?:-[A-Z]{1,8})?$/.test(gateId);
-        if (!valid) {
-          consoleLine(`INVALID GATE ID: ${gateId}`, "warn");
+        // Require ID
+        if (!targetId) {
+          return consoleLine("USAGE: ACKNOWLEDGE <GATE-ID> | ACKNOWLEDGE <RELAY-ID>", "warn");
+        }
+
+        // Resolve the target ID
+        const target = resolveTargetId(targetId);
+
+        if (!target) {
+          consoleLine(`INVALID TARGET ID: ${targetId}`, "warn");
           playSfx("error");
           return;
         }
 
-        // Mark it as acknowledged in the local flavor list (no gameplay effect).
-        const list = (g.inboundGatePings || []);
-        const hit = [...list].reverse().find(p => p && String(p.from || "").toUpperCase() === gateId && !p.acknowledged)
-                 || [...list].reverse().find(p => p && String(p.from || "").toUpperCase() === gateId);
-        if (hit) hit.acknowledged = true;
-
-        consoleLine(`ACKNOWLEDGED: ${gateId}`, "good");
-        eventLine(`ACKNOWLEDGED: ${gateId}`, "dim");
-        pushPacket(g, `ACKNOWLEDGE ${gateId}`);
-
-        // Simulate connection time measurement with response
-        const connectionTime = randRange(2400, 9800);
-        setTimeout(() => {
-          consoleLine(`CONNECTION TIME RESPONSE: ${gateId} (${connectionTime}ms)`, "good");
-          pushPacket(g, `CONNECTION TIME ${gateId} ${connectionTime}ms`);
-        }, connectionTime);
-
-        return;
+        // Route to appropriate handler
+        if (target.type === "gate") {
+          return cmdAckGate(target.id);
+        } else {
+          return cmdAckRelay(target.id);
+        }
       }
 
       if (cmd === "ACK") {
-        const id = (parts[1] || "").toUpperCase();
-        if (!id) return consoleLine("USAGE: ACK <RELAY-ID>", "warn");
-        return cmdAckRelay(id);
+        const arg1 = (parts[1] || "").toUpperCase();
+
+        // Require ID
+        if (!arg1) {
+          return consoleLine("USAGE: ACK <GATE-ID> | ACK <RELAY-ID>", "warn");
+        }
+
+        // Resolve the target ID
+        const target = resolveTargetId(arg1);
+
+        if (!target) {
+          consoleLine(`INVALID TARGET ID: ${arg1}`, "warn");
+          playSfx("error");
+          return;
+        }
+
+        // Route to appropriate handler
+        if (target.type === "gate") {
+          return cmdAckGate(target.id);
+        } else {
+          return cmdAckRelay(target.id);
+        }
       }
       if (cmd === "RESTORE") {
         const relayId = resolveRelayId(parts.slice(1).join(" "));
