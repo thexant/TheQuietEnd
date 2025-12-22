@@ -48,60 +48,17 @@
       --interface-gap: clamp(8px, 2vmin, 14px);
       --frame-pad: clamp(10px, 2.6vmin, 18px);
       --terminal-h: clamp(220px, 30vh, 360px);
-		/* Scrollbars that automatically match the active theme */
-		:root{
-			--sb-track: rgba(0,0,0,0.22);
-			--sb-border: var(--line);
-			--sb-glow: var(--glow);
 
-			/* sensible fallback if color-mix isn't supported */
-			--sb-thumb: rgba(255,255,255,0.10);
-			--sb-thumb-hover: rgba(255,255,255,0.16);
-			--sb-thumb-active: rgba(255,255,255,0.22);
-		}
+      /* Scrollbar colors that automatically match the active theme */
+      --sb-track: rgba(0,0,0,0.22);
+      --sb-border: var(--line);
+      --sb-glow: var(--glow);
 
-		/* Prefer theme-colored thumbs when supported */
-		@supports (color: color-mix(in srgb, red, transparent)) {
-			:root{
-				--sb-thumb: color-mix(in srgb, var(--signal) 28%, transparent);
-				--sb-thumb-hover: color-mix(in srgb, var(--signal) 42%, transparent);
-				--sb-thumb-active: color-mix(in srgb, var(--signal) 62%, transparent);
-			}
-		}
+      /* Sensible fallback if color-mix isn't supported */
+      --sb-thumb: rgba(255,255,255,0.10);
+      --sb-thumb-hover: rgba(255,255,255,0.16);
+      --sb-thumb-active: rgba(255,255,255,0.22);
 
-		/* Firefox */
-		*{
-			scrollbar-width: thin;
-			scrollbar-color: var(--sb-thumb) var(--sb-track);
-		}
-
-		/* Chromium / Edge / Safari */
-		*::-webkit-scrollbar{ width: 10px; height: 10px; }
-
-		*::-webkit-scrollbar-track{
-			background: var(--sb-track);
-			border: 1px solid var(--sb-border);
-			border-radius: 999px;
-			box-shadow: inset 0 0 10px rgba(0,0,0,0.45);
-		}
-
-		*::-webkit-scrollbar-thumb{
-			border-radius: 999px;
-			border: 1px solid var(--sb-border);
-			background: var(--sb-thumb);
-			box-shadow: 0 0 12px var(--sb-glow);
-		}
-
-		*::-webkit-scrollbar-thumb:hover{
-			background: var(--sb-thumb-hover);
-		}
-
-		*::-webkit-scrollbar-thumb:active{
-			background: var(--sb-thumb-active);
-			box-shadow: 0 0 16px var(--signal);
-		}
-
-		*::-webkit-scrollbar-corner{ background: var(--sb-track); }
       /* Theme defaults (green) */
       --ink: #b6ffd9;
       --muted: #6aa98d;
@@ -114,6 +71,54 @@
       --shadowText: rgba(77, 255, 154, 0.20);
       --shadowText2: rgba(77, 255, 154, 0.12);
       --stat: #d2a95a;
+    }
+
+    /* Prefer theme-colored thumbs when supported */
+    @supports (color: color-mix(in srgb, red, transparent)) {
+      :root {
+        --sb-thumb: color-mix(in srgb, var(--signal) 28%, transparent);
+        --sb-thumb-hover: color-mix(in srgb, var(--signal) 42%, transparent);
+        --sb-thumb-active: color-mix(in srgb, var(--signal) 62%, transparent);
+      }
+    }
+
+    /* Firefox scrollbars */
+    * {
+      scrollbar-width: thin;
+      scrollbar-color: var(--sb-thumb) var(--sb-track);
+    }
+
+    /* Chromium / Edge / Safari scrollbars */
+    *::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+
+    *::-webkit-scrollbar-track {
+      background: var(--sb-track);
+      border: 1px solid var(--sb-border);
+      border-radius: 999px;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.45);
+    }
+
+    *::-webkit-scrollbar-thumb {
+      border-radius: 999px;
+      border: 1px solid var(--sb-border);
+      background: var(--sb-thumb);
+      box-shadow: 0 0 12px var(--sb-glow);
+    }
+
+    *::-webkit-scrollbar-thumb:hover {
+      background: var(--sb-thumb-hover);
+    }
+
+    *::-webkit-scrollbar-thumb:active {
+      background: var(--sb-thumb-active);
+      box-shadow: 0 0 16px var(--signal);
+    }
+
+    *::-webkit-scrollbar-corner {
+      background: var(--sb-track);
     }
 
     :root[data-theme="green"] {
@@ -402,6 +407,79 @@
     .severed-actions { display: flex; justify-content: center; }
     .severed-actions button { min-width: 200px; }
     body.severed #severed-overlay { display: flex; }
+
+    #shiftcomplete-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, var(--bg-hi) 0%, var(--deep) 100%);
+      color: var(--ink);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      z-index: 190;
+      font-family: var(--font-title);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      padding: 24px;
+    }
+    .shiftcomplete-card {
+      width: min(720px, 94vw);
+      border: 1px solid var(--line);
+      background: rgba(13, 10, 13, 0.85);
+      box-shadow: 0 0 40px var(--glow), inset 0 0 0 1px var(--line);
+      padding: 28px;
+      display: grid;
+      gap: 18px;
+    }
+    .shiftcomplete-title {
+      font-size: clamp(1.1rem, 2.4vw, 1.5rem);
+      letter-spacing: 0.28em;
+      color: var(--signal);
+      text-shadow: 0 0 16px var(--glow);
+    }
+    .shiftcomplete-sub {
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.24em;
+    }
+    .shiftcomplete-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px 18px;
+      font-family: var(--font-body);
+      letter-spacing: 0.08em;
+      text-transform: none;
+    }
+    .shiftcomplete-stat {
+      border: 1px solid var(--line);
+      background: color-mix(in srgb, var(--signal) 3%, transparent);
+      padding: 10px 12px;
+      display: grid;
+      gap: 6px;
+    }
+    .shiftcomplete-stat .label {
+      font-size: 0.6rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.22em;
+      font-family: var(--font-title);
+    }
+    .shiftcomplete-stat .value {
+      font-size: 0.95rem;
+      color: var(--signal);
+      letter-spacing: 0.12em;
+    }
+    .shiftcomplete-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .shiftcomplete-actions button {
+      min-width: 180px;
+    }
+    body.shiftcomplete #shiftcomplete-overlay { display: flex; }
 
     #confirm-reset-overlay {
       position: fixed;
@@ -1489,6 +1567,47 @@ button.btn-error {
     </div>
   </div>
 
+  <div id="shiftcomplete-overlay">
+    <div class="shiftcomplete-card">
+      <div class="shiftcomplete-title">Shift Complete</div>
+      <div class="shiftcomplete-sub">Standard 8-Hour Shift Summary</div>
+      <div class="shiftcomplete-grid">
+        <div class="shiftcomplete-stat">
+          <span class="label">Gate</span>
+          <span id="shiftcomplete-gate" class="value">GATE-00</span>
+        </div>
+        <div class="shiftcomplete-stat">
+          <span class="label">Completion Time</span>
+          <span id="shiftcomplete-time" class="value">00:00:00</span>
+        </div>
+        <div class="shiftcomplete-stat">
+          <span class="label">Shift Duration</span>
+          <span id="shiftcomplete-shift" class="value">08:00:00</span>
+        </div>
+        <div class="shiftcomplete-stat">
+          <span class="label">Gate Health</span>
+          <span id="shiftcomplete-health" class="value">OPERATIONAL</span>
+        </div>
+        <div class="shiftcomplete-stat">
+          <span class="label">Ships Approved</span>
+          <span id="shiftcomplete-approved" class="value">0</span>
+        </div>
+        <div class="shiftcomplete-stat">
+          <span class="label">Ships Denied</span>
+          <span id="shiftcomplete-denied" class="value">0</span>
+        </div>
+        <div class="shiftcomplete-stat">
+          <span class="label">Wage Earned</span>
+          <span id="shiftcomplete-wage" class="value">0 credits</span>
+        </div>
+      </div>
+      <div class="shiftcomplete-actions">
+        <button id="btn-shiftcomplete-continue">Continue Shift</button>
+        <button id="btn-shiftcomplete-reset" class="btn-danger">Reset Gate</button>
+      </div>
+    </div>
+  </div>
+
   <div id="confirm-reset-overlay" aria-hidden="true">
     <div class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="confirm-reset-title">
       <div id="confirm-reset-title" class="confirm-title">Confirm Gate Reset</div>
@@ -2083,7 +2202,8 @@ button.btn-error {
       sfxEnabled: "tqe_gate_terminal_sfx_enabled",
       musicEnabled: "tqe_gate_terminal_music_enabled",
       operatorCallsign: "tqe_gate_terminal_operator_callsign",
-			shiftMs: "tqe_gate_terminal_shift_ms"
+			shiftMs: "tqe_gate_terminal_shift_ms",
+		shiftCompleteShown: "tqe_gate_terminal_shift_complete_shown"
     };
 
 	function buildGateList(count = 1) {
@@ -2350,47 +2470,46 @@ button.btn-error {
         case "TOW":
           // Emergency rescues - VERY tight deadlines
           deadlineType = rng() < 0.6 ? "CRITICAL" : "URGENT";
-          multiplier = deadlineType === "CRITICAL" ? 1.3 : 1.8;
+          multiplier = deadlineType === "CRITICAL" ? 0.40 : 0.60;
           break;
 
         case "DEPART":
           // VIP/scheduled departures - tight windows
           deadlineType = s.priority ? "CRITICAL" : (rng() < 0.3 ? "URGENT" : "STANDARD");
-          multiplier = s.priority ? 1.2 : (deadlineType === "URGENT" ? 1.5 : 2.0);
+          multiplier = s.priority ? 0.40 : (deadlineType === "URGENT" ? 0.60 : 0.80);
           break;
 
         case "CREW TRANSFER":
           // Personnel critical for operations
           deadlineType = rng() < 0.35 ? "URGENT" : "STANDARD";
-          multiplier = deadlineType === "URGENT" ? 1.5 : 2.0;
+          multiplier = deadlineType === "URGENT" ? 0.60 : 0.80;
           break;
 
         case "REFUEL":
           // Fuel transfers - moderate pressure
           deadlineType = rng() < 0.2 ? "URGENT" : "STANDARD";
-          multiplier = deadlineType === "URGENT" ? 1.6 : 2.2;
+          multiplier = deadlineType === "URGENT" ? 0.60 : 0.80;
           break;
 
         case "CARGO LOAD":
           // Time-sensitive cargo, perishables
           deadlineType = rng() < 0.25 ? "URGENT" : (rng() < 0.5 ? "STANDARD" : "RELAXED");
-          multiplier = deadlineType === "URGENT" ? 1.6 : (deadlineType === "STANDARD" ? 2.3 : 3.0);
+          multiplier = deadlineType === "URGENT" ? 0.60 : (deadlineType === "STANDARD" ? 0.80 : 0.95);
           break;
 
         default:
           deadlineType = "STANDARD";
-          multiplier = 2.0;
+          multiplier = 0.80;
           break;
       }
 
-      // Calculate deadline: Current time + ETA + buffer time
-      const bufferTime = Math.floor(baseDeadline * multiplier);
-      s.departureDeadline = Date.now() + (baseDeadline + bufferTime) * 1000;
+      // Apply percentage of ETA as the deadline offset
+      const departureDeadlineOffset = Math.floor(baseDeadline * multiplier);
+      s.departureDeadline = Date.now() + (departureDeadlineOffset * 1000);
       s.deadlineType = deadlineType;
 
-      // Warning triggers at 75% of deadline time
-      const totalTime = (baseDeadline + bufferTime) * 1000;
-      s.deadlineWarningAt = Date.now() + Math.floor(totalTime * 0.75);
+      // Warning at 75% of deadline time
+      s.deadlineWarningAt = Date.now() + Math.floor(departureDeadlineOffset * 1000 * 0.75);
 
       // Set urgency level for visual feedback
       s.urgencyLevel = deadlineType === "CRITICAL" ? 3 :
@@ -2981,7 +3100,18 @@ button.btn-error {
       severedApproved: document.getElementById("severed-approved"),
       severedDenied: document.getElementById("severed-denied"),
       severedWage: document.getElementById("severed-wage"),
-      btnRestart: document.getElementById("btn-restart")
+      btnRestart: document.getElementById("btn-restart"),
+
+      shiftcompleteOverlay: document.getElementById("shiftcomplete-overlay"),
+      shiftcompleteGate: document.getElementById("shiftcomplete-gate"),
+      shiftcompleteTime: document.getElementById("shiftcomplete-time"),
+      shiftcompleteShift: document.getElementById("shiftcomplete-shift"),
+      shiftcompleteHealth: document.getElementById("shiftcomplete-health"),
+      shiftcompleteApproved: document.getElementById("shiftcomplete-approved"),
+      shiftcompleteDenied: document.getElementById("shiftcomplete-denied"),
+      shiftcompleteWage: document.getElementById("shiftcomplete-wage"),
+      btnShiftcompleteContinue: document.getElementById("btn-shiftcomplete-continue"),
+      btnShiftcompleteReset: document.getElementById("btn-shiftcomplete-reset")
     };
 
     const runtime = {
@@ -2997,6 +3127,7 @@ button.btn-error {
       saveTick: 0,
       severed: false,
       lastSevered: null,
+      shiftCompleteShown: false,
       maintenance: {},
       processingCount: 0,
       resumeShiftMs: null,
@@ -3158,6 +3289,7 @@ button.btn-error {
         error: makeAudioPool("error.ogg", 2, 0.6),
         charged: makeAudioPool("charged.ogg", 2, 0.55),
         severed: makeAudioPool("severed.ogg", 1, 0.7),
+        shiftcomplete: makeAudioPool("shiftcomplete.ogg", 1, 0.7),
         purge: makeLoopAudio("purge.ogg", 0.75),
         reset: makeLoopAudio("reset.ogg", 0.65),
         scan: makeLoopAudio("scan.ogg", 1),
@@ -3388,6 +3520,17 @@ button.btn-error {
       ui.severedWage.textContent = `${summary.wage} credits`;
     }
 
+    function updateShiftcompleteOverlay(summary) {
+      if (!summary) return;
+      ui.shiftcompleteGate.textContent = summary.gateId;
+      ui.shiftcompleteTime.textContent = formatClock(summary.time);
+      ui.shiftcompleteShift.textContent = formatHMS(summary.shiftMs);
+      ui.shiftcompleteHealth.textContent = summary.health;
+      ui.shiftcompleteApproved.textContent = String(summary.approved);
+      ui.shiftcompleteDenied.textContent = String(summary.denied);
+      ui.shiftcompleteWage.textContent = `${summary.wage} credits`;
+    }
+
     function clearLog(el) {
       // Keep the sticky header (first child)
       const head = el.querySelector(".loghead");
@@ -3537,6 +3680,42 @@ button.btn-error {
       }
     }
 
+    function triggerShiftComplete() {
+      if (runtime.severed || runtime.shiftCompleteShown) return;
+
+      const g = activeGate();
+      const stats = ensureGateStats(g);
+      const shiftMs = getShiftMs();
+
+      const summary = {
+        gateId: g.id,
+        time: Date.now(),
+        shiftMs,
+        health: g.health || "OPERATIONAL",
+        approved: stats.approved,
+        denied: stats.denied,
+        wage: computeWage(stats, shiftMs)
+      };
+
+      updateShiftcompleteOverlay(summary);
+      runtime.shiftCompleteShown = true;
+      storeBool(LS.shiftCompleteShown, true);
+
+      // DO NOT stop music (key difference from severGate)
+      // DO NOT change theme (key difference from severGate)
+      // DO NOT pause game loops
+
+      playSfx(audio.shiftcomplete);
+      document.body.classList.add("shiftcomplete");
+      eventLine("SHIFT COMPLETE: 8 HOUR MARK REACHED", "good");
+    }
+
+    function continueAfterShiftComplete() {
+      document.body.classList.remove("shiftcomplete");
+      consoleLine("CONTINUING EXTENDED SHIFT", "good");
+      // Shift complete flag remains true - don't show again
+    }
+
     function restartGate() {
       const oldId = runtime.activeGateId;
       const newId = generateGateId();
@@ -3547,12 +3726,15 @@ button.btn-error {
       runtime.shiftStart = Date.now();
       runtime.severed = false;
       runtime.lastSevered = null;
+      runtime.shiftCompleteShown = false;
 			localStorage.removeItem(LS.shiftMs);
+		localStorage.removeItem(LS.shiftCompleteShown);
       localStorage.setItem(LS.gateList, JSON.stringify(runtime.catalog));
       localStorage.setItem(LS.gateCurrent, newId);
       if (oldId) localStorage.removeItem(LS.gateStatePrefix + oldId);
 
       document.body.classList.remove("severed");
+      document.body.classList.remove("shiftcomplete");
       clearLog(ui.events);
       clearLog(ui.console);
       setGateById(newId, true);
@@ -5726,6 +5908,33 @@ function tickGate(g) {
       return worst;
     }
 
+    function fullyStabilizeLink(g) {
+      if (!g.corridors.length) return null;
+      // pick the worst link and fully stabilize it
+      const score = (st) => st === "OFFLINE" ? 3 : (st === "INTERMITTENT" ? 2 : (st === "DEGRADED" ? 1 : 0));
+      const worst = [...g.corridors].sort((a,b) => score(b.status) - score(a.status))[0];
+      if (!worst || worst.status === "STABLE") return null;
+
+      worst.status = "STABLE";
+      worst.cls = CORRIDOR_STATES.find(x => x.key === "STABLE")?.cls || "good";
+      worst.lastChange = Date.now();
+      return worst;
+    }
+
+    function fullyStabilizeAllLinks(g) {
+      if (!g.corridors.length) return [];
+      const improved = [];
+      for (const corridor of g.corridors) {
+        if (corridor.status !== "STABLE") {
+          corridor.status = "STABLE";
+          corridor.cls = CORRIDOR_STATES.find(x => x.key === "STABLE")?.cls || "good";
+          corridor.lastChange = Date.now();
+          improved.push(corridor);
+        }
+      }
+      return improved;
+    }
+
     function worsenRandomLink(g) {
       if (!g.corridors.length) return null;
       const c = g.corridors[Math.floor(Math.random() * g.corridors.length)];
@@ -5781,28 +5990,75 @@ function tickGate(g) {
           consoleLine("MAINT: ALIGNMENT WITHIN TOLERANCE", "good");
           if (g.id === runtime.activeGateId) eventLine("MAINT: ALIGNMENT WITHIN TOLERANCE", "good");
 
-          // realign can also stabilize one link (often), with a small chance to steady another
           let improvedAny = false;
-          if (Math.random() < 0.78) {
-            const improved = improveLinkOneStep(g);
-            if (improved) {
+          const jackpotRoll = Math.random();
+
+          // 1% chance: JACKPOT - fully stabilize ALL links and alignment
+          if (jackpotRoll < 0.01) {
+            const allImproved = fullyStabilizeAllLinks(g);
+            if (allImproved.length > 0) {
               improvedAny = true;
-              consoleLine(`MAINT: LINK ${improved.link} -> ${improved.status}`, improved.status === "STABLE" ? "good" : "warn");
+              consoleLine("MAINT: ALL LINKS FULLY STABILIZED", "good");
               if (g.id === runtime.activeGateId) {
-                eventLine(`MAINT: LINK ${improved.link} -> ${improved.status}`, improved.status === "STABLE" ? "good" : "warn");
+                eventLine("MAINT: ALL LINKS FULLY STABILIZED", "good");
+                playSfx("restore");
+              }
+              for (const corridor of allImproved) {
+                consoleLine(`MAINT: LINK ${corridor.link} -> STABLE`, "good");
+                if (g.id === runtime.activeGateId) {
+                  eventLine(`MAINT: LINK ${corridor.link} -> STABLE`, "good");
+                }
               }
             }
           }
-          if (Math.random() < 0.25 && hasRealignNeed(g)) {
-            const improved = improveLinkOneStep(g);
-            if (improved) {
+          // 5% chance: major success - fully stabilize ONE link OR alignment is already done
+          else if (jackpotRoll < 0.06) {
+            const fullyImproved = fullyStabilizeLink(g);
+            if (fullyImproved) {
               improvedAny = true;
-              consoleLine(`MAINT: LINK ${improved.link} -> ${improved.status}`, improved.status === "STABLE" ? "good" : "warn");
+              consoleLine(`MAINT: LINK ${fullyImproved.link} FULLY STABILIZED`, "good");
               if (g.id === runtime.activeGateId) {
-                eventLine(`MAINT: LINK ${improved.link} -> ${improved.status}`, improved.status === "STABLE" ? "good" : "warn");
+                eventLine(`MAINT: LINK ${fullyImproved.link} FULLY STABILIZED`, "good");
+                playSfx("restore");
+              }
+            } else {
+              consoleLine("MAINT: GATE ALIGNMENT OPTIMAL", "good");
+              if (g.id === runtime.activeGateId) {
+                eventLine("MAINT: GATE ALIGNMENT OPTIMAL", "good");
               }
             }
           }
+          // Normal behavior: improve links step by step
+          else {
+            // 78% chance for first improvement
+            if (Math.random() < 0.78) {
+              const improved = improveLinkOneStep(g);
+              if (improved) {
+                improvedAny = true;
+                consoleLine(`MAINT: LINK ${improved.link} -> ${improved.status}`, improved.status === "STABLE" ? "good" : "warn");
+                if (g.id === runtime.activeGateId) {
+                  eventLine(`MAINT: LINK ${improved.link} -> ${improved.status}`, improved.status === "STABLE" ? "good" : "warn");
+                }
+              }
+            }
+
+            // 25% chance for multiple additional improvements (2-3 more links)
+            if (Math.random() < 0.25 && hasRealignNeed(g)) {
+              const additionalImprovements = Math.floor(Math.random() * 2) + 2; // 2-3 additional improvements
+              for (let i = 0; i < additionalImprovements; i++) {
+                if (!hasRealignNeed(g)) break; // stop if everything is stable
+                const improved = improveLinkOneStep(g);
+                if (improved) {
+                  improvedAny = true;
+                  consoleLine(`MAINT: LINK ${improved.link} -> ${improved.status}`, improved.status === "STABLE" ? "good" : "warn");
+                  if (g.id === runtime.activeGateId) {
+                    eventLine(`MAINT: LINK ${improved.link} -> ${improved.status}`, improved.status === "STABLE" ? "good" : "warn");
+                  }
+                }
+              }
+            }
+          }
+
           if (!improvedAny) {
             consoleLine("MAINT: LINK STATE UNCHANGED", "dim");
             if (g.id === runtime.activeGateId) eventLine("MAINT: LINK STATE UNCHANGED", "dim");
@@ -6968,6 +7224,8 @@ function cmdPingRelay(id) {
       ui.btnHardReset.addEventListener("click", () => setResetConfirmOpen(true));
     }
     if (ui.btnRestart) ui.btnRestart.addEventListener("click", restartGate);
+    if (ui.btnShiftcompleteContinue) ui.btnShiftcompleteContinue.addEventListener("click", continueAfterShiftComplete);
+    if (ui.btnShiftcompleteReset) ui.btnShiftcompleteReset.addEventListener("click", restartGate);
 
     loadTheme();
 
@@ -7083,6 +7341,7 @@ function cmdPingRelay(id) {
       loadTheme();
       runtime.operatorCallsign = safeStorageGet(LS.operatorCallsign) || "";
       updateOperatorLabel();
+      runtime.shiftCompleteShown = loadStoredBool(LS.shiftCompleteShown, false);
       runtime.catalog = loadGateCatalog();
 			const resumeBoot = typeof runtime.resumeShiftMs === "number";
 			const storedShiftMs = loadShiftMsFromStorage();
@@ -7117,8 +7376,15 @@ function cmdPingRelay(id) {
 
       runtime.tickTimer = setInterval(tickAllGates, 1000);
       runtime.uiTimer = setInterval(() => {
-        if (runtime.severed) return;
         const shiftMs = Date.now() - runtime.shiftStart;
+        const EIGHT_HOURS_MS = 28_800_000;
+
+        // Check for 8-hour shift completion
+        if (!runtime.shiftCompleteShown && !runtime.severed && shiftMs >= EIGHT_HOURS_MS) {
+          triggerShiftComplete();
+        }
+
+        if (runtime.severed) return;
         ui.shiftTime.textContent = formatHMS(shiftMs);
         const g = activeGate();
         const stats = ensureGateStats(g);
