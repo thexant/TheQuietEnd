@@ -301,10 +301,110 @@
       font-size: 0.7rem;
       color: var(--muted);
     }
+    .start-name-slot {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin: -6px 0;
+    }
+    .start-name-label {
+      cursor: pointer;
+      font-family: var(--font-title);
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--signal);
+      text-shadow: 0 0 16px var(--glow);
+      padding: 8px 16px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: rgba(0,0,0,0.4);
+      box-shadow: 0 0 16px rgba(0,0,0,0.3), inset 0 0 0 1px rgba(255,255,255,0.08);
+      transition: all 0.2s ease;
+    }
+    .start-name-label:hover {
+      border-color: var(--signal);
+      box-shadow: 0 0 20px var(--glow), inset 0 0 0 1px var(--signal);
+    }
+    .start-name-slot.editing .start-name-label {
+      display: none;
+    }
+    .start-name-input {
+      display: none;
+      min-width: 200px;
+      font-size: 1rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      text-align: center;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid var(--signal);
+      color: var(--signal);
+      padding: 8px 16px;
+      border-radius: 6px;
+      outline: none;
+      box-shadow: 0 0 16px var(--glow);
+      font-family: var(--font-title);
+      font-weight: 700;
+    }
+    .start-name-slot.editing .start-name-input {
+      display: inline-block;
+    }
     #btn-start {
       font-size: 1.05rem;
       letter-spacing: 0.3em;
       padding: 14px 16px;
+    }
+    #btn-data-reset {
+      display: none;
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      padding: 8px 12px;
+      margin-top: 12px;
+      background: rgba(139, 0, 0, 0.3);
+      border-color: rgba(200, 50, 50, 0.6);
+      color: rgba(255, 100, 100, 0.9);
+    }
+    #btn-data-reset:hover {
+      background: rgba(139, 0, 0, 0.5);
+      border-color: rgba(255, 80, 80, 0.8);
+      color: rgba(255, 120, 120, 1);
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.4);
+    }
+    #btn-data-reset.visible {
+      display: block;
+    }
+    body.start-loading #btn-data-reset {
+      display: none;
+    }
+    body.start-loading #btn-start-resume {
+      display: none;
+    }
+    body.start-loading .start-name-label {
+      display: none;
+    }
+    .start-loading-text {
+      display: none;
+      font-family: var(--font-title);
+      text-transform: uppercase;
+      letter-spacing: 0.3em;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+    body.start-loading .start-loading-text {
+      display: block;
+    }
+    .start-loading-dots::after {
+      content: '';
+      animation: loadingDots 1.5s steps(4, end) infinite;
+    }
+    @keyframes loadingDots {
+      0%, 24.99% { content: ''; }
+      25%, 49.99% { content: '.'; }
+      50%, 74.99% { content: '..'; }
+      75%, 100% { content: '...'; }
     }
     .start-status {
       display: none;
@@ -491,6 +591,18 @@
       z-index: 180;
     }
     body.resetting #confirm-reset-overlay { display: flex; }
+
+    #confirm-data-reset-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, rgba(10, 6, 8, 0.92) 0%, rgba(0,0,0,0.98) 70%);
+      z-index: 230;
+    }
+    body.data-resetting #confirm-data-reset-overlay { display: flex; }
+
     .confirm-card {
       width: min(560px, 92vw);
       border: 1px solid rgba(255,255,255,0.12);
@@ -848,6 +960,87 @@ button.btn-error {
       letter-spacing: 0.15em;
       color: var(--muted);
       margin-bottom: 8px;
+    }
+
+    /* Collapsible panel headers */
+    .panel-header,
+    .subsection-header {
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.15s ease;
+    }
+
+    .panel-header:hover,
+    .subsection-header:hover {
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 3px;
+    }
+
+    .panel-header:active,
+    .subsection-header:active {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    /* Chevron icons */
+    .panel-chevron,
+    .subsection-chevron {
+      display: inline-block;
+      font-size: 0.7em;
+      transition: transform 0.2s ease;
+      color: var(--signal);
+      text-shadow: 0 0 8px var(--glow);
+    }
+
+    /* Rotate chevron when collapsed */
+    .panel.collapsed .panel-chevron,
+    .queue-section.collapsed .subsection-chevron,
+    .sys-block.collapsed .subsection-chevron,
+    .logbox.collapsed .subsection-chevron {
+      transform: rotate(-90deg);
+    }
+
+    /* Content wrappers - ensure they work with grid layout */
+    .panel-content {
+      display: contents; /* Makes wrapper transparent to grid layout */
+    }
+
+    .subsection-content {
+      min-height: 0; /* Critical for grid overflow */
+      display: contents; /* Makes wrapper transparent to grid layout */
+    }
+
+    /* Hide content when collapsed */
+    .panel.collapsed .panel-content,
+    .queue-section.collapsed .subsection-content,
+    .sys-block.collapsed .subsection-content,
+    .logbox.collapsed .subsection-content {
+      display: none;
+    }
+
+    /* Visual feedback for collapsed state */
+    .panel.collapsed,
+    .queue-section.collapsed,
+    .sys-block.collapsed,
+    .logbox.collapsed {
+      opacity: 0.7;
+      transition: opacity 0.2s ease;
+    }
+
+    .panel.collapsed:hover,
+    .queue-section.collapsed:hover,
+    .sys-block.collapsed:hover,
+    .logbox.collapsed:hover {
+      opacity: 0.9;
+    }
+
+    /* Grid adjustments for collapsed panels */
+    #traffic.collapsed,
+    #systems.collapsed,
+    #terminal.collapsed {
+      grid-template-rows: auto;
     }
 
     .interface {
@@ -1358,7 +1551,7 @@ button.btn-error {
       margin: -10px -10px 10px -10px;
       padding: 8px 10px;
       border-bottom: 1px solid rgba(255,255,255,0.06);
-      background: rgba(0,0,0,0.55);
+      background: rgba(0,0,0,1);
       font-family: var(--font-title);
       letter-spacing: 0.14em;
       text-transform: uppercase;
@@ -1436,6 +1629,12 @@ button.btn-error {
       }
       .kv { grid-template-columns: 120px 1fr; }
       .logs { grid-template-columns: 1fr; }
+
+      /* Smaller chevrons on mobile */
+      .panel-chevron,
+      .subsection-chevron {
+        font-size: 0.65em;
+      }
     }
 
     @media (max-width: 420px) {
@@ -1513,6 +1712,58 @@ button.btn-error {
       }
       .help-row { grid-template-columns: 1fr; gap: 4px; }
     }
+
+    /* VFX LOW mode - reduced animations and effects for better performance */
+    body.vfx-low .status-bar::before,
+    body.vfx-low .gate-display::before,
+    body.vfx-low .loading-progress {
+      box-shadow: none !important;
+    }
+
+    body.vfx-low button,
+    body.vfx-low select,
+    body.vfx-low .relay-btn,
+    body.vfx-low .logline {
+      box-shadow: none !important;
+    }
+
+    body.vfx-low button:hover,
+    body.vfx-low select:hover,
+    body.vfx-low .relay-btn:hover {
+      box-shadow: none !important;
+    }
+
+    body.vfx-low .beacon,
+    body.vfx-low .beacon-inner {
+      animation: none !important;
+    }
+
+    body.vfx-low .btn-danger {
+      animation: none !important;
+    }
+
+    body.vfx-low .ack-strip {
+      animation: none !important;
+    }
+
+    body.vfx-low .relay-ping {
+      animation: none !important;
+    }
+
+    body.vfx-low .help-panel,
+    body.vfx-low .confirm-overlay {
+      backdrop-filter: none !important;
+      background: rgba(0, 0, 0, 0.95) !important;
+    }
+
+    body.vfx-low @keyframes startFill,
+    body.vfx-low @keyframes btnErrorFlash,
+    body.vfx-low @keyframes beaconPulse,
+    body.vfx-low @keyframes pulse-urgent,
+    body.vfx-low @keyframes ackPulse,
+    body.vfx-low @keyframes relayPingPulse {
+      from, to { opacity: 1; transform: none; }
+    }
   </style>
 </head>
 
@@ -1521,13 +1772,32 @@ button.btn-error {
   <div id="start-overlay" aria-hidden="false">
     <div class="start-card">
       <div class="start-sub">Awaiting Operator Input</div>
+      <div id="start-name-slot" class="start-name-slot">
+        <div id="start-name-label" class="start-name-label" role="button" tabindex="0">USER</div>
+        <input id="start-name-input" class="start-name-input" type="text" maxlength="24" aria-label="Operator callsign" />
+      </div>
       <button id="btn-start">START</button>
+      <button id="btn-start-resume">RESUME</button>
+      <button id="btn-data-reset">RESET</button>
+      <input id="start-resume-file" type="file" accept=".tqegate,application/json" hidden>
+      <div id="start-loading-text" class="start-loading-text">LOADING: <span id="start-loading-name"></span><span class="start-loading-dots"></span></div>
       <div class="start-status" aria-live="polite">INITIALIZING...</div>
       <div class="start-progress" aria-hidden="true">
         <div class="start-progress-fill"></div>
       </div>
     </div>
   </div>
+
+  <div id="confirm-data-reset-overlay" aria-hidden="true">
+    <div class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="confirm-data-reset-title">
+      <div id="confirm-data-reset-title" class="confirm-title">RESET GATE?</div>
+      <div class="confirm-actions">
+        <button id="btn-data-reset-confirm" class="btn-danger">YES</button>
+        <button id="btn-data-reset-cancel">NO</button>
+      </div>
+    </div>
+  </div>
+
   <div id="severed-overlay">
     <div class="severed-card">
       <div class="severed-title">Gate Connection Severed</div>
@@ -1654,6 +1924,7 @@ button.btn-error {
           <button id="btn-resume" aria-label="Resume from an exported save">RESUME</button>
           <button id="btn-sfx" aria-label="Toggle sound effects" aria-pressed="true">SFX: ON</button>
           <button id="btn-music" aria-label="Toggle background music" aria-pressed="true">MUSIC: ON</button>
+          <button id="btn-vfx" aria-label="Toggle visual effects" aria-pressed="true">VFX: REG</button>
           <button id="btn-help" aria-expanded="false" aria-controls="help-panel">HELP</button>
           <button id="btn-hard-reset" class="btn-danger" aria-label="Reset gate simulation">RESET</button>
         </div>
@@ -1696,6 +1967,10 @@ button.btn-error {
               <div class="help-row">
                 <div class="help-key">Audio toggles</div>
                 <div>SFX and MUSIC toggle sound effects and background audio for this terminal.</div>
+              </div>
+              <div class="help-row">
+                <div class="help-key">VFX toggle</div>
+                <div>VFX toggles between REG (regular) and LOW (reduced animations/glows) visual effects modes for better performance.</div>
               </div>
               <div class="help-row">
                 <div class="help-key">Hard reset</div>
@@ -1771,6 +2046,10 @@ button.btn-error {
                 <div>SFX ON|OFF|TOGGLE and MUSIC ON|OFF|TOGGLE control sound effects and background music.</div>
               </div>
               <div class="help-row">
+                <div class="help-key">VFX</div>
+                <div>VFX REG|LOW|TOGGLE controls visual effects. LOW mode reduces animations and glows for better performance.</div>
+              </div>
+              <div class="help-row">
                 <div class="help-key">Theme + help</div>
                 <div>THEME GREEN|RED|BLUE|AMBER|BLACK swaps the display. HELP or ? lists all commands.</div>
               </div>
@@ -1820,15 +2099,23 @@ button.btn-error {
     <div class="interface">
       <!-- TRAFFIC -->
       <section id="traffic" class="panel">
-        <div class="label">Traffic Queue</div>
+        <div class="label panel-header" data-panel="traffic">
+          <span class="panel-chevron">▼</span>
+          <span>Traffic Queue</span>
+        </div>
 
+        <div class="panel-content">
         <div class="queue">
           <div class="queue-section">
-            <div class="queue-head">
-              <div class="queue-title">Inbound</div>
+            <div class="queue-head subsection-header" data-panel="traffic-inbound">
+              <div class="queue-title">
+                <span class="subsection-chevron">▼</span>
+                <span>Inbound</span>
+              </div>
               <div id="inbound-meta" class="queue-meta">—</div>
             </div>
 
+            <div class="subsection-content">
             <div class="scroll">
               <table>
                 <thead>
@@ -1843,14 +2130,19 @@ button.btn-error {
                 <tbody id="inbound-body"></tbody>
               </table>
             </div>
+            </div>
           </div>
 
           <div class="queue-section">
-            <div class="queue-head">
-              <div class="queue-title">Outbound</div>
+            <div class="queue-head subsection-header" data-panel="traffic-outbound">
+              <div class="queue-title">
+                <span class="subsection-chevron">▼</span>
+                <span>Outbound</span>
+              </div>
               <div id="outbound-meta" class="queue-meta">—</div>
             </div>
 
+            <div class="subsection-content">
             <div class="scroll">
               <table>
                 <thead>
@@ -1865,111 +2157,166 @@ button.btn-error {
                 <tbody id="outbound-body"></tbody>
               </table>
             </div>
+            </div>
           </div>
+        </div>
         </div>
       </section>
 
       <!-- SYSTEMS -->
       <section id="systems" class="panel">
-        <div class="label">Systems</div>
+        <div class="label panel-header" data-panel="systems">
+          <span class="panel-chevron">▼</span>
+          <span>Systems</span>
+        </div>
 
+        <div class="panel-content">
         <div class="sys-grid">
           <div class="sys-block">
-            <div class="queue-head">
-              <div class="queue-title">Gate Systems</div>
+            <div class="queue-head subsection-header" data-panel="systems-gate">
+              <div class="queue-title">
+                <span class="subsection-chevron">▼</span>
+                <span>Gate Systems</span>
+              </div>
               <div class="gate-head-pills">
                 <div id="beacon-pill" class="pill ok beacon-pill">BEACON ONLINE</div>
                 <div id="gate-health-pill" class="pill ok">OK</div>
               </div>
             </div>
 
+            <div class="subsection-content">
             <div class="kv">
               <div class="k">Node</div><div id="kv-node" class="v">—</div>
               <div class="k">Beacon Array</div><div id="kv-beacon" class="v">—</div>
               <div class="k">Alignment</div><div id="kv-align" class="v">—</div>
               <div class="k">Sync State</div><div id="kv-sync" class="v">—</div>
             </div>
+            </div>
           </div>
 
           <div class="sys-block">
-            <div class="queue-head">
-              <div class="queue-title">Corridor Links</div>
+            <div class="queue-head subsection-header" data-panel="systems-corridor">
+              <div class="queue-title">
+                <span class="subsection-chevron">▼</span>
+                <span>Corridor Links</span>
+              </div>
               <div id="corridor-meta" class="queue-meta">—</div>
             </div>
+            <div class="subsection-content">
             <div id="corridor-list" class="kv"></div>
+            </div>
           </div>
 
           <div class="sys-block">
-            <div class="queue-head">
-              <div class="queue-title">Facility Subsystems</div>
+            <div class="queue-head subsection-header" data-panel="systems-facility">
+              <div class="queue-title">
+                <span class="subsection-chevron">▼</span>
+                <span>Facility Subsystems</span>
+              </div>
               <div id="facility-meta" class="queue-meta">—</div>
             </div>
+            <div class="subsection-content">
             <div id="facility-list" class="status-list"></div>
             <div class="label-mini">Work Orders</div>
             <div id="workorder-list" class="status-list"></div>
             <div class="label-mini">Repairs <span id="repair-meta" class="label-meta">STANDBY</span></div>
             <div id="repair-list" class="status-list"></div>
+            </div>
           </div>
 
           <div class="sys-block">
-            <div class="queue-head">
-              <div class="queue-title">Resources</div>
+            <div class="queue-head subsection-header" data-panel="systems-resources">
+              <div class="queue-title">
+                <span class="subsection-chevron">▼</span>
+                <span>Resources</span>
+              </div>
               <div id="resource-meta" class="queue-meta">2 TRACKS</div>
             </div>
+            <div class="subsection-content">
             <div id="resource-list" class="resource-list"></div>
+            </div>
           </div>
 
           <div class="sys-block">
-            <div class="queue-head">
-              <div class="queue-title">Concourse / Docking</div>
+            <div class="queue-head subsection-header" data-panel="systems-concourse">
+              <div class="queue-title">
+                <span class="subsection-chevron">▼</span>
+                <span>Concourse / Docking</span>
+              </div>
               <div id="concourse-pill" class="pill ok">QUIET</div>
             </div>
+            <div class="subsection-content">
             <div class="kv">
               <div class="k">Concourse Status</div><div id="concourse-status" class="v">—</div>
             </div>
             <div id="dock-list" class="status-list"></div>
+            </div>
           </div>
 
           <div class="sys-block">
-            <div class="queue-head">
-              <div class="queue-title">Repeater Relays</div>
+            <div class="queue-head subsection-header" data-panel="systems-relays">
+              <div class="queue-title">
+                <span class="subsection-chevron">▼</span>
+                <span>Repeater Relays</span>
+              </div>
               <div class="queue-meta">LOCAL</div>
             </div>
+            <div class="subsection-content">
             <div id="relay-list" class="status-list"></div>
+            </div>
           </div>
 
           <div class="sys-block">
-            <div class="queue-head">
-              <div class="queue-title">Maintenance</div>
+            <div class="queue-head subsection-header" data-panel="systems-maintenance">
+              <div class="queue-title">
+                <span class="subsection-chevron">▼</span>
+                <span>Maintenance</span>
+              </div>
               <div class="queue-meta">LOCAL AUTH</div>
             </div>
+            <div class="subsection-content">
             <div class="sys-actions">
               <button id="btn-realign">REALIGN</button>
               <button id="btn-reset">RESET</button>
               <button id="btn-purge">PURGE</button>
               <button id="btn-scan">SCAN</button>
             </div>
+            </div>
           </div>
+        </div>
         </div>
       </section>
 
       <!-- TERMINAL -->
       <section id="terminal" class="panel">
-        <div class="label">Operator Console</div>
+        <div class="label panel-header" data-panel="terminal">
+          <span class="panel-chevron">▼</span>
+          <span>Operator Console</span>
+        </div>
 
+        <div class="panel-content">
         <div class="logs">
           <div id="console-log" class="logbox" aria-label="Console output">
-            <div class="loghead">Console</div>
+            <div class="loghead subsection-header" data-panel="terminal-console">
+              <span class="subsection-chevron">▼</span>
+              <span>Console</span>
+            </div>
+            <div class="subsection-content"></div>
           </div>
 
           <div id="events-log" class="logbox" aria-label="Events log">
-            <div class="loghead">Events</div>
+            <div class="loghead subsection-header" data-panel="terminal-events">
+              <span class="subsection-chevron">▼</span>
+              <span>Events</span>
+            </div>
+            <div class="subsection-content"></div>
           </div>
         </div>
 
         <div class="prompt">
           <div id="ps1" class="ps1">GATE-—&gt;</div>
           <input id="cmd" type="text" placeholder="HELP / STATUS / DETAIL V-9012 / APPROVE V-9012 ..." autocomplete="off" spellcheck="false">
+        </div>
         </div>
       </section>
     </div>
@@ -2202,9 +2549,11 @@ button.btn-error {
       gateStatePrefix: "tqe_gate_terminal_gate_state::",
       sfxEnabled: "tqe_gate_terminal_sfx_enabled",
       musicEnabled: "tqe_gate_terminal_music_enabled",
+      vfxEnabled: "tqe_gate_terminal_vfx_enabled",
       operatorCallsign: "tqe_gate_terminal_operator_callsign",
 			shiftMs: "tqe_gate_terminal_shift_ms",
-		shiftCompleteShown: "tqe_gate_terminal_shift_complete_shown"
+		shiftCompleteShown: "tqe_gate_terminal_shift_complete_shown",
+      collapsedPanels: "tqe_gate_terminal_collapsed_panels"
     };
 
 	function buildGateList(count = 1) {
@@ -3009,6 +3358,17 @@ button.btn-error {
       return true;
     }
 
+    async function resumeFromFileToStartScreen(file) {
+      const text = await file.text();
+      const save = JSON.parse(text);
+      const applied = applySaveState(save);
+      if (!applied) return false;
+      runtime.skipHashLoad = true;
+      safeReplaceState(location.pathname + location.search);
+      updateStartNameLabel();
+      return true;
+    }
+
     async function copyToClipboard(text) {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(text);
@@ -3032,6 +3392,11 @@ button.btn-error {
     const ui = {
       startOverlay: document.getElementById("start-overlay"),
       btnStart: document.getElementById("btn-start"),
+      btnStartResume: document.getElementById("btn-start-resume"),
+      startResumeInput: document.getElementById("start-resume-file"),
+      startNameSlot: document.getElementById("start-name-slot"),
+      startNameLabel: document.getElementById("start-name-label"),
+      startNameInput: document.getElementById("start-name-input"),
       gateDisplay: document.getElementById("gate-display"),
       themeSelect: document.getElementById("theme-select"),
       btnShare: document.getElementById("btn-share"),
@@ -3040,6 +3405,7 @@ button.btn-error {
       resumeInput: document.getElementById("resume-file"),
       btnSfx: document.getElementById("btn-sfx"),
       btnMusic: document.getElementById("btn-music"),
+      btnVfx: document.getElementById("btn-vfx"),
       btnHelp: document.getElementById("btn-help"),
       btnHardReset: document.getElementById("btn-hard-reset"),
       helpPanel: document.getElementById("help-panel"),
@@ -3047,6 +3413,10 @@ button.btn-error {
       resetOverlay: document.getElementById("confirm-reset-overlay"),
       btnResetCancel: document.getElementById("btn-reset-cancel"),
       btnResetConfirm: document.getElementById("btn-reset-confirm"),
+      btnDataReset: document.getElementById("btn-data-reset"),
+      dataResetOverlay: document.getElementById("confirm-data-reset-overlay"),
+      btnDataResetCancel: document.getElementById("btn-data-reset-cancel"),
+      btnDataResetConfirm: document.getElementById("btn-data-reset-confirm"),
 
       operatorSlot: document.getElementById("operator-slot"),
       operatorLabel: document.getElementById("operator-label"),
@@ -3134,7 +3504,27 @@ button.btn-error {
       resumeShiftMs: null,
       skipHashLoad: false,
       operatorCallsign: "",
-      inlineDetailId: null
+      inlineDetailId: null,
+      collapsedPanels: {
+        // Main panels
+        traffic: false,
+        systems: false,
+        terminal: false,
+        // TRAFFIC sub-sections
+        'traffic-inbound': false,
+        'traffic-outbound': false,
+        // SYSTEMS sub-sections
+        'systems-gate': false,
+        'systems-corridor': false,
+        'systems-facility': false,
+        'systems-resources': false,
+        'systems-concourse': false,
+        'systems-relays': false,
+        'systems-maintenance': false,
+        // TERMINAL sub-sections
+        'terminal-console': false,
+        'terminal-events': false
+      }
     };
 
     // ---------------------------
@@ -3211,6 +3601,47 @@ button.btn-error {
     }
 
     // ---------------------------
+    // Start Screen Name
+    // ---------------------------
+    function updateStartNameLabel() {
+      if (!ui.startNameLabel) return;
+      const trimmed = String(runtime.operatorCallsign || "").trim();
+      if (!trimmed) {
+        ui.startNameLabel.textContent = "USER";
+      } else {
+        // Check if there's save data beyond just the operator name
+        const hasOtherSaveData = hasSavedData();
+        if (hasOtherSaveData) {
+          ui.startNameLabel.textContent = "WELCOME BACK: " + trimmed;
+        } else {
+          ui.startNameLabel.textContent = "BEGIN SHIFT: " + trimmed;
+        }
+      }
+      if (ui.startNameInput && !ui.startNameSlot?.classList.contains("editing")) {
+        ui.startNameInput.value = runtime.operatorCallsign || "";
+      }
+    }
+
+    function startStartNameEdit() {
+      if (!ui.startNameSlot || !ui.startNameInput) return;
+      ui.startNameSlot.classList.add("editing");
+      ui.startNameInput.value = runtime.operatorCallsign || "";
+      ui.startNameInput.focus();
+      ui.startNameInput.select();
+    }
+
+    function finishStartNameEdit(save) {
+      if (!ui.startNameSlot || !ui.startNameInput) return;
+      if (save) {
+        setOperatorCallsign(ui.startNameInput.value);
+        updateStartNameLabel();
+      } else {
+        ui.startNameInput.value = runtime.operatorCallsign || "";
+      }
+      ui.startNameSlot.classList.remove("editing");
+    }
+
+    // ---------------------------
     // Audio
     // ---------------------------
     function loadStoredBool(key, fallback) {
@@ -3279,6 +3710,10 @@ button.btn-error {
       ackAlarmOn: false
     };
 
+    const vfxState = {
+      enabled: loadStoredBool(LS.vfxEnabled, true)
+    };
+
       const audio = {
         click: makeAudioPool("click.ogg", 5, 0.35),
 				clack: makeAudioPool("clack.ogg", 6, 0.28),
@@ -3291,6 +3726,7 @@ button.btn-error {
         charged: makeAudioPool("charged.ogg", 2, 0.55),
         severed: makeAudioPool("severed.ogg", 1, 0.7),
         shiftcomplete: makeAudioPool("shiftcomplete.ogg", 1, 0.7),
+        showhide: makeAudioPool("showhide.ogg", 3, 0.45),
         purge: makeLoopAudio("purge.ogg", 0.75),
         reset: makeLoopAudio("reset.ogg", 0.65),
         scan: makeLoopAudio("scan.ogg", 1),
@@ -3309,6 +3745,10 @@ button.btn-error {
       if (ui.btnMusic) {
         ui.btnMusic.textContent = `MUSIC: ${audioState.musicEnabled ? "ON" : "OFF"}`;
         ui.btnMusic.setAttribute("aria-pressed", audioState.musicEnabled ? "true" : "false");
+      }
+      if (ui.btnVfx) {
+        ui.btnVfx.textContent = `VFX: ${vfxState.enabled ? "REG" : "LOW"}`;
+        ui.btnVfx.setAttribute("aria-pressed", vfxState.enabled ? "true" : "false");
       }
     }
 
@@ -3403,6 +3843,21 @@ button.btn-error {
       storeBool(LS.musicEnabled, audioState.musicEnabled);
       updateAudioButtons();
       updateMusicState();
+    }
+
+    function setVfxEnabled(enabled) {
+      vfxState.enabled = !!enabled;
+      storeBool(LS.vfxEnabled, vfxState.enabled);
+      updateAudioButtons();
+      applyVfxMode();
+    }
+
+    function applyVfxMode() {
+      if (vfxState.enabled) {
+        document.body.classList.remove("vfx-low");
+      } else {
+        document.body.classList.add("vfx-low");
+      }
     }
 
     function requestStartupSound() {
@@ -3533,17 +3988,25 @@ button.btn-error {
     }
 
     function clearLog(el) {
-      // Keep the sticky header (first child)
+      if (!el) return;
+      // Keep the sticky header and subsection-content wrapper
       const head = el.querySelector(".loghead");
+      const content = el.querySelector(".subsection-content");
       el.innerHTML = "";
       if (head) el.appendChild(head);
+      if (content) {
+        content.innerHTML = "";
+        el.appendChild(content);
+      }
     }
 
     function logLine(el, text, cls = "dim") {
       const div = document.createElement("div");
       div.className = `terminal-line ${cls}`;
       div.innerHTML = escapeText(text);
-      el.appendChild(div);
+      // Append to subsection-content if it exists, otherwise directly to el
+      const target = el.querySelector(".subsection-content") || el;
+      target.appendChild(div);
       el.scrollTop = el.scrollHeight;
     }
 
@@ -3551,7 +4014,9 @@ button.btn-error {
       const div = document.createElement("div");
       div.className = `terminal-line ${cls}`;
       div.textContent = text;
-      el.appendChild(div);
+      // Append to subsection-content if it exists, otherwise directly to el
+      const target = el.querySelector(".subsection-content") || el;
+      target.appendChild(div);
       el.scrollTop = el.scrollHeight;
       return div;
     }
@@ -4446,6 +4911,9 @@ button.btn-error {
       renderQueues();
       renderSystems();
       ui.dataAge.textContent = formatMMSS((Date.now() - g.lastRefresh) / 1000);
+
+      // Apply collapsed states after rendering
+      applyCollapsedStates();
     }
 
     function findShipById(g, id) {
@@ -4968,6 +5436,94 @@ button.btn-error {
 
       g.lastRefresh = Date.now();
       renderAll();
+    }
+
+    // ---------------------------
+    // Panel Collapse Functionality
+    // ---------------------------
+
+    function togglePanel(panelId) {
+      if (!runtime.collapsedPanels) {
+        runtime.collapsedPanels = {};
+      }
+
+      runtime.collapsedPanels[panelId] = !runtime.collapsedPanels[panelId];
+      saveCollapsedPanels();
+      applyCollapsedStates();
+      playSfx("showhide");
+    }
+
+    function applyCollapsedStates() {
+      if (!runtime.collapsedPanels) return;
+
+      // Main panels
+      ['traffic', 'systems', 'terminal'].forEach(id => {
+        const panel = document.getElementById(id);
+        if (!panel) return;
+
+        const isCollapsed = runtime.collapsedPanels[id] || false;
+        panel.classList.toggle('collapsed', isCollapsed);
+
+        const header = panel.querySelector('.panel-header');
+        if (header) {
+          header.setAttribute('aria-expanded', String(!isCollapsed));
+          header.setAttribute('role', 'button');
+          header.setAttribute('tabindex', '0');
+        }
+      });
+
+      // Sub-sections
+      const subSections = [
+        { id: 'traffic-inbound', selector: '#traffic .queue-section:nth-child(1)' },
+        { id: 'traffic-outbound', selector: '#traffic .queue-section:nth-child(2)' },
+        { id: 'systems-gate', selector: '#systems .sys-block:nth-child(1)' },
+        { id: 'systems-corridor', selector: '#systems .sys-block:nth-child(2)' },
+        { id: 'systems-facility', selector: '#systems .sys-block:nth-child(3)' },
+        { id: 'systems-resources', selector: '#systems .sys-block:nth-child(4)' },
+        { id: 'systems-concourse', selector: '#systems .sys-block:nth-child(5)' },
+        { id: 'systems-relays', selector: '#systems .sys-block:nth-child(6)' },
+        { id: 'systems-maintenance', selector: '#systems .sys-block:nth-child(7)' },
+        { id: 'terminal-console', selector: '#console-log' },
+        { id: 'terminal-events', selector: '#events-log' }
+      ];
+
+      subSections.forEach(({ id, selector }) => {
+        const element = document.querySelector(selector);
+        if (!element) return;
+
+        const isCollapsed = runtime.collapsedPanels[id] || false;
+        element.classList.toggle('collapsed', isCollapsed);
+
+        const header = element.querySelector('.subsection-header');
+        if (header) {
+          header.setAttribute('aria-expanded', String(!isCollapsed));
+          header.setAttribute('role', 'button');
+          header.setAttribute('tabindex', '0');
+        }
+      });
+    }
+
+    function saveCollapsedPanels() {
+      try {
+        const json = JSON.stringify(runtime.collapsedPanels || {});
+        localStorage.setItem(LS.collapsedPanels, json);
+      } catch (e) {
+        console.warn("Failed to save collapsed panels:", e);
+      }
+    }
+
+    function loadCollapsedPanels() {
+      try {
+        const raw = localStorage.getItem(LS.collapsedPanels);
+        if (!raw) return;
+
+        const parsed = JSON.parse(raw);
+        if (typeof parsed === 'object' && parsed !== null) {
+          runtime.collapsedPanels = { ...runtime.collapsedPanels, ...parsed };
+        }
+      } catch (e) {
+        console.warn("Failed to load collapsed panels:", e);
+      }
     }
 
     // ---------------------------
@@ -6739,6 +7295,7 @@ function cmdPingRelay(id) {
       consoleLine("  CALLSIGN <NAME> | CALLSIGN CLEAR", "dim");
       consoleLine("  SFX ON|OFF|TOGGLE", "dim");
       consoleLine("  MUSIC ON|OFF|TOGGLE", "dim");
+      consoleLine("  VFX REG|LOW|TOGGLE", "dim");
       consoleLine("  THEME GREEN|RED|BLUE|PURPLE|AMBER|CYAN|BLACK|LIGHT", "dim");
       consoleLine("  CLEAR (console)", "dim");
       consoleLine("  CLEAR EVENTS", "dim");
@@ -7049,6 +7606,23 @@ function cmdPingRelay(id) {
         return;
       }
 
+      if (cmd === "VFX") {
+        const arg = (parts[1] || "").toUpperCase();
+        if (!arg || arg === "STATUS") {
+          consoleLine(`VFX ${vfxState.enabled ? "REG" : "LOW"}`, "dim");
+          return;
+        }
+        if (!["REG", "LOW", "TOGGLE"].includes(arg)) {
+          consoleLine("USAGE: VFX REG|LOW|TOGGLE", "warn");
+          playSfx("error");
+          return;
+        }
+        const next = arg === "REG" ? true : (arg === "LOW" ? false : !vfxState.enabled);
+        setVfxEnabled(next);
+        consoleLine(`VFX ${next ? "REG" : "LOW"}`, "dim");
+        return;
+      }
+
       if (cmd === "THEME") {
         const t = (parts[1] || "").toLowerCase();
         if (!["green","red","blue","purple","amber","black","light"].includes(t)) {
@@ -7078,12 +7652,16 @@ function cmdPingRelay(id) {
     // Wire up UI
     // ---------------------------
     updateAudioButtons();
+    applyVfxMode();
 
     if (ui.btnSfx) {
       ui.btnSfx.addEventListener("click", () => setSfxEnabled(!audioState.sfxEnabled));
     }
     if (ui.btnMusic) {
       ui.btnMusic.addEventListener("click", () => setMusicEnabled(!audioState.musicEnabled));
+    }
+    if (ui.btnVfx) {
+      ui.btnVfx.addEventListener("click", () => setVfxEnabled(!vfxState.enabled));
     }
 
     document.addEventListener("click", (e) => {
@@ -7153,6 +7731,34 @@ function cmdPingRelay(id) {
         }
       });
       ui.operatorInput.addEventListener("blur", () => finishOperatorEdit(true));
+    }
+
+    if (ui.startNameLabel && ui.startNameInput && ui.startNameSlot) {
+      ui.startNameLabel.addEventListener("click", () => startStartNameEdit());
+      ui.startNameLabel.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          startStartNameEdit();
+        }
+      });
+      ui.startNameInput.addEventListener("keydown", (e) => {
+        unlockAudio();
+
+        // Play typing sounds
+        if (!MODIFIER_ONLY.has(e.key)) {
+          if (e.key !== "Enter") playSfx("clack");
+        }
+
+        if (e.key === "Enter") {
+          playSfx("click");
+          e.preventDefault();
+          finishStartNameEdit(true);
+        } else if (e.key === "Escape") {
+          e.preventDefault();
+          finishStartNameEdit(false);
+        }
+      });
+      ui.startNameInput.addEventListener("blur", () => finishStartNameEdit(true));
     }
 
     function queueMaintenance(kind, btn, options = {}) {
@@ -7297,9 +7903,9 @@ function cmdPingRelay(id) {
     if (ui.btnHardReset) {
       ui.btnHardReset.addEventListener("click", () => setResetConfirmOpen(true));
     }
-    if (ui.btnRestart) ui.btnRestart.addEventListener("click", restartGate);
+    if (ui.btnRestart) ui.btnRestart.addEventListener("click", () => setResetConfirmOpen(true));
     if (ui.btnShiftcompleteContinue) ui.btnShiftcompleteContinue.addEventListener("click", continueAfterShiftComplete);
-    if (ui.btnShiftcompleteReset) ui.btnShiftcompleteReset.addEventListener("click", restartGate);
+    if (ui.btnShiftcompleteReset) ui.btnShiftcompleteReset.addEventListener("click", () => setResetConfirmOpen(true));
 
     loadTheme();
 
@@ -7309,6 +7915,10 @@ function cmdPingRelay(id) {
       if (didBoot || startInProgress) return;
       startInProgress = true;
       document.body.classList.add("start-loading");
+      const loadingNameEl = document.getElementById("start-loading-name");
+      if (loadingNameEl) {
+        loadingNameEl.textContent = runtime.operatorCallsign || "USER";
+      }
       ui.btnStart?.setAttribute("disabled", "true");
       ui.startOverlay?.setAttribute("aria-hidden", "false");
       unlockAudio();
@@ -7328,6 +7938,28 @@ function cmdPingRelay(id) {
       ui.btnStart.focus();
     }
 
+    if (ui.btnStartResume && ui.startResumeInput) {
+      ui.btnStartResume.addEventListener("click", () => ui.startResumeInput.click());
+      ui.startResumeInput.addEventListener("change", async () => {
+        const file = ui.startResumeInput.files?.[0];
+        ui.startResumeInput.value = "";
+        if (!file) return;
+        try {
+          const ok = await resumeFromFileToStartScreen(file);
+          if (ok) {
+            playSfx("click");
+          } else {
+            playSfx("error");
+          }
+        } catch (_) {
+          playSfx("error");
+        }
+      });
+    }
+
+    // Initialize data reset button visibility
+    updateDataResetButtonVisibility();
+
     function setHelpOpen(open) {
       if (!ui.helpPanel || !ui.btnHelp) return;
       ui.helpPanel.classList.toggle("open", open);
@@ -7343,6 +7975,77 @@ function cmdPingRelay(id) {
         ui.btnResetConfirm?.focus();
       } else {
         ui.btnHardReset?.focus();
+      }
+    }
+
+    function hasSavedData() {
+      try {
+        // Check for gate states (any keys starting with the prefix)
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith(LS.gateStatePrefix)) {
+            return true;
+          }
+        }
+        // Check for shift time (indicates active or past shift)
+        if (localStorage.getItem(LS.shiftMs)) {
+          return true;
+        }
+        // Check for shift complete shown flag
+        if (localStorage.getItem(LS.shiftCompleteShown)) {
+          return true;
+        }
+        // Check for collapsed panels state
+        if (localStorage.getItem(LS.collapsedPanels)) {
+          return true;
+        }
+      } catch (_) {}
+      return false;
+    }
+
+    function updateDataResetButtonVisibility() {
+      if (!ui.btnDataReset) return;
+      if (hasSavedData()) {
+        ui.btnDataReset.classList.add("visible");
+      } else {
+        ui.btnDataReset.classList.remove("visible");
+      }
+    }
+
+    function setDataResetConfirmOpen(open) {
+      if (!ui.dataResetOverlay) return;
+      document.body.classList.toggle("data-resetting", open);
+      ui.dataResetOverlay.setAttribute("aria-hidden", open ? "false" : "true");
+      if (open) {
+        ui.btnDataResetConfirm?.focus();
+      } else {
+        ui.btnDataReset?.focus();
+      }
+    }
+
+    function clearAllSavedData() {
+      try {
+        // Clear all gate states
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith(LS.gateStatePrefix)) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+
+        // Clear other saved data (but keep operator name, theme, and audio preferences)
+        localStorage.removeItem(LS.shiftMs);
+        localStorage.removeItem(LS.shiftCompleteShown);
+        localStorage.removeItem(LS.gateList);
+        localStorage.removeItem(LS.gateCurrent);
+        localStorage.removeItem(LS.collapsedPanels);
+
+        // Update button visibility
+        updateDataResetButtonVisibility();
+      } catch (e) {
+        console.error("Failed to clear saved data:", e);
       }
     }
 
@@ -7364,6 +8067,38 @@ function cmdPingRelay(id) {
       if (e.key !== "Escape") return;
       setHelpOpen(false);
       setResetConfirmOpen(false);
+      setDataResetConfirmOpen(false);
+    });
+
+    // Panel collapse event delegation
+    document.addEventListener('click', (e) => {
+      const header = e.target.closest('[data-panel]');
+      if (!header) return;
+      if (!header.classList.contains('panel-header') &&
+          !header.classList.contains('subsection-header')) return;
+
+      const panelId = header.getAttribute('data-panel');
+      if (panelId) {
+        e.stopPropagation();
+        togglePanel(panelId);
+      }
+    });
+
+    // Keyboard support for collapse
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+
+      const header = e.target.closest('[data-panel]');
+      if (!header) return;
+      if (!header.classList.contains('panel-header') &&
+          !header.classList.contains('subsection-header')) return;
+
+      const panelId = header.getAttribute('data-panel');
+      if (panelId) {
+        e.preventDefault();
+        e.stopPropagation();
+        togglePanel(panelId);
+      }
     });
     if (ui.resetOverlay) {
       ui.resetOverlay.addEventListener("click", (e) => {
@@ -7377,6 +8112,32 @@ function cmdPingRelay(id) {
       ui.btnResetConfirm.addEventListener("click", () => {
         setResetConfirmOpen(false);
         restartGate();
+      });
+    }
+
+    // Data reset handlers
+    if (ui.btnDataReset) {
+      ui.btnDataReset.addEventListener("click", () => {
+        playSfx("click");
+        setDataResetConfirmOpen(true);
+      });
+    }
+    if (ui.dataResetOverlay) {
+      ui.dataResetOverlay.addEventListener("click", (e) => {
+        if (e.target === ui.dataResetOverlay) setDataResetConfirmOpen(false);
+      });
+    }
+    if (ui.btnDataResetCancel) {
+      ui.btnDataResetCancel.addEventListener("click", () => {
+        playSfx("click");
+        setDataResetConfirmOpen(false);
+      });
+    }
+    if (ui.btnDataResetConfirm) {
+      ui.btnDataResetConfirm.addEventListener("click", () => {
+        playSfx("click");
+        setDataResetConfirmOpen(false);
+        clearAllSavedData();
       });
     }
 
@@ -7413,8 +8174,10 @@ function cmdPingRelay(id) {
     async function boot() {
       await loadSaveFromHash();
       loadTheme();
+      loadCollapsedPanels();
       runtime.operatorCallsign = safeStorageGet(LS.operatorCallsign) || "";
       updateOperatorLabel();
+      updateStartNameLabel();
       runtime.shiftCompleteShown = loadStoredBool(LS.shiftCompleteShown, false);
       runtime.catalog = loadGateCatalog();
 			const resumeBoot = typeof runtime.resumeShiftMs === "number";
