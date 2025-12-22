@@ -3962,7 +3962,7 @@ button.btn-error {
     }
 
     function departureDeadlineCountdown(s) {
-      if (!s || s.dir !== "OUT" || !s.departureDeadline || s.state === "DEPARTED" || s.state === "DENIED") return "";
+      if (!s || s.dir !== "OUT" || !s.departureDeadline || s.state === "DEPARTED" || s.state === "DENIED" || s.state === "CLEARED") return "";
 
       const now = Date.now();
       const remaining = Math.max(0, Math.ceil((s.departureDeadline - now) / 1000));
@@ -3977,7 +3977,7 @@ button.btn-error {
 
     function getUrgencyClass(s) {
       if (s.dir !== "OUT" || !s.departureDeadline) return "";
-      if (s.state === "DEPARTED" || s.state === "DENIED") return "";
+      if (s.state === "DEPARTED" || s.state === "DENIED" || s.state === "CLEARED") return "";
 
       const now = Date.now();
       const remaining = s.departureDeadline - now;
@@ -3993,7 +3993,7 @@ button.btn-error {
 
     function getDeadlineSymbol(s) {
       if (s.dir !== "OUT" || !s.departureDeadline) return "";
-      if (s.state === "DEPARTED" || s.state === "DENIED") return "";
+      if (s.state === "DEPARTED" || s.state === "DENIED" || s.state === "CLEARED") return "";
 
       return s.deadlineType === "CRITICAL" ? " !" :
              s.deadlineType === "URGENT" ? " *" : "";
