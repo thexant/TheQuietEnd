@@ -5431,7 +5431,7 @@ button.btn-error {
           bumpStat(g, "operatorErrors");
           const errorReason = denyReasonForShip(s);
           if (g.id === runtime.activeGateId) {
-            eventLine(`OPERATOR ERROR: ${id} (${errorReason}) (-3 CR)`, "warn");
+            eventLine(`OPERATOR ERROR: ${id} (${errorReason})`, "warn");
           }
         }
       } else if (action === "hold") {
@@ -5451,7 +5451,7 @@ button.btn-error {
 
         // Show credit bonus for correctly denying hazardous OUTGOING ships
         if (correct && outgoingShipHasHazard(s)) {
-          consoleLine(`DENIED: ${id} (${s.reason}) (+3 CR)`, "bad");
+          consoleLine(`DENIED: ${id} (${s.reason})`, "bad");
         } else {
           consoleLine(`DENIED: ${id} (${s.reason})`, "bad");
         }
