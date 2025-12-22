@@ -111,6 +111,14 @@
       --shadowText: rgba(255, 184, 77, 0.18); --shadowText2: rgba(255, 184, 77, 0.10);
       --stat: #ffe9c2;
     }
+		:root[data-theme="cyan"] {
+      --ink: #ccfbff; --muted: #6fa7ad; --signal: #38f6ff;
+      --good: var(--signal);
+      --line: rgba(56, 246, 255, 0.18); --grid: rgba(56, 246, 255, 0.05);
+      --glow: rgba(56, 246, 255, 0.35); --bg-hi: #0d1a1a;
+      --shadowText: rgba(56, 246, 255, 0.18); --shadowText2: rgba(56, 246, 255, 0.10);
+      --stat: #d2a95a;
+    }
     :root[data-theme="black"] {
       --deep: #000; --bg-hi: #000;
       --ink: #eaeaea; --muted: #9a9a9a; --signal: #f2f2f2; --good: #4dff9a;
@@ -2086,7 +2094,7 @@ button.btn-error {
     const RATES = {
       maxIn: 6,
       maxOut: 6,
-      spawnInChance: 0.0055,   // ~1 every 2.7 min
+      spawnInChance: 0.0056,   // ~1 every 2.7 min
       spawnOutChance: 0.0053,  // ~1 every 3.3 min
       reportChance: 0.018,    // sparse ambient chatter
       flavorChance: 0.0025,   // rare ambient flavor text
@@ -2142,7 +2150,7 @@ button.btn-error {
     }
 
     // ETA ranges in seconds (slow but not ridiculous)
-    const ETA = { min: 30, max: 600 }; // 0:45-15:00 minutes
+    const ETA = { min: 30, max: 600 }; // 0:30-10:00 minutes
     const RELAY_ACK_WINDOW_MS = 30_000;
     const RELAY_HEARTBEAT_MIN_MS = 1_200;
     const RELAY_HEARTBEAT_MAX_MS = 3_200;
@@ -2901,7 +2909,7 @@ button.btn-error {
       return { pool, index: 0 };
     }
 
-    function makeLoopAudio(src, volume = 1) {
+    function makeLoopAudio(src, volume = 0.8) {
       const audio = new Audio(src);
       audio.preload = "auto";
       audio.loop = true;
@@ -3207,7 +3215,7 @@ button.btn-error {
       setTimeout(() => btn.classList.remove("btn-error"), 500);
     }
 
-    const THEME_OPTIONS = ["green", "red", "blue", "purple", "amber", "black", "light"];
+    const THEME_OPTIONS = ["green", "red", "blue", "purple", "amber", "cyan", "black", "light"];
 
     function pickRandomTheme(exclude) {
       const options = THEME_OPTIONS.filter((t) => t !== exclude);
@@ -5695,7 +5703,7 @@ function cmdPingRelay(id) {
       consoleLine("  CALLSIGN <NAME> | CALLSIGN CLEAR", "dim");
       consoleLine("  SFX ON|OFF|TOGGLE", "dim");
       consoleLine("  MUSIC ON|OFF|TOGGLE", "dim");
-      consoleLine("  THEME GREEN|RED|BLUE|AMBER|BLACK", "dim");
+      consoleLine("  THEME GREEN|RED|BLUE|PURPLE|AMBER|CYAN|BLACK|LIGHT", "dim");
       consoleLine("  CLEAR (console)", "dim");
       consoleLine("  CLEAR EVENTS", "dim");
     }
@@ -5973,7 +5981,7 @@ function cmdPingRelay(id) {
       if (cmd === "THEME") {
         const t = (parts[1] || "").toLowerCase();
         if (!["green","red","blue","purple","amber","black","light"].includes(t)) {
-          consoleLine("USAGE: THEME GREEN|RED|BLUE|PURPLE|AMBER|BLACK|LIGHT", "warn");
+          consoleLine("USAGE: THEME GREEN|RED|BLUE|PURPLE|AMBER|CYAN|BLACK|LIGHT", "warn");
           return;
         }
         setTheme(t);
