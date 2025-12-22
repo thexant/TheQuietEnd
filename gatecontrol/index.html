@@ -1925,10 +1925,10 @@
 
     // Sparse rates (per second tick)
     const RATES = {
-      maxIn: 3,
-      maxOut: 3,
-      spawnInChance: 0.0058,   // ~1 every 2.7 min
-      spawnOutChance: 0.0051,  // ~1 every 3.3 min
+      maxIn: 6,
+      maxOut: 6,
+      spawnInChance: 0.0055,   // ~1 every 2.7 min
+      spawnOutChance: 0.0053,  // ~1 every 3.3 min
       reportChance: 0.018,    // sparse ambient chatter
       flavorChance: 0.0025,   // rare ambient flavor text
       driftChance: 0.015,     // alignment drift
@@ -2108,9 +2108,12 @@
         phaseEndsAt: 0
       }));
 
-      const relayCount = 2;
-      const relays = Array.from({ length: relayCount }, (_, i) => ({
-        id: `RELAY-${i + 1}`,
+
+			// Small chance (20%) to have 3 relays instead of 2
+			const relayCount = (rng() < 0.20) ? 3 : 2;
+			
+			const relays = Array.from({ length: relayCount }, (_, i) => ({
+				id: `RELAY-${i + 1}`,
         status: "ONLINE",
         lastChange: Date.now(),
         lastPacketAt: 0,
@@ -2291,9 +2294,11 @@
       }
 
       g.relays ||= [];
-      const desiredRelays = 2;
-      if (g.relays.length > desiredRelays) g.relays = g.relays.slice(0, desiredRelays);
-      while (g.relays.length < desiredRelays) {
+			const currentCount = g.relays.length;
+			const desiredRelays = (currentCount >= 3) ? 3 : 2;
+
+			if (g.relays.length > desiredRelays) g.relays = g.relays.slice(0, desiredRelays);
+			while (g.relays.length < 2) { // Ensure at least 2 exist
         g.relays.push({
           id: `RELAY-${g.relays.length + 1}`,
           status: "ONLINE",
@@ -3662,15 +3667,18 @@
       return null;
     }
 
-    function resolveRelayId(input) {
-      const raw = String(input || "").toUpperCase();
-      const match = raw.match(/RELAY[\s-]*([12])/);
-      if (match) return `RELAY-${match[1]}`;
-      const trimmed = raw.replace(/[^A-Z0-9]/g, "");
-      if (trimmed === "R1") return "RELAY-1";
-      if (trimmed === "R2") return "RELAY-2";
-      return null;
-    }
+		function resolveRelayId(input) {
+			const raw = String(input || "").toUpperCase();
+			// CHANGE: Allow digits 1-3
+			const match = raw.match(/RELAY[\s-]*([1-3])/);
+			if (match) return `RELAY-${match[1]}`;
+			const trimmed = raw.replace(/[^A-Z0-9]/g, "");
+			if (trimmed === "R1") return "RELAY-1";
+			if (trimmed === "R2") return "RELAY-2";
+			// CHANGE: Add R3 shortcut
+			if (trimmed === "R3") return "RELAY-3";
+			return null;
+		}
 
     function getFacility(g, id) {
       return (g.facility || []).find(f => f.id === id) || null;
