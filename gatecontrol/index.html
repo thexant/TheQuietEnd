@@ -919,6 +919,50 @@ button.btn-error {
       50% { box-shadow: 0 0 14px rgba(255,255,255,0.25); }
     }
 
+    /* Deadline urgency row highlighting */
+    tr.urgency-critical {
+      background-color: rgba(225, 100, 100, 0.08);
+      animation: pulse-urgent 2s ease-in-out infinite;
+    }
+
+    tr.urgency-high {
+      background-color: rgba(210, 169, 90, 0.06);
+    }
+
+    tr.urgency-medium {
+      background-color: rgba(210, 169, 90, 0.03);
+    }
+
+    @keyframes pulse-urgent {
+      0%, 100% { background-color: rgba(225, 100, 100, 0.08); }
+      50% { background-color: rgba(225, 100, 100, 0.15); }
+    }
+
+    /* Deadline countdown styling */
+    .status-meta {
+      font-size: 0.7rem;
+      margin-top: 4px;
+      opacity: 0.9;
+    }
+
+    .status-meta.deadline-critical {
+      color: var(--alert);
+      font-weight: 700;
+    }
+
+    .status-meta.deadline-urgent {
+      color: var(--stat);
+    }
+
+    .status-meta.deadline-standard {
+      color: var(--dim);
+    }
+
+    .status-meta.deadline-relaxed {
+      color: var(--dim);
+      opacity: 0.7;
+    }
+
     .row-actions { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; align-items: center; }
     td.action-cell { overflow: visible; }
     .btn-mini {
@@ -1743,6 +1787,8 @@ button.btn-error {
             <div id="facility-list" class="status-list"></div>
             <div class="label-mini">Work Orders</div>
             <div id="workorder-list" class="status-list"></div>
+            <div class="label-mini">Repairs <span id="repair-meta" class="label-meta">STANDBY</span></div>
+            <div id="repair-list" class="status-list"></div>
           </div>
 
           <div class="sys-block">
@@ -2168,6 +2214,14 @@ button.btn-error {
       supplyDrainDecon: 0.025
     };
 
+    // Repair system configuration
+    const REPAIR_DELAY_MIN = 15; // seconds
+    const REPAIR_DELAY_MAX = 30; // seconds
+    const REPAIR_FAILURE_CHANCE = 0.30; // 30%
+    const REPAIR_COOLDOWN_MS = 5000; // 5 seconds
+    const DEGRADED_TIMEOUT_MIN_MS = 2 * 60 * 1000; // 2 min
+    const DEGRADED_TIMEOUT_MAX_MS = 5 * 60 * 1000; // 5 min
+
     const CORRIDOR_TRAFFIC_WEIGHTS = {
       STABLE: 1,
       DEGRADED: 0.75,
@@ -2272,8 +2326,76 @@ button.btn-error {
         hazardDeadline: 0,
         obscured,
         infoMasked,
-        hiddenThreat
+        hiddenThreat,
+        // Deadline properties for outgoing ships
+        departureDeadline: 0,
+        deadlineType: null,
+        deadlineWarningAt: 0,
+        missedDeadline: false,
+        penaltyApplied: false,
+        urgencyLevel: 0,
+        deadlineWarning: false,
+        criticalAudioPlayed: false,
+        finalWarningPlayed: false
       };
+    }
+
+    function calculateDepartureDeadline(s, rng) {
+      if (s.dir !== "OUT") return;
+
+      const baseDeadline = s.eta; // Start from ETA in seconds
+      let deadlineType, multiplier;
+
+      switch(s.request) {
+        case "TOW":
+          // Emergency rescues - VERY tight deadlines
+          deadlineType = rng() < 0.6 ? "CRITICAL" : "URGENT";
+          multiplier = deadlineType === "CRITICAL" ? 1.3 : 1.8;
+          break;
+
+        case "DEPART":
+          // VIP/scheduled departures - tight windows
+          deadlineType = s.priority ? "CRITICAL" : (rng() < 0.3 ? "URGENT" : "STANDARD");
+          multiplier = s.priority ? 1.2 : (deadlineType === "URGENT" ? 1.5 : 2.0);
+          break;
+
+        case "CREW TRANSFER":
+          // Personnel critical for operations
+          deadlineType = rng() < 0.35 ? "URGENT" : "STANDARD";
+          multiplier = deadlineType === "URGENT" ? 1.5 : 2.0;
+          break;
+
+        case "REFUEL":
+          // Fuel transfers - moderate pressure
+          deadlineType = rng() < 0.2 ? "URGENT" : "STANDARD";
+          multiplier = deadlineType === "URGENT" ? 1.6 : 2.2;
+          break;
+
+        case "CARGO LOAD":
+          // Time-sensitive cargo, perishables
+          deadlineType = rng() < 0.25 ? "URGENT" : (rng() < 0.5 ? "STANDARD" : "RELAXED");
+          multiplier = deadlineType === "URGENT" ? 1.6 : (deadlineType === "STANDARD" ? 2.3 : 3.0);
+          break;
+
+        default:
+          deadlineType = "STANDARD";
+          multiplier = 2.0;
+          break;
+      }
+
+      // Calculate deadline: Current time + ETA + buffer time
+      const bufferTime = Math.floor(baseDeadline * multiplier);
+      s.departureDeadline = Date.now() + (baseDeadline + bufferTime) * 1000;
+      s.deadlineType = deadlineType;
+
+      // Warning triggers at 75% of deadline time
+      const totalTime = (baseDeadline + bufferTime) * 1000;
+      s.deadlineWarningAt = Date.now() + Math.floor(totalTime * 0.75);
+
+      // Set urgency level for visual feedback
+      s.urgencyLevel = deadlineType === "CRITICAL" ? 3 :
+                       deadlineType === "URGENT" ? 2 :
+                       deadlineType === "STANDARD" ? 1 : 0;
     }
 
     function initialCount(rng) {
@@ -2312,14 +2434,21 @@ button.btn-error {
       });
 
       const inbound = Array.from({length: initialCount(rng)}, () => makeShip(rng, "IN"));
-      const outbound = Array.from({length: initialCount(rng)}, () => makeShip(rng, "OUT"));
+      const outbound = Array.from({length: initialCount(rng)}, () => {
+        const ship = makeShip(rng, "OUT");
+        calculateDepartureDeadline(ship, rng);
+        return ship;
+      });
 
       const facility = FACILITY_SYSTEMS.map(sys => ({
         id: sys.id,
         name: sys.name,
         status: "ONLINE",
         lastChange: Date.now(),
-        stableUntil: Date.now() + randRange(18 * 60_000, 40 * 60_000)
+        stableUntil: Date.now() + randRange(18 * 60_000, 40 * 60_000),
+        lastRepairAttemptAt: 0,
+        degradedSince: 0,
+        degradedTimeoutAt: 0
       }));
 
       const dockSlots = ["SLOT-1", "SLOT-2", "SLOT-3", "SLOT-4"].map(id => ({
@@ -2425,7 +2554,10 @@ button.btn-error {
           relayAcks: 0,
         maintenanceOps: 0,
         resourceOrders: 0,
-        resourceOrderSpend: 0
+        resourceOrderSpend: 0,
+        repairAttempts: 0,
+        repairSuccesses: 0,
+        repairFailures: 0
       };
         g.stats.approved = typeof g.stats.approved === "number" ? g.stats.approved : 0;
         g.stats.denied = typeof g.stats.denied === "number" ? g.stats.denied : 0;
@@ -2439,8 +2571,12 @@ button.btn-error {
       g.stats.maintenanceOps = typeof g.stats.maintenanceOps === "number" ? g.stats.maintenanceOps : 0;
       g.stats.resourceOrders = typeof g.stats.resourceOrders === "number" ? g.stats.resourceOrders : 0;
       g.stats.resourceOrderSpend = typeof g.stats.resourceOrderSpend === "number" ? g.stats.resourceOrderSpend : 0;
+      g.stats.repairAttempts = typeof g.stats.repairAttempts === "number" ? g.stats.repairAttempts : 0;
+      g.stats.repairSuccesses = typeof g.stats.repairSuccesses === "number" ? g.stats.repairSuccesses : 0;
+      g.stats.repairFailures = typeof g.stats.repairFailures === "number" ? g.stats.repairFailures : 0;
       g.tech ||= { driftSuppressedUntil: 0, wobbleSuppressedUntil: 0 };
       g.workOrders ||= [];
+      g.repairAttempts ||= [];
       g.concourseLevel = typeof g.concourseLevel === "number" ? g.concourseLevel : randRange(6, 26);
       for (const w of g.workOrders) {
         w.systemId ||= resolveFacility(w.systemName || "") || "DECON";
@@ -2501,6 +2637,9 @@ button.btn-error {
         f.status ||= "ONLINE";
         f.lastChange ||= Date.now();
         if (typeof f.stableUntil !== "number") f.stableUntil = Date.now() + randRange(18 * 60_000, 40 * 60_000);
+        f.lastRepairAttemptAt ||= 0;
+        f.degradedSince ||= 0;
+        f.degradedTimeoutAt ||= 0;
       }
 
       g.dockSlots ||= ["SLOT-1", "SLOT-2", "SLOT-3", "SLOT-4"].map(id => ({
@@ -2816,6 +2955,8 @@ button.btn-error {
       facilityMeta: document.getElementById("facility-meta"),
       facilityList: document.getElementById("facility-list"),
       workorderList: document.getElementById("workorder-list"),
+      repairMeta: document.getElementById("repair-meta"),
+      repairList: document.getElementById("repair-list"),
       resourceMeta: document.getElementById("resource-meta"),
       resourceList: document.getElementById("resource-list"),
       concourseStatus: document.getElementById("concourse-status"),
@@ -3016,6 +3157,7 @@ button.btn-error {
         offline: makeAudioPool("offline.ogg", 2, 0.65),
         error: makeAudioPool("error.ogg", 2, 0.6),
         charged: makeAudioPool("charged.ogg", 2, 0.55),
+        severed: makeAudioPool("severed.ogg", 1, 0.7),
         purge: makeLoopAudio("purge.ogg", 0.75),
         reset: makeLoopAudio("reset.ogg", 0.65),
         scan: makeLoopAudio("scan.ogg", 1),
@@ -3180,7 +3322,11 @@ button.btn-error {
             relayAcks: 0,
             maintenanceOps: 0,
             resourceOrders: 0,
-            resourceOrderSpend: 0
+            resourceOrderSpend: 0,
+            deadlinesMet: 0,
+            deadlinesMissed: 0,
+            criticalMisses: 0,
+            urgentMisses: 0
           };
         }
         if (typeof g.stats.approved !== "number") g.stats.approved = 0;
@@ -3195,6 +3341,10 @@ button.btn-error {
       if (typeof g.stats.maintenanceOps !== "number") g.stats.maintenanceOps = 0;
       if (typeof g.stats.resourceOrders !== "number") g.stats.resourceOrders = 0;
       if (typeof g.stats.resourceOrderSpend !== "number") g.stats.resourceOrderSpend = 0;
+      if (typeof g.stats.deadlinesMet !== "number") g.stats.deadlinesMet = 0;
+      if (typeof g.stats.deadlinesMissed !== "number") g.stats.deadlinesMissed = 0;
+      if (typeof g.stats.criticalMisses !== "number") g.stats.criticalMisses = 0;
+      if (typeof g.stats.urgentMisses !== "number") g.stats.urgentMisses = 0;
       return g.stats;
     }
 
@@ -3219,7 +3369,11 @@ button.btn-error {
         + ((safe.relayAcks || 0) * 1)
         + ((safe.maintenanceOps || 0) * 2)
         + ((safe.resourceOrders || 0) * 1)
-        - ((safe.resourceOrderSpend || 0));
+        - ((safe.resourceOrderSpend || 0))
+        + ((safe.deadlinesMet || 0) * 2)
+        - ((safe.deadlinesMissed || 0) * 3)
+        - ((safe.criticalMisses || 0) * 5)
+        - ((safe.urgentMisses || 0) * 2);
       return Math.max(0, Math.floor(credits));
     }
 
@@ -3342,6 +3496,24 @@ button.btn-error {
 
     function severGate(reason) {
       if (runtime.severed) return;
+
+      // Stop all looping audio
+      audio.music.pause();
+      audio.music.currentTime = 0;
+      audio.processing.pause();
+      audio.processing.currentTime = 0;
+      audio.ackalarm.pause();
+      audio.ackalarm.currentTime = 0;
+      audio.purge.pause();
+      audio.purge.currentTime = 0;
+      audio.reset.pause();
+      audio.reset.currentTime = 0;
+      audio.scan.pause();
+      audio.scan.currentTime = 0;
+
+      // Play severed sound effect
+      playSfx(audio.severed);
+
       randomizeTheme();
       const g = activeGate();
       const stats = ensureGateStats(g);
@@ -3606,6 +3778,56 @@ button.btn-error {
       return formatMMSS(remaining);
     }
 
+    function departureDeadlineCountdown(s) {
+      if (!s || s.dir !== "OUT" || !s.departureDeadline || s.state === "DEPARTED" || s.state === "DENIED") return "";
+
+      const now = Date.now();
+      const remaining = Math.max(0, Math.ceil((s.departureDeadline - now) / 1000));
+
+      if (remaining === 0) return "EXPIRED";
+
+      const prefix = s.deadlineType === "CRITICAL" ? "!" :
+                     s.deadlineType === "URGENT" ? "*" : "";
+
+      return prefix ? `${prefix} ${formatMMSS(remaining)}` : formatMMSS(remaining);
+    }
+
+    function getUrgencyClass(s) {
+      if (s.dir !== "OUT" || !s.departureDeadline) return "";
+      if (s.state === "DEPARTED" || s.state === "DENIED") return "";
+
+      const now = Date.now();
+      const remaining = s.departureDeadline - now;
+      const total = s.departureDeadline - (s.departureDeadline - ((s.eta + 30) * 1000)); // Approximate
+      const pct = remaining / total;
+
+      if (s.deadlineType === "CRITICAL" && pct < 0.25) return "urgency-critical";
+      if (pct < 0.15) return "urgency-high";
+      if (pct < 0.3) return "urgency-medium";
+
+      return "";
+    }
+
+    function getDeadlineSymbol(s) {
+      if (s.dir !== "OUT" || !s.departureDeadline) return "";
+      if (s.state === "DEPARTED" || s.state === "DENIED") return "";
+
+      return s.deadlineType === "CRITICAL" ? " !" :
+             s.deadlineType === "URGENT" ? " *" : "";
+    }
+
+    function formatDeadlineDetail(s) {
+      if (!s.departureDeadline) return "--";
+
+      const now = Date.now();
+      const remaining = Math.max(0, Math.ceil((s.departureDeadline - now) / 1000));
+
+      if (remaining === 0) return "EXPIRED";
+      if (s.missedDeadline) return `MISSED (${formatMMSS(Math.abs((s.departureDeadline - now) / 1000))})`;
+
+      return formatMMSS(remaining);
+    }
+
 
     // Inline ship detail helpers (DTL / DETAIL)
     function shipDetailKVHtml(s) {
@@ -3620,6 +3842,10 @@ button.btn-error {
         ["STATE", s.state],
         ...(deconTime ? [["DECON REMAIN", deconTime]] : []),
         ["ETA", eta],
+        ...(s.dir === "OUT" && s.departureDeadline ? [
+          ["DEADLINE", formatDeadlineDetail(s)],
+          ["PRIORITY", s.deadlineType || "STANDARD"]
+        ] : []),
         ["SLOT", s.slotId || "--"],
         ["DOCK", s.dockState || "--"],
         ["TRANSPONDER", displayTransponder]
@@ -3630,6 +3856,10 @@ button.btn-error {
         ["STATE", s.state],
         ...(deconTime ? [["DECON REMAIN", deconTime]] : []),
         ["ETA", eta],
+        ...(s.dir === "OUT" && s.departureDeadline ? [
+          ["DEADLINE", formatDeadlineDetail(s)],
+          ["PRIORITY", s.deadlineType || "STANDARD"]
+        ] : []),
         ["SLOT", s.slotId || "--"],
         ["DOCK", s.dockState || "--"],
         ["TRANSPONDER", displayTransponder],
@@ -3676,22 +3906,25 @@ button.btn-error {
       const g = activeGate();
       const [pText, pCls] = shipStatusPill(s);
       const deconTime = deconCountdown(s);
+      const deadlineTime = departureDeadlineCountdown(s);
       const eta = (["DENIED","ARRIVED","DEPARTED","WAITING TO DOCK","WAITING DECON","DECON","SERVICING","CLEARING","COMPLETE"].includes(s.state)) ? "—" : formatMMSS(s.eta);
       const prio = shipDisplayPriority(s) ? " ★" : "";
         const tr = (shipDisplayTransponder(s) !== "VALID") ? " !" : "";
         const mask = s.obscured ? " X" : "";
+        const urgency = getUrgencyClass(s);
         const canQuery = (s.infoMasked || s.transponder !== "VALID") && !s.queryPending;
         const deconOnline = getFacility(g, "DECON")?.status === "ONLINE";
         const canDecon = s.dir === "IN" && s.state === "WAITING DECON" && deconOnline && !shipHasEffect(s, "VACUUM BLOOM");
         const isDetailOpen = runtime.inlineDetailId === s.id;
         return `
-          <tr>
-            <td class="code" data-label="Id" title="${escapeText(shipDisplayRequest(s))} / ${escapeText(shipDisplayTransponder(s))}">${escapeText(s.id)}${prio}${tr}${mask}</td>
+          <tr class="${urgency}">
+            <td class="code" data-label="Id" title="${escapeText(shipDisplayRequest(s))} / ${escapeText(shipDisplayTransponder(s))}">${escapeText(s.id)}${prio}${tr}${mask}${getDeadlineSymbol(s)}</td>
             <td data-label="Eta">${escapeText(eta)}</td>
             <td data-label="Type" title="${escapeText(shipDisplayRequest(s))}">${escapeText(shipDisplayType(s))}</td>
             <td data-label="Status">
               <span class="pill ${pCls}">${escapeText(pText)}</span>
               ${deconTime ? `<div class="status-meta">T-${escapeText(deconTime)}</div>` : ""}
+              ${deadlineTime ? `<div class="status-meta deadline-${s.deadlineType?.toLowerCase()}">${deadlineTime}</div>` : ""}
             </td>
             <td data-label="Action" class="action-cell" style="text-align:right;">
               <div class="row-actions">
@@ -3763,13 +3996,25 @@ button.btn-error {
       ui.facilityMeta.textContent = `${facility.length} SYSTEMS / ${fDegraded} DEG / ${fOffline} OFF`;
       ui.facilityList.innerHTML = facility.map(f => {
         const pf = pillForState(FACILITY_STATES, f.status);
-        const needsWO = f.status !== "ONLINE" && !hasActiveWorkOrder(g, f.id);
+        const isDegraded = f.status === "DEGRADED";
+        const isOffline = f.status === "OFFLINE";
+        const hasRepair = hasActiveRepair(g, f.id);
+        const hasWO = hasActiveWorkOrder(g, f.id);
+        const cooldownRemaining = Math.max(0, REPAIR_COOLDOWN_MS - (now - (f.lastRepairAttemptAt || 0)));
+        const onCooldown = cooldownRemaining > 0;
+
+        const needsRepair = isDegraded && !hasRepair && !onCooldown;
+        const needsWO = isOffline && !hasWO;
+        const showCooldown = isDegraded && onCooldown;
+
         return `
           <div class="status-row">
             <div class="status-name">${escapeText(f.name)}</div>
             <div class="status-right">
               <span class="pill ${pf.cls}">${escapeText(f.status)}</span>
+              ${needsRepair ? `<button class="btn-mini attn" data-action="repair" data-system="${escapeText(f.id)}">REPAIR</button>` : ""}
               ${needsWO ? `<button class="btn-mini hold" data-action="workorder" data-system="${escapeText(f.id)}">WO</button>` : ""}
+              ${showCooldown ? `<span class="status-meta">${Math.ceil(cooldownRemaining / 1000)}s</span>` : ""}
             </div>
           </div>
         `;
@@ -3785,6 +4030,23 @@ button.btn-error {
               </div>
             </div>
           `).join("")
+        : `<div class="status-row"><div class="status-name">NONE</div><div class="status-meta">STANDBY</div></div>`;
+
+      const repairMeta = (g.repairAttempts || []).filter(r => r.state === "REPAIRING").length;
+      ui.repairMeta.textContent = repairMeta > 0 ? `${repairMeta} ACTIVE` : "STANDBY";
+
+      ui.repairList.innerHTML = (g.repairAttempts && g.repairAttempts.length)
+        ? g.repairAttempts
+            .filter(r => r.state === "REPAIRING")
+            .map(r => `
+              <div class="status-row">
+                <div class="status-name">${escapeText(r.systemName)}</div>
+                <div class="status-right">
+                  <span class="pill warn">REPAIRING</span>
+                  <span class="status-meta">${escapeText(formatMMSS((r.completesAt - now) / 1000))}</span>
+                </div>
+              </div>
+            `).join("")
         : `<div class="status-row"><div class="status-name">NONE</div><div class="status-meta">STANDBY</div></div>`;
 
       const resources = ensureResources(g);
@@ -3909,6 +4171,9 @@ button.btn-error {
 
       ui.facilityList.querySelectorAll("[data-action='workorder']").forEach(btn => {
         btn.addEventListener("click", () => issueWorkOrder(btn.getAttribute("data-system")));
+      });
+      ui.facilityList.querySelectorAll("[data-action='repair']").forEach(btn => {
+        btn.addEventListener("click", () => initiateRepair(btn.getAttribute("data-system")));
       });
       ui.relayList.querySelectorAll("[data-action='workorder']").forEach(btn => {
         btn.addEventListener("click", () => issueWorkOrder(btn.getAttribute("data-system")));
@@ -4105,6 +4370,10 @@ button.btn-error {
 
     function hasActiveWorkOrder(g, id) {
       return (g.workOrders || []).some(w => w.systemId === id && w.state !== "COMPLETE");
+    }
+
+    function hasActiveRepair(g, systemId) {
+      return (g.repairAttempts || []).some(r => r.systemId === systemId && r.state !== "COMPLETE");
     }
 
     function makeShipmentShip(resourceId, amount) {
@@ -4517,6 +4786,7 @@ button.btn-error {
 
       const rng = mulberry32(strHash(`${g.id}::${Date.now()}::${dir}`));
       const s = makeShip(rng, dir);
+      if (dir === "OUT") calculateDepartureDeadline(s, rng);
       list.unshift(s);
       if (g.id === runtime.activeGateId) playSfx("beep");
 
@@ -4680,20 +4950,98 @@ button.btn-error {
         if (f.status === "ONLINE" && now > (f.stableUntil || 0) && Math.random() < RATES.facilityFaultChance) {
           f.status = Math.random() < 0.75 ? "DEGRADED" : "OFFLINE";
           f.lastChange = now;
+          if (f.status === "DEGRADED") {
+            f.degradedSince = now;
+            f.degradedTimeoutAt = now + randRange(DEGRADED_TIMEOUT_MIN_MS, DEGRADED_TIMEOUT_MAX_MS);
+          }
           if (g.id === runtime.activeGateId) {
             if (f.status === "DEGRADED") playSfx("restore");
             if (f.status === "OFFLINE") playSfx("offline");
             eventLine(`FACILITY: ${f.name} ${f.status}`, f.status === "OFFLINE" ? "bad" : "warn");
           }
-        } else if (f.status === "DEGRADED" && Math.random() < RATES.facilityWorsenChance) {
-          f.status = "OFFLINE";
-          f.lastChange = now;
-          if (g.id === runtime.activeGateId) {
-            playSfx("offline");
-            eventLine(`FACILITY: ${f.name} OFFLINE`, "bad");
+        } else if (f.status === "DEGRADED") {
+          if (!f.degradedSince) {
+            f.degradedSince = now;
+            f.degradedTimeoutAt = now + randRange(DEGRADED_TIMEOUT_MIN_MS, DEGRADED_TIMEOUT_MAX_MS);
+          }
+
+          const hasRepair = hasActiveRepair(g, f.id);
+
+          if (!hasRepair && now > f.degradedTimeoutAt) {
+            f.status = "OFFLINE";
+            f.lastChange = now;
+            f.degradedSince = 0;
+            f.degradedTimeoutAt = 0;
+            if (g.id === runtime.activeGateId) {
+              playSfx("offline");
+              eventLine(`FACILITY: ${f.name} OFFLINE (TIMEOUT)`, "bad");
+            }
+          }
+          else if (!hasRepair && Math.random() < RATES.facilityWorsenChance) {
+            f.status = "OFFLINE";
+            f.lastChange = now;
+            f.degradedSince = 0;
+            f.degradedTimeoutAt = 0;
+            if (g.id === runtime.activeGateId) {
+              playSfx("offline");
+              eventLine(`FACILITY: ${f.name} OFFLINE`, "bad");
+            }
           }
         }
       }
+    }
+
+    function tickRepairAttempts(g) {
+      if (!g.repairAttempts) return;
+      const now = Date.now();
+
+      for (const r of g.repairAttempts) {
+        if (r.state === "COMPLETE") continue;
+        if (now < r.completesAt) continue;
+
+        const sys = getFacility(g, r.systemId);
+        if (!sys) {
+          r.state = "COMPLETE";
+          continue;
+        }
+
+        if (sys.status !== "DEGRADED") {
+          r.state = "COMPLETE";
+          consoleLine(`REPAIR CANCELLED: ${sys.name} (STATE CHANGED)`, "dim");
+          continue;
+        }
+
+        r.state = "COMPLETE";
+
+        if (Math.random() < REPAIR_FAILURE_CHANCE) {
+          sys.status = "OFFLINE";
+          sys.lastChange = now;
+          sys.degradedSince = 0;
+          sys.degradedTimeoutAt = 0;
+          bumpStat(g, "repairFailures");
+          consoleLine(`REPAIR FAILED: ${sys.name} OFFLINE`, "bad");
+          if (g.id === runtime.activeGateId) {
+            playSfx("offline");
+            eventLine(`REPAIR FAILED: ${sys.name} OFFLINE`, "bad");
+          }
+        } else {
+          sys.status = "ONLINE";
+          sys.lastChange = now;
+          sys.degradedSince = 0;
+          sys.degradedTimeoutAt = 0;
+          sys.stableUntil = now + randRange(45 * 60_000, 90 * 60_000);
+          bumpStat(g, "repairSuccesses");
+          consoleLine(`REPAIR SUCCESS: ${sys.name} ONLINE`, "good");
+          if (g.id === runtime.activeGateId) {
+            playSfx("restore");
+            eventLine(`REPAIR SUCCESS: ${sys.name} ONLINE`, "good");
+          }
+        }
+      }
+
+      g.repairAttempts = g.repairAttempts.filter(r =>
+        !(r.state === "COMPLETE" && now > r.completesAt + 10000)
+      );
     }
 
     function tickWorkOrders(g) {
@@ -4721,6 +5069,8 @@ button.btn-error {
           if (sys) {
             sys.status = "ONLINE";
             sys.lastChange = now;
+            sys.degradedSince = 0;
+            sys.degradedTimeoutAt = 0;
             sys.stableUntil = now + randRange(45 * 60_000, 90 * 60_000);
           }
           if (relay) {
@@ -4938,6 +5288,221 @@ button.btn-error {
       if (g.id === runtime.activeGateId) playSfx("blip");
     }
 
+    function checkOutboundDeadlines(g, s) {
+      if (s.dir !== "OUT" || !s.departureDeadline || s.penaltyApplied) return;
+
+      const now = Date.now();
+
+      // Warning phase
+      if (now >= s.deadlineWarningAt && !s.deadlineWarning) {
+        s.deadlineWarning = true;
+        if (g.id === runtime.activeGateId) {
+          const remaining = Math.max(0, Math.ceil((s.departureDeadline - now) / 1000));
+          eventLine(`DEADLINE WARNING: ${s.id} (${formatMMSS(remaining)} REMAINING)`, "warn");
+          playSfx("error");
+        }
+      }
+
+      // Deadline passed
+      if (now > s.departureDeadline) {
+        applyDeadlinePenalty(g, s);
+      }
+    }
+
+    function applyDeadlinePenalty(g, s) {
+      if (s.penaltyApplied) return;
+
+      s.penaltyApplied = true;
+      s.missedDeadline = true;
+
+      const now = Date.now();
+      const overtime = Math.floor((now - s.departureDeadline) / 1000);
+
+      // Consequences by deadline type
+      switch(s.deadlineType) {
+        case "CRITICAL":
+          applyCriticalDeadlineMiss(g, s, overtime);
+          break;
+
+        case "URGENT":
+          applyUrgentDeadlineMiss(g, s, overtime);
+          break;
+
+        case "STANDARD":
+          applyStandardDeadlineMiss(g, s, overtime);
+          break;
+
+        case "RELAXED":
+          applyRelaxedDeadlineMiss(g, s, overtime);
+          break;
+      }
+    }
+
+    function applyCriticalDeadlineMiss(g, s, overtime) {
+      const resources = ensureResources(g);
+
+      switch(s.request) {
+        case "DEPART":
+          // VIP missed connection - severe reputation hit
+          s.state = "DENIED";
+          s.reason = "DEADLINE EXPIRED (VIP MISSED CONNECTION)";
+          s.doneAt = Date.now();
+          bumpStat(g, "deniedIncorrect");
+          bumpStat(g, "deadlinesMissed");
+          bumpStat(g, "criticalMisses");
+          bumpConcourse(g, 8 + Math.random() * 12);
+          if (g.id === runtime.activeGateId) {
+            eventLine(`CRITICAL FAILURE: ${s.id} VIP MISSED CONNECTION`, "bad");
+            playSfx("offline");
+          }
+          break;
+
+        case "TOW":
+          // Stranded ship lost - GAME OVER scenario
+          if (overtime > 300) {
+            severGate(`EMERGENCY TOW FAILURE: ${s.id} LOST`);
+          } else {
+            s.state = "DENIED";
+            s.reason = "TOW EMERGENCY CRITICAL";
+            s.doneAt = Date.now();
+            bumpStat(g, "deadlinesMissed");
+            bumpStat(g, "criticalMisses");
+            resources.FUEL.level = Math.max(0, resources.FUEL.level - 15);
+            resources.SUPPLY.level = Math.max(0, resources.SUPPLY.level - 15);
+            if (g.id === runtime.activeGateId) {
+              eventLine(`CRITICAL: ${s.id} TOW MISSION FAILURE`, "bad");
+              consoleLine(`RESOURCE LOSS: EMERGENCY RESPONSE DEPLOYED`, "bad");
+              playSfx("offline");
+            }
+          }
+          break;
+
+        case "CREW TRANSFER":
+          // Critical personnel delayed - system degradation
+          s.state = "DENIED";
+          s.reason = "DEADLINE EXPIRED (PERSONNEL CRITICAL)";
+          s.doneAt = Date.now();
+          bumpStat(g, "deadlinesMissed");
+          bumpStat(g, "criticalMisses");
+          const facility = g.facility || [];
+          const online = facility.filter(f => f.status === "ONLINE");
+          if (online.length > 0) {
+            const target = online[Math.floor(Math.random() * online.length)];
+            target.status = "DEGRADED";
+            if (g.id === runtime.activeGateId) {
+              eventLine(`SYSTEM DEGRADED: ${target.name} (CREW DELAY)`, "bad");
+              playSfx("error");
+            }
+          }
+          break;
+
+        default:
+          // Generic critical failure
+          s.state = "DENIED";
+          s.reason = "DEADLINE EXPIRED (CRITICAL)";
+          s.doneAt = Date.now();
+          bumpStat(g, "deniedIncorrect");
+          bumpStat(g, "deadlinesMissed");
+          bumpStat(g, "criticalMisses");
+      }
+    }
+
+    function applyUrgentDeadlineMiss(g, s, overtime) {
+      const resources = ensureResources(g);
+
+      switch(s.request) {
+        case "DEPART":
+          s.state = "DENIED";
+          s.reason = "DEADLINE EXPIRED (DEPARTURE SLOT LOST)";
+          s.doneAt = Date.now();
+          bumpConcourse(g, 5 + Math.random() * 8);
+          bumpStat(g, "deniedIncorrect");
+          bumpStat(g, "deadlinesMissed");
+          bumpStat(g, "urgentMisses");
+          if (g.id === runtime.activeGateId) {
+            eventLine(`DEADLINE MISS: ${s.id} DEPARTURE WINDOW CLOSED`, "warn");
+            playSfx("error");
+          }
+          break;
+
+        case "TOW":
+          s.state = "DENIED";
+          s.reason = "TOW DEADLINE EXPIRED";
+          s.doneAt = Date.now();
+          bumpStat(g, "deadlinesMissed");
+          bumpStat(g, "urgentMisses");
+          resources.FUEL.level = Math.max(0, resources.FUEL.level - 8);
+          resources.SUPPLY.level = Math.max(0, resources.SUPPLY.level - 8);
+          if (g.id === runtime.activeGateId) {
+            eventLine(`TOW DELAY: ${s.id} ADDITIONAL RESOURCES CONSUMED`, "warn");
+            consoleLine(`RESOURCE DRAIN: FUEL -8, SUPPLY -8`, "warn");
+          }
+          break;
+
+        case "REFUEL":
+          s.state = "DENIED";
+          s.reason = "REFUEL WINDOW EXPIRED";
+          s.doneAt = Date.now();
+          bumpStat(g, "deadlinesMissed");
+          bumpStat(g, "urgentMisses");
+          resources.FUEL.level = Math.max(0, resources.FUEL.level - 10);
+          if (g.id === runtime.activeGateId) {
+            eventLine(`REFUEL TIMEOUT: ${s.id} FUEL TRANSFER ABORTED`, "warn");
+            consoleLine(`FUEL LOSS: -10 (TRANSFER CANCELLED)`, "warn");
+          }
+          break;
+
+        case "CREW TRANSFER":
+        case "CARGO LOAD":
+          s.state = "DENIED";
+          s.reason = "DEADLINE EXPIRED (URGENT)";
+          s.doneAt = Date.now();
+          bumpStat(g, "deniedIncorrect");
+          bumpStat(g, "deadlinesMissed");
+          bumpStat(g, "urgentMisses");
+          bumpConcourse(g, 3 + Math.random() * 5);
+          if (g.id === runtime.activeGateId) {
+            eventLine(`DEADLINE MISS: ${s.id} ${s.request} FAILED`, "warn");
+          }
+          break;
+      }
+    }
+
+    function applyStandardDeadlineMiss(g, s, overtime) {
+      const resources = ensureResources(g);
+
+      s.state = "DENIED";
+      s.reason = `DEADLINE EXPIRED (${s.request})`;
+      s.doneAt = Date.now();
+      bumpStat(g, "deadlinesMissed");
+
+      if (s.request === "REFUEL") {
+        resources.FUEL.level = Math.max(0, resources.FUEL.level - 5);
+      } else if (s.request === "CARGO LOAD") {
+        resources.SUPPLY.level = Math.max(0, resources.SUPPLY.level - 5);
+      }
+
+      bumpConcourse(g, 2 + Math.random() * 4);
+      bumpStat(g, "deniedIncorrect");
+
+      if (g.id === runtime.activeGateId) {
+        eventLine(`DEADLINE MISS: ${s.id} (PENALTY APPLIED)`, "warn");
+      }
+    }
+
+    function applyRelaxedDeadlineMiss(g, s, overtime) {
+      s.state = "DENIED";
+      s.reason = "DEADLINE EXPIRED";
+      s.doneAt = Date.now();
+      bumpStat(g, "deadlinesMissed");
+
+      bumpConcourse(g, 1 + Math.random() * 2);
+
+      if (g.id === runtime.activeGateId) {
+        eventLine(`DEADLINE MISS: ${s.id} (MINOR DELAY)`, "dim");
+      }
+    }
+
     function resolveTraffic(g) {
       manageDockReservations(g);
       const waitingShip = dockWaitingShips(g);
@@ -4969,6 +5534,11 @@ button.btn-error {
           if (s.transponder !== "VALID" && s.state !== "CLEARED") step *= 0.55;
           s.eta = Math.max(0, s.eta - step);
 
+        // Check outbound deadlines (warnings and violations)
+        if (s.dir === "OUT") {
+          checkOutboundDeadlines(g, s);
+        }
+
         if (s.eta <= 0) {
           if (s.dir === "IN") {
             if (s.state === "CLEARED") {
@@ -4991,11 +5561,21 @@ button.btn-error {
             if (s.state === "CLEARED") {
               s.state = "DEPARTED";
               s.doneAt = Date.now();
+              // Track deadline success
+              if (s.departureDeadline && Date.now() < s.departureDeadline) {
+                bumpStat(g, "deadlinesMet");
+              }
               if (g.id === runtime.activeGateId) eventLine(`DEPART EVENT: ${s.id} DEPARTED`, "dim");
             } else {
-              s.state = "PENDING AUTH";
-              s.eta = 60 + Math.floor(Math.random() * 240); // 1–5 min more waiting
-              if (g.id === runtime.activeGateId) eventLine(`OUTBOUND STALL: ${s.id} (AUTH WAIT)`, "warn");
+              // Check if deadline passed
+              const now = Date.now();
+              if (s.departureDeadline && now > s.departureDeadline && !s.penaltyApplied) {
+                applyDeadlinePenalty(g, s);
+              } else {
+                s.state = "PENDING AUTH";
+                s.eta = 60 + Math.floor(Math.random() * 240); // 1–5 min more waiting
+                if (g.id === runtime.activeGateId) eventLine(`OUTBOUND STALL: ${s.id} (AUTH WAIT)`, "warn");
+              }
             }
           }
         }
@@ -5045,13 +5625,44 @@ button.btn-error {
       scheduleNextInboundGatePing(g, now);
     }
 
+    function checkUrgentDeadlineAudio(g) {
+      if (g.id !== runtime.activeGateId) return;
+
+      const now = Date.now();
+
+      for (const s of g.outbound) {
+        if (s.state === "DEPARTED" || s.state === "DENIED") continue;
+        if (!s.departureDeadline) continue;
+
+        const remaining = s.departureDeadline - now;
+
+        // Play urgent warning for CRITICAL deadlines under 30 seconds
+        if (s.deadlineType === "CRITICAL" && remaining > 0 && remaining < 30000) {
+          if (!s.criticalAudioPlayed) {
+            playSfx("error");
+            s.criticalAudioPlayed = true;
+          }
+        }
+
+        // Play warning for any deadline under 10 seconds
+        if (remaining > 0 && remaining < 10000) {
+          if (!s.finalWarningPlayed) {
+            playSfx("blip");
+            s.finalWarningPlayed = true;
+          }
+        }
+      }
+    }
+
 function tickGate(g) {
       const now = Date.now();
       resolveTraffic(g);
+      checkUrgentDeadlineAudio(g);
       tickDockSlots(g);
       driftSystems(g);
       driftFacility(g);
       tickWorkOrders(g);
+      tickRepairAttempts(g);
       enforceBeaconDependency(g);
       maybeSpawnShip(g, "IN");
       maybeSpawnShip(g, "OUT");
@@ -5388,6 +5999,11 @@ function tickGate(g) {
         playSfx("error");
         return;
       }
+      if (sys.status === "DEGRADED") {
+        consoleLine(`WORKORDER REFUSED: ${sys.name} DEGRADED (USE REPAIR)`, "dim");
+        playSfx("error");
+        return;
+      }
       if (hasActiveWorkOrder(g, sysId)) {
         consoleLine(`WORKORDER EXISTS: ${sys.name}`, "warn");
         playSfx("error");
@@ -5408,6 +6024,66 @@ function tickGate(g) {
       consoleLine(`WORKORDER QUEUED: ${sys.name}`, "dim");
       if (g.id === runtime.activeGateId) eventLine(`WORKORDER QUEUED: ${sys.name}`, "dim");
       g.lastRefresh = Date.now();
+      renderAll();
+    }
+
+    function initiateRepair(systemText) {
+      const g = activeGate();
+      const sysId = resolveFacility(systemText);
+
+      if (!sysId) {
+        consoleLine("USAGE: REPAIR <SYSTEM>", "warn");
+        playSfx("error");
+        return;
+      }
+
+      const sys = getFacility(g, sysId);
+      if (!sys) {
+        consoleLine(`UNKNOWN SYSTEM: ${systemText}`, "bad");
+        playSfx("error");
+        return;
+      }
+
+      if (sys.status !== "DEGRADED") {
+        consoleLine(`REPAIR REFUSED: ${sys.name} NOT DEGRADED`, "dim");
+        playSfx("error");
+        return;
+      }
+
+      const now = Date.now();
+      const cooldownRemaining = REPAIR_COOLDOWN_MS - (now - (sys.lastRepairAttemptAt || 0));
+      if (cooldownRemaining > 0) {
+        const secRemaining = Math.ceil(cooldownRemaining / 1000);
+        consoleLine(`REPAIR COOLDOWN: ${sys.name} (${secRemaining}s)`, "warn");
+        playSfx("error");
+        return;
+      }
+
+      if (hasActiveRepair(g, sysId)) {
+        consoleLine(`REPAIR IN PROGRESS: ${sys.name}`, "warn");
+        playSfx("error");
+        return;
+      }
+
+      const delaySec = randRange(REPAIR_DELAY_MIN, REPAIR_DELAY_MAX);
+      const repair = {
+        systemId: sysId,
+        systemName: sys.name,
+        startedAt: now,
+        completesAt: now + delaySec * 1000,
+        state: "REPAIRING"
+      };
+
+      g.repairAttempts.push(repair);
+      sys.lastRepairAttemptAt = now;
+      bumpStat(g, "repairAttempts");
+
+      consoleLine(`REPAIR INITIATED: ${sys.name}`, "dim");
+      if (g.id === runtime.activeGateId) {
+        eventLine(`REPAIR INITIATED: ${sys.name}`, "dim");
+      }
+
+      g.lastRefresh = now;
       renderAll();
     }
 
@@ -5750,6 +6426,7 @@ function cmdPingRelay(id) {
       consoleLine("  QUERY <ID>", "dim");
       consoleLine("  DECON START <ID>", "dim");
       consoleLine("  REALIGN | RESET | PURGE | SCAN", "dim");
+      consoleLine("  REPAIR <SYSTEM>           - Quick repair DEGRADED system (30% fail chance)", "dim");
       consoleLine("  WORKORDER <SYSTEM>", "dim");
       consoleLine("  RELAYS | PING <RELAY-ID> | PING GATE <GATE-ID> | ACK <RELAY-ID> | RESTORE <RELAY-ID>", "dim");
       consoleLine("  PACKETS", "dim");
@@ -5933,6 +6610,8 @@ function cmdPingRelay(id) {
       if (cmd === "PURGE") return queueMaintenance("purge", ui.btnPurge, { showConsole: true });
       if (cmd === "SCAN") return queueMaintenance("scan", ui.btnScan, { showConsole: true });
 
+      if (cmd === "REPAIR") return initiateRepair(parts.slice(1).join(" "));
+
       if (cmd === "WORKORDER") return issueWorkOrder(parts.slice(1).join(" "));
       if (cmd === "RELAYS") return cmdRelays();
       if (cmd === "PING") {
@@ -5982,6 +6661,14 @@ function cmdPingRelay(id) {
         consoleLine(`ACKNOWLEDGED: ${gateId}`, "good");
         eventLine(`ACKNOWLEDGED: ${gateId}`, "dim");
         pushPacket(g, `ACKNOWLEDGE ${gateId}`);
+
+        // Simulate connection time measurement with response
+        const connectionTime = randRange(2400, 9800);
+        setTimeout(() => {
+          consoleLine(`CONNECTION TIME RESPONSE: ${gateId} (${connectionTime}ms)`, "good");
+          pushPacket(g, `CONNECTION TIME ${gateId} ${connectionTime}ms`);
+        }, connectionTime);
+
         return;
       }
 
