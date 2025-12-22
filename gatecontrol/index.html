@@ -3961,7 +3961,8 @@ button.btn-error {
         + ((safe.deadlinesMet || 0) * 2)
         - ((safe.deadlinesMissed || 0) * 3)
         - ((safe.criticalMisses || 0) * 5)
-        - ((safe.urgentMisses || 0) * 2);
+        - ((safe.urgentMisses || 0) * 2)
+        - ((safe.operatorErrors || 0) * 3);
       return Math.max(0, Math.floor(credits));
     }
 
@@ -5217,8 +5218,9 @@ button.btn-error {
     }
 
     function denyReasonForShip(s) {
-      if (shipHasEffect(s, "VACUUM BLOOM")) return "VACUUM BLOOM HAZARD";
-      if (shipIsRaider(s) || s.hiddenThreat) return "HOSTILE PROFILE";
+      if (shipHasEffect(s, "VACUUM BLOOM")) return "QUARANTINE REQUIRED";
+      if (shipIsRaider(s) || s.hiddenThreat) return "AUTHORITIES NOTIFIED";
+      if (s.dir === "OUT" && shipHasEffect(s, "CORRIDOR RADIATION")) return "RADIATION HAZARD";
       if (s.obscured) return "SIGNAL MASKED";
       if (s.infoMasked) return "UNVERIFIED REGISTRY";
       if (s.transponder !== "VALID") return "TRANSPONDER ANOMALY";
@@ -5230,6 +5232,16 @@ button.btn-error {
       if (shipHasEffect(s, "VACUUM BLOOM")) return true;
       if (shipIsRaider(s) || s.hiddenThreat) return true;
       if (s.transponder !== "VALID") return true;
+      // OUTGOING ships with Corridor Radiation should be denied
+      if (s.dir === "OUT" && shipHasEffect(s, "CORRIDOR RADIATION")) return true;
+      return false;
+    }
+
+    function outgoingShipHasHazard(s) {
+      if (s.dir !== "OUT") return false;
+      if (shipHasEffect(s, "VACUUM BLOOM")) return true;
+      if (shipHasEffect(s, "CORRIDOR RADIATION")) return true;
+      if (shipIsRaider(s) || s.hiddenThreat) return true;
       return false;
     }
 
@@ -5413,6 +5425,15 @@ button.btn-error {
           consoleLine(`CLEARED: ${id} (${shipDisplayRequest(s)})`, "good");
           if (["DOCK","DECON","REFUEL","CREW TRANSFER"].includes(s.request)) bumpConcourse(g, 2 + Math.random() * 4);
         }
+
+        // Check if OUTGOING ship with hazards was incorrectly approved
+        if (outgoingShipHasHazard(s)) {
+          bumpStat(g, "operatorErrors");
+          const errorReason = denyReasonForShip(s);
+          if (g.id === runtime.activeGateId) {
+            eventLine(`OPERATOR ERROR: ${id} (${errorReason}) (-3 CR)`, "warn");
+          }
+        }
       } else if (action === "hold") {
         s.state = "HOLD";
         if (s.transponder !== "VALID") {
@@ -5427,7 +5448,14 @@ button.btn-error {
         s.reason = correct ? denyReasonForShip(s) : "NO ACTIONABLE CAUSE";
         if (prevState !== "DENIED") bumpStat(g, correct ? "deniedCorrect" : "deniedIncorrect");
         s.doneAt = Date.now();
-        consoleLine(`DENIED: ${id} (${s.reason})`, "bad");
+
+        // Show credit bonus for correctly denying hazardous OUTGOING ships
+        if (correct && outgoingShipHasHazard(s)) {
+          consoleLine(`DENIED: ${id} (${s.reason}) (+3 CR)`, "bad");
+        } else {
+          consoleLine(`DENIED: ${id} (${s.reason})`, "bad");
+        }
+
         if (!correct && g.id === runtime.activeGateId) eventLine(`DENY PENALTY: ${id} (NO CAUSE)`, "warn");
       }
 
