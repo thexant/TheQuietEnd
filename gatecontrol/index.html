@@ -2806,7 +2806,11 @@ button.btn-error {
         urgencyLevel: 0,
         deadlineWarning: false,
         criticalAudioPlayed: false,
-        finalWarningPlayed: false
+        finalWarningPlayed: false,
+        // HOLD tracking properties
+        holdUsed: false,
+        holdStartTime: 0,
+        holdDuration: 0
       };
     }
 
@@ -4551,6 +4555,29 @@ button.btn-error {
       return `<div class="dock-inline-detail">${shipInlineDetailPanel(s, { compact: true })}</div>`;
     }
 
+    function renderHoldButton(s) {
+      // If HOLD has been used and ship is no longer on HOLD, hide button
+      if (s.holdUsed && s.state !== "HOLD") {
+        return "";
+      }
+
+      // If currently on HOLD with active timer, show countdown
+      if (s.state === "HOLD" && s.holdStartTime > 0 && s.holdDuration > 0) {
+        const elapsed = Date.now() - s.holdStartTime;
+        const remaining = Math.max(0, s.holdDuration - elapsed);
+        const remainingSec = Math.ceil(remaining / 1000);
+        return `<button class="btn-mini hold" disabled>${remainingSec}s</button>`;
+      }
+
+      // If HOLD has been used but not currently on HOLD (shouldn't happen), hide
+      if (s.holdUsed) {
+        return "";
+      }
+
+      // Normal HOLD button
+      return `<button class="btn-mini hold" data-action="hold" data-id="${escapeText(s.id)}">HOLD</button>`;
+    }
+
     function shipRow(s) {
       const g = activeGate();
       const [pText, pCls] = shipStatusPill(s);
@@ -4581,7 +4608,7 @@ button.btn-error {
                 ${canQuery ? `<button class="btn-mini hold" data-action="query" data-id="${escapeText(s.id)}">QRY</button>` : ""}
                 ${canDecon ? `<button class="btn-mini approve" data-action="decon" data-id="${escapeText(s.id)}">DECON</button>` : ""}
                 <button class="btn-mini approve" data-action="approve" data-id="${escapeText(s.id)}">APP</button>
-                <button class="btn-mini hold" data-action="hold" data-id="${escapeText(s.id)}">HOLD</button>
+                ${renderHoldButton(s)}
                 <button class="btn-mini deny" data-action="deny" data-id="${escapeText(s.id)}">DENY</button>
               </div>
             </td>
@@ -5367,6 +5394,8 @@ button.btn-error {
             if (target.state === "HOLD" && target.reason === "TRANSPONDER VERIFY" && target.wasCleared) {
               target.state = "CLEARED";
               target.reason = null;
+              target.holdStartTime = 0;
+              target.holdDuration = 0;
               if (target.eta <= 0) target.eta = randRange(60, 180);
               if (g.id === runtime.activeGateId) eventLine(`CLEARANCE RESTORED: ${target.id}`, "good");
             }
@@ -5435,13 +5464,21 @@ button.btn-error {
           }
         }
       } else if (action === "hold") {
+        if (s.holdUsed) {
+          consoleLine(`HOLD UNAVAILABLE: ${id} (ALREADY USED)`, "warn");
+          return;
+        }
         s.state = "HOLD";
+        s.holdUsed = true;
+        s.holdStartTime = Date.now();
+        s.holdDuration = 30000 + Math.random() * 30000; // 30-60 seconds
         if (s.transponder !== "VALID") {
           s.reason = "TRANSPONDER VERIFY";
         } else {
           s.reason = s.reason || pick(Math.random, HOLD_REASONS);
         }
-        consoleLine(`HOLD SET: ${id} (${s.reason})`, "warn");
+        const durationSec = Math.round(s.holdDuration / 1000);
+        consoleLine(`HOLD SET: ${id} (${s.reason}) - ${durationSec}s`, "warn");
       } else if (action === "deny") {
         s.state = "DENIED";
         const correct = isCorrectDeny(s);
@@ -6295,6 +6332,21 @@ button.btn-error {
       if (waitingShip && g.id === runtime.activeGateId) {
         eventLine(`DOCK EVENT: ${waitingShip.id} ASSIGNED (FROM WAITING)`, "dim");
       }
+      // Check for expired HOLD timers
+      for (const s of [...g.inbound, ...g.outbound]) {
+        if (s.state === "HOLD" && s.holdStartTime > 0 && s.holdDuration > 0) {
+          const elapsed = Date.now() - s.holdStartTime;
+          if (elapsed >= s.holdDuration) {
+            // HOLD timer expired - release the ship
+            s.state = "PENDING";
+            s.reason = null;
+            s.holdStartTime = 0;
+            s.holdDuration = 0;
+            if (g.id === runtime.activeGateId) eventLine(`HOLD EXPIRED: ${s.id}`, "dim");
+          }
+        }
+      }
+
       // release holds when dock slots open
       const hasEmptySlot = (g.dockSlots || []).some(x => x.state === "EMPTY");
       if (hasEmptySlot) {
@@ -6302,6 +6354,8 @@ button.btn-error {
           if (s.state === "HOLD" && s.reason === "NO SLOT" && s.wasCleared) {
             s.state = "CLEARED";
             s.eta = randRange(60, 180);
+            s.holdStartTime = 0;
+            s.holdDuration = 0;
             if (g.id === runtime.activeGateId) eventLine(`HOLD RELEASE: ${s.id} (SLOT OPEN)`, "dim");
             break;
           }
@@ -6733,6 +6787,8 @@ function tickGate(g) {
             if (Math.random() < chance) {
             s.state = "PENDING";
             s.reason = null;
+            s.holdStartTime = 0;
+            s.holdDuration = 0;
             released += 1;
             }
           }
