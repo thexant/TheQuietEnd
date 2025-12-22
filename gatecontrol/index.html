@@ -1941,7 +1941,7 @@
       relayShiftChance: 0.0012,
       relayPingChance: 0.0010,
       relayDropChance: 0.00035,
-      concourseFade: 0.03,
+      concourseFade: 0.08,
       fuelDrain: 0.015,
       supplyDrainWorkOrder: 0.045,
       supplyDrainDecon: 0.025
@@ -3119,9 +3119,9 @@
     }
 
     function concourseBand(level) {
-      if (level >= 70) return { text: "CROWDED", cls: "warn" };
-      if (level >= 40) return { text: "ACTIVE", cls: "warn" };
-      if (level >= 20) return { text: "LOW", cls: "ok" };
+      if (level >= 75) return { text: "CROWDED", cls: "warn" };
+      if (level >= 50) return { text: "ACTIVE", cls: "warn" };
+      if (level >= 25) return { text: "LOW", cls: "ok" };
       return { text: "QUIET", cls: "ok" };
     }
 
@@ -4114,13 +4114,13 @@
           s.wasCleared = true;
           consoleLine(`CLEARED: ${id} (TRANSPONDER OVERRIDE)`, "warn");
           if (g.id === runtime.activeGateId) eventLine(`CLEARANCE OVERRIDE: ${id} (TRANSPONDER)`, "warn");
-          if (["DOCK","DECON","REFUEL","CREW TRANSFER"].includes(s.request)) bumpConcourse(g, 8 + Math.random() * 6);
+          if (["DOCK","DECON","REFUEL","CREW TRANSFER"].includes(s.request)) bumpConcourse(g, 2 + Math.random() * 4);
         } else {
           s.state = "CLEARED";
           s.reason = null;
           s.wasCleared = true;
           consoleLine(`CLEARED: ${id} (${shipDisplayRequest(s)})`, "good");
-          if (["DOCK","DECON","REFUEL","CREW TRANSFER"].includes(s.request)) bumpConcourse(g, 8 + Math.random() * 6);
+          if (["DOCK","DECON","REFUEL","CREW TRANSFER"].includes(s.request)) bumpConcourse(g, 2 + Math.random() * 4);
         }
       } else if (action === "hold") {
         s.state = "HOLD";
