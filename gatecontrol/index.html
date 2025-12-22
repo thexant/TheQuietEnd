@@ -884,6 +884,49 @@ button.btn-error {
     .btn-mini.hold { color: var(--stat); border-color: rgba(210,169,90,0.35); }
     .btn-mini.approve { color: var(--signal); }
     .btn-mini:active { background: rgba(255,255,255,0.06); color: var(--ink); }
+
+    /* Inline ship detail panels (DTL / DETAIL) */
+    .detail-row td { padding: 0 6px 8px; }
+    .dock-inline-detail { margin: -2px 0 10px 0; padding-left: 10px; }
+
+    .inline-detail {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(0,0,0,0.18);
+      padding: 10px;
+      box-shadow: 0 0 18px rgba(0,0,0,0.35);
+    }
+    .inline-detail.inline-detail-compact { padding: 8px; }
+
+    .inline-detail-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .inline-detail-title {
+      font-family: var(--font-title);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      color: var(--signal);
+      line-height: 1.2;
+    }
+    .inline-detail-sub {
+      margin-top: 4px;
+      font-size: 0.72rem;
+      opacity: 0.85;
+    }
+    .inline-detail .kv { grid-template-columns: 120px 1fr; }
+    .inline-detail .v { white-space: normal; overflow-wrap: anywhere; }
+
+    .btn-mini.detail-open {
+      color: var(--ink);
+      border-color: rgba(255,255,255,0.25);
+      box-shadow: 0 0 14px var(--glow);
+    }
+
     @keyframes ackPulse {
       0%, 100% { box-shadow: 0 0 10px rgba(210,169,90,0.3); }
       50% { box-shadow: 0 0 18px rgba(210,169,90,0.7); }
@@ -2755,17 +2798,18 @@ button.btn-error {
       processingCount: 0,
       resumeShiftMs: null,
       skipHashLoad: false,
-      operatorCallsign: ""
+      operatorCallsign: "",
+      inlineDetailId: null
     };
 
     // ---------------------------
     // Maintenance cooldowns
     // ---------------------------
     const MAINT_COOLDOWNS_MS = Object.freeze({
-      scan: 30_000,
-      reset: 30_000,
-      realign: 30_000,
-      purge: 30_000
+      scan: 15_000,
+      reset: 15_000,
+      realign: 15_000,
+      purge: 15_000
     });
 
     function getMaintLastAt(g, kind) {
@@ -2910,12 +2954,12 @@ button.btn-error {
         offline: makeAudioPool("offline.ogg", 2, 0.65),
         error: makeAudioPool("error.ogg", 2, 0.6),
         charged: makeAudioPool("charged.ogg", 2, 0.55),
-        purge: makeLoopAudio("purge.ogg", 0.6),
-        reset: makeLoopAudio("reset.ogg", 0.6),
+        purge: makeLoopAudio("purge.ogg", 0.75),
+        reset: makeLoopAudio("reset.ogg", 0.65),
         scan: makeLoopAudio("scan.ogg", 1),
-      processing: makeLoopAudio("processing.ogg", 0.6),
+      processing: makeLoopAudio("processing.ogg", 0.65),
       ackalarm: makeLoopAudio("ackalarm.ogg", 0.65),
-      music: makeLoopAudio("bgaudio.ogg", 0.40)
+      music: makeLoopAudio("bgaudio.ogg", 0.32)
     };
 		
 		audio.clack.pitch = { min: 0.8, max: 1.20 }; // try 0.98–1.02 if you want it *very* subtle
@@ -3500,6 +3544,72 @@ button.btn-error {
       return formatMMSS(remaining);
     }
 
+
+    // Inline ship detail helpers (DTL / DETAIL)
+    function shipDetailKVHtml(s) {
+      const deconTime = deconCountdown(s);
+      const eta = (["DENIED","ARRIVED","DEPARTED","WAITING TO DOCK","WAITING DECON","DECON","SERVICING","CLEARING","COMPLETE"].includes(s.state)) ? "--:--" : formatMMSS(s.eta);
+      const displayTransponder = shipDisplayTransponder(s);
+      const visibleEffects = (s.effects || []).filter(e => !e.hidden || e.revealed).map(e => e.name);
+      const effectLine = visibleEffects.length ? visibleEffects.join(" / ") : "NONE";
+
+      const rows = s.obscured ? [
+        ["DIR", s.dir],
+        ["STATE", s.state],
+        ...(deconTime ? [["DECON REMAIN", deconTime]] : []),
+        ["ETA", eta],
+        ["SLOT", s.slotId || "--"],
+        ["DOCK", s.dockState || "--"],
+        ["TRANSPONDER", displayTransponder]
+      ] : [
+        ["DIR", s.dir],
+        ["TYPE", shipDisplayType(s)],
+        ["REQUEST", shipDisplayRequest(s)],
+        ["STATE", s.state],
+        ...(deconTime ? [["DECON REMAIN", deconTime]] : []),
+        ["ETA", eta],
+        ["SLOT", s.slotId || "--"],
+        ["DOCK", s.dockState || "--"],
+        ["TRANSPONDER", displayTransponder],
+        ["PRIORITY", shipDisplayPriority(s) ? "YES" : "NO"],
+        ["REASON", s.reason || "—"],
+        ["EFFECTS", effectLine],
+        ["NOTES", s.notes ? s.notes : "—"]
+      ];
+
+      return rows.map(([k, v]) => `<div class="k">${escapeText(k)}</div><div class="v">${escapeText(String(v))}</div>`).join("");
+    }
+
+    function shipInlineDetailPanel(s, opts = {}) {
+      const note = s.obscured ? `<div class="inline-detail-sub">SIGNAL MASKED / IDENTITY UNVERIFIED</div>` : "";
+      return `
+        <div class="inline-detail ${opts.compact ? "inline-detail-compact" : ""}">
+          <div class="inline-detail-head">
+            <div>
+              <div class="inline-detail-title">DETAIL: ${escapeText(s.id)}</div>
+              ${note}
+            </div>
+            <button class="btn-mini hold" data-action="detail" data-id="${escapeText(s.id)}">CLOSE</button>
+          </div>
+          <div class="kv">${shipDetailKVHtml(s)}</div>
+        </div>
+      `;
+    }
+
+    function shipDetailTableRow(s) {
+      return `
+        <tr class="detail-row">
+          <td colspan="5">
+            ${shipInlineDetailPanel(s)}
+          </td>
+        </tr>
+      `;
+    }
+
+    function shipDetailDockRow(s) {
+      return `<div class="dock-inline-detail">${shipInlineDetailPanel(s, { compact: true })}</div>`;
+    }
+
     function shipRow(s) {
       const g = activeGate();
       const [pText, pCls] = shipStatusPill(s);
@@ -3511,6 +3621,7 @@ button.btn-error {
         const canQuery = (s.infoMasked || s.transponder !== "VALID") && !s.queryPending;
         const deconOnline = getFacility(g, "DECON")?.status === "ONLINE";
         const canDecon = s.dir === "IN" && s.state === "WAITING DECON" && deconOnline && !shipHasEffect(s, "VACUUM BLOOM");
+        const isDetailOpen = runtime.inlineDetailId === s.id;
         return `
           <tr>
             <td class="code" data-label="Id" title="${escapeText(shipDisplayRequest(s))} / ${escapeText(shipDisplayTransponder(s))}">${escapeText(s.id)}${prio}${tr}${mask}</td>
@@ -3522,7 +3633,7 @@ button.btn-error {
             </td>
             <td data-label="Action" class="action-cell" style="text-align:right;">
               <div class="row-actions">
-                <button class="btn-mini" data-action="detail" data-id="${escapeText(s.id)}">DTL</button>
+                <button class="btn-mini ${isDetailOpen ? "detail-open" : ""}" data-action="detail" data-id="${escapeText(s.id)}">DTL</button>
                 ${canQuery ? `<button class="btn-mini hold" data-action="query" data-id="${escapeText(s.id)}">QRY</button>` : ""}
                 ${canDecon ? `<button class="btn-mini approve" data-action="decon" data-id="${escapeText(s.id)}">DECON</button>` : ""}
                 <button class="btn-mini approve" data-action="approve" data-id="${escapeText(s.id)}">APP</button>
@@ -3531,6 +3642,7 @@ button.btn-error {
               </div>
             </td>
           </tr>
+          ${isDetailOpen ? shipDetailTableRow(s) : ""}
         `;
     }
 
@@ -3686,16 +3798,18 @@ button.btn-error {
         const dockMeta = `${shipName} / ${dockState}${deconTime ? ` / T-${deconTime}` : ""}${exposureStr}`;
         
         const canDecon = ship && ship.state === "WAITING DECON" && getFacility(g, "DECON")?.status === "ONLINE" && !shipHasEffect(ship, "VACUUM BLOOM");
+        const isDetailOpen = !!ship && runtime.inlineDetailId === ship.id;
         
         // (Return statement remains the same, just utilizing the updated dockMeta)
         return `
           <div class="status-row">
             <div class="status-name">${escapeText(slot.id)} <span class="status-meta">${escapeText(dockMeta)}</span></div>
             <div class="status-right">
-              ${ship ? `<button class="btn-mini" data-action="detail" data-id="${escapeText(ship.id)}">DTL</button>` : ""}
+              ${ship ? `<button class="btn-mini ${isDetailOpen ? "detail-open" : ""}" data-action="detail" data-id="${escapeText(ship.id)}">DTL</button>` : ""}
               ${canDecon ? `<button class="btn-mini approve" data-action="decon" data-id="${escapeText(ship.id)}">DECON</button>` : ""}
             </div>
           </div>
+          ${isDetailOpen ? shipDetailDockRow(ship) : ""}
         `;
       }).join("");
 
@@ -3799,7 +3913,7 @@ button.btn-error {
       });
 
       ui.dockList.querySelectorAll("[data-action='detail']").forEach(btn => {
-        btn.addEventListener("click", () => cmdDetail(btn.getAttribute("data-id")));
+        btn.addEventListener("click", () => cmdDetail(btn.getAttribute("data-id"), { log: false }));
       });
       ui.dockList.querySelectorAll("[data-action='decon']").forEach(btn => {
         const id = btn.getAttribute("data-id");
@@ -4260,7 +4374,7 @@ button.btn-error {
       const prevState = s.state;
 
       if (action === "detail") {
-        cmdDetail(id);
+        cmdDetail(id, { log: false });
         return;
       }
 
@@ -5616,15 +5730,32 @@ function cmdPingRelay(id) {
       }
     }
 
-    function cmdDetail(id) {
+    
+    function cmdDetail(id, opts) {
       const g = activeGate();
-      const s = findShipById(g, id);
-      if (!s) { consoleLine(`NOT FOUND: ${id}`, "bad"); return; }
+      const shipId = String(id || "").toUpperCase();
+      const options = (typeof opts === "object" && opts) ? opts : { log: opts !== false };
+      const log = options.log !== false;
+
+      const s = findShipById(g, shipId);
+      if (!s) {
+        if (log) consoleLine(`NOT FOUND: ${shipId}`, "bad");
+        playSfx("error");
+        return;
+      }
+
+      // Toggle inline detail panel (DTL button + DETAIL command)
+      runtime.inlineDetailId = (runtime.inlineDetailId === s.id) ? null : s.id;
+      renderAll();
+
+      if (!log) return;
+
       if (s.obscured) {
         consoleLine(`DETAIL REFUSED: ${s.id}`, "warn");
         consoleLine("  SIGNAL MASKED / IDENTITY UNVERIFIED", "warn");
         return;
       }
+
       const deconTime = deconCountdown(s);
       consoleLine(`DETAIL: ${s.id}`, "dim");
       consoleLine(`  DIR: ${s.dir}`, "dim");
@@ -5644,6 +5775,7 @@ function cmdPingRelay(id) {
       consoleLine(`  EFFECTS: ${effectLine}`, visibleEffects.length ? "warn" : "dim");
       consoleLine(`  NOTES: ${s.notes ? s.notes : "—"}`, "dim");
     }
+
 
     function cmdNote(id, note) {
       const g = activeGate();
