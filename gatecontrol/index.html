@@ -2711,14 +2711,32 @@
       return audio;
     }
 
-    function playAudioPool(group) {
-      if (!group?.pool?.length) return;
-      const audio = group.pool[group.index];
-      group.index = (group.index + 1) % group.pool.length;
-      audio.currentTime = 0;
-      const promise = audio.play();
-      if (promise?.catch) promise.catch(() => {});
-    }
+		function playAudioPool(group) {
+			if (!group?.pool?.length) return;
+
+			const audioEl = group.pool[group.index];
+			group.index = (group.index + 1) % group.pool.length;
+
+			// --- pitch variation (optional per group) ---
+			if (group.pitch) {
+				const min = typeof group.pitch.min === "number" ? group.pitch.min : 1;
+				const max = typeof group.pitch.max === "number" ? group.pitch.max : 1;
+				const rate = min + Math.random() * (max - min);
+
+				// ensure rate change actually changes pitch (some browsers try to preserve it)
+				if ("preservesPitch" in audioEl) audioEl.preservesPitch = false;
+				if ("mozPreservesPitch" in audioEl) audioEl.mozPreservesPitch = false;
+				if ("webkitPreservesPitch" in audioEl) audioEl.webkitPreservesPitch = false;
+
+				audioEl.playbackRate = rate;
+			} else {
+				audioEl.playbackRate = 1;
+			}
+
+			audioEl.currentTime = 0;
+			const promise = audioEl.play();
+			if (promise?.catch) promise.catch(() => {});
+		}
 
     const audioState = {
       sfxEnabled: loadStoredBool(LS.sfxEnabled, true),
@@ -2739,12 +2757,14 @@
         error: makeAudioPool("error.ogg", 2, 0.6),
         purge: makeLoopAudio("purge.ogg", 0.6),
         reset: makeLoopAudio("reset.ogg", 0.6),
-        scan: makeLoopAudio("scan.ogg", 0.7),
+        scan: makeLoopAudio("scan.ogg", 1),
       processing: makeLoopAudio("processing.ogg", 0.5),
       ackalarm: makeLoopAudio("ackalarm.ogg", 0.65),
       music: makeLoopAudio("bgaudio.ogg", 0.40)
     };
-
+		
+		audio.clack.pitch = { min: 0.8, max: 1.20 }; // try 0.98–1.02 if you want it *very* subtle
+		
     function updateAudioButtons() {
       if (ui.btnSfx) {
         ui.btnSfx.textContent = `SFX: ${audioState.sfxEnabled ? "ON" : "OFF"}`;
