@@ -2237,6 +2237,9 @@
         createdAt: Date.now(),
         lastRefresh: Date.now(),
         lastScanAt: 0,
+        lastRealignAt: 0,
+        lastResetAt: 0,
+        lastPurgeAt: 0,
         relayFailureSince: 0,
         beacon,
         alignment,
@@ -2285,6 +2288,9 @@
       g.createdAt ||= Date.now();
       g.lastRefresh ||= Date.now();
       g.lastScanAt ||= 0;
+      g.lastRealignAt ||= 0;
+      g.lastResetAt ||= 0;
+      g.lastPurgeAt ||= 0;
       g.relayFailureSince = typeof g.relayFailureSince === "number" ? g.relayFailureSince : 0;
       g.alerts ||= [];
       g.reports ||= [];
@@ -2737,6 +2743,35 @@
       skipHashLoad: false,
       operatorCallsign: ""
     };
+
+    // ---------------------------
+    // Maintenance cooldowns
+    // ---------------------------
+    const MAINT_COOLDOWNS_MS = Object.freeze({
+      scan: 30_000,
+      reset: 30_000,
+      realign: 30_000,
+      purge: 30_000
+    });
+
+    function getMaintLastAt(g, kind) {
+      if (!g) return 0;
+      if (kind === "scan") return (typeof g.lastScanAt === "number") ? g.lastScanAt : 0;
+      if (kind === "realign") return (typeof g.lastRealignAt === "number") ? g.lastRealignAt : 0;
+      if (kind === "reset") return (typeof g.lastResetAt === "number") ? g.lastResetAt : 0;
+      if (kind === "purge") return (typeof g.lastPurgeAt === "number") ? g.lastPurgeAt : 0;
+      return 0;
+    }
+
+    function maintCooldownRemainingMs(g, kind) {
+      const cd = MAINT_COOLDOWNS_MS[kind] || 0;
+      if (!cd) return 0;
+      const last = getMaintLastAt(g, kind);
+      const now = Date.now();
+      const elapsed = now - last;
+      if (elapsed >= cd) return 0;
+      return cd - Math.max(0, elapsed);
+    }
 
     function updateOperatorLabel() {
       if (!ui.operatorLabel) return;
@@ -4936,6 +4971,7 @@ function tickGate(g) {
 
       if (kind === "realign") {
         const shouldAward = hasRealignNeed(g);
+        g.lastRealignAt = Date.now();
         consoleLine("MAINT: REALIGN (IN PROGRESS)...", "dim");
         setTimeout(() => {
           g.alignment = "WITHIN TOLERANCE";
@@ -4979,6 +5015,7 @@ function tickGate(g) {
 
         if (kind === "reset") {
           const shouldAward = hasResetNeed(g);
+          g.lastResetAt = Date.now();
           consoleLine("MAINT: RESET HANDSHAKE (IN PROGRESS)...", "dim");
           setTimeout(() => {
             const prevSync = g.sync;
@@ -5014,6 +5051,7 @@ function tickGate(g) {
 
       if (kind === "purge") {
         const shouldAward = hasPurgeNeed(g);
+        g.lastPurgeAt = Date.now();
         consoleLine("MAINT: PURGE QUEUE (LOCAL)", "warn");
         let removed = 0;
         let released = 0;
@@ -5054,8 +5092,11 @@ function tickGate(g) {
 
       if (kind === "scan") {
         const now = Date.now();
-        if (now - g.lastScanAt < 12_000) {
-          consoleLine("SCAN: COOLDOWN", "warn");
+        const cooldownMs = MAINT_COOLDOWNS_MS.scan;
+        const elapsed = now - g.lastScanAt;
+        if (elapsed < cooldownMs) {
+          const remainingS = Math.ceil((cooldownMs - Math.max(0, elapsed)) / 1000);
+          consoleLine(`SCAN: COOLDOWN (${remainingS}s)`, "warn");
           playSfx("error");
           return;
         }
@@ -5899,6 +5940,21 @@ function cmdPingRelay(id) {
         flashErrorButton(btn);
         return;
       }
+
+      const g = activeGate();
+      const remainingMs = maintCooldownRemainingMs(g, kind);
+      if (remainingMs > 0) {
+        const remainingS = Math.ceil(remainingMs / 1000);
+        if (kind === "scan") {
+          consoleLine(`SCAN: COOLDOWN (${remainingS}s)`, "warn");
+        } else {
+          consoleLine(`MAINT: ${kind.toUpperCase()} COOLDOWN (${remainingS}s)`, "warn");
+        }
+        playSfx("error");
+        flashErrorButton(btn);
+        return;
+      }
+
       const label = btn?.dataset.label || btn?.textContent.trim() || kind.toUpperCase();
       if (btn) {
         btn.dataset.label = label;
@@ -5962,6 +6018,35 @@ function cmdPingRelay(id) {
       }, delaySec * 1000);
 
       runtime.maintenance[kind] = { timer, tick, progressTick };
+    }
+
+    function updateMaintenanceCooldownUI() {
+      const g = activeGate();
+      const defs = [
+        { kind: "realign", btn: ui.btnRealign },
+        { kind: "reset", btn: ui.btnReset },
+        { kind: "purge", btn: ui.btnPurge },
+        { kind: "scan", btn: ui.btnScan }
+      ];
+      for (const { kind, btn } of defs) {
+        if (!btn) continue;
+        btn.dataset.baseLabel ||= (btn.dataset.label || btn.textContent.trim() || kind.toUpperCase());
+
+        // don't stomp the in-process label
+        if (btn.dataset.busy === "true" || runtime.maintenance[kind]) continue;
+
+        const remainingMs = maintCooldownRemainingMs(g, kind);
+        if (remainingMs > 0) {
+          const remainingS = Math.ceil(remainingMs / 1000);
+          btn.disabled = true;
+          btn.dataset.cooldown = "true";
+          btn.textContent = `${btn.dataset.baseLabel} (COOLDOWN ${remainingS}s)`;
+        } else if (btn.dataset.cooldown === "true") {
+          btn.disabled = false;
+          delete btn.dataset.cooldown;
+          btn.textContent = btn.dataset.baseLabel;
+        }
+      }
     }
 
     ui.btnRealign.addEventListener("click", () => queueMaintenance("realign", ui.btnRealign));
@@ -6130,6 +6215,7 @@ function cmdPingRelay(id) {
           ui.shiftWage.textContent = `${computeWage(stats, shiftMs)} CR`;
         }
         ui.dataAge.textContent = formatMMSS((Date.now() - g.lastRefresh) / 1000);
+        updateMaintenanceCooldownUI();
       }, 250);
 
       setTimeout(() => ui.cmd.focus(), 150);
