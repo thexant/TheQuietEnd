@@ -48,7 +48,60 @@
       --interface-gap: clamp(8px, 2vmin, 14px);
       --frame-pad: clamp(10px, 2.6vmin, 18px);
       --terminal-h: clamp(220px, 30vh, 360px);
+		/* Scrollbars that automatically match the active theme */
+		:root{
+			--sb-track: rgba(0,0,0,0.22);
+			--sb-border: var(--line);
+			--sb-glow: var(--glow);
 
+			/* sensible fallback if color-mix isn't supported */
+			--sb-thumb: rgba(255,255,255,0.10);
+			--sb-thumb-hover: rgba(255,255,255,0.16);
+			--sb-thumb-active: rgba(255,255,255,0.22);
+		}
+
+		/* Prefer theme-colored thumbs when supported */
+		@supports (color: color-mix(in srgb, red, transparent)) {
+			:root{
+				--sb-thumb: color-mix(in srgb, var(--signal) 28%, transparent);
+				--sb-thumb-hover: color-mix(in srgb, var(--signal) 42%, transparent);
+				--sb-thumb-active: color-mix(in srgb, var(--signal) 62%, transparent);
+			}
+		}
+
+		/* Firefox */
+		*{
+			scrollbar-width: thin;
+			scrollbar-color: var(--sb-thumb) var(--sb-track);
+		}
+
+		/* Chromium / Edge / Safari */
+		*::-webkit-scrollbar{ width: 10px; height: 10px; }
+
+		*::-webkit-scrollbar-track{
+			background: var(--sb-track);
+			border: 1px solid var(--sb-border);
+			border-radius: 999px;
+			box-shadow: inset 0 0 10px rgba(0,0,0,0.45);
+		}
+
+		*::-webkit-scrollbar-thumb{
+			border-radius: 999px;
+			border: 1px solid var(--sb-border);
+			background: var(--sb-thumb);
+			box-shadow: 0 0 12px var(--sb-glow);
+		}
+
+		*::-webkit-scrollbar-thumb:hover{
+			background: var(--sb-thumb-hover);
+		}
+
+		*::-webkit-scrollbar-thumb:active{
+			background: var(--sb-thumb-active);
+			box-shadow: 0 0 16px var(--signal);
+		}
+
+		*::-webkit-scrollbar-corner{ background: var(--sb-track); }
       /* Theme defaults (green) */
       --ink: #b6ffd9;
       --muted: #6aa98d;
@@ -3797,22 +3850,22 @@ button.btn-error {
         const deconTime = deconCountdown(ship);
 
         // NEW: Calculate exposure countdown
-        let exposureStr = "";
+        let exposureHtml = "";
         if (ship && ship.state === "WAITING DECON" && ship.exposureDeadline) {
            const left = Math.max(0, Math.ceil((ship.exposureDeadline - Date.now()) / 1000));
-           exposureStr = ` / EXP-${formatMMSS(left)}`;
+           exposureHtml = ` <span style="color: var(--alert); font-weight: bold;">EXPOSURE ${formatMMSS(left)}</span>`;
         }
 
-        // Add exposureStr to the display string
-        const dockMeta = `${shipName} / ${dockState}${deconTime ? ` / T-${deconTime}` : ""}${exposureStr}`;
+        // Add meta info to the display string (without exposure - that's added separately)
+        const dockMeta = `${shipName} / ${dockState}${deconTime ? ` / T-${deconTime}` : ""}`;
         
         const canDecon = ship && ship.state === "WAITING DECON" && getFacility(g, "DECON")?.status === "ONLINE" && !shipHasEffect(ship, "VACUUM BLOOM");
         const isDetailOpen = !!ship && runtime.inlineDetailId === ship.id;
         
-        // (Return statement remains the same, just utilizing the updated dockMeta)
+        // Return statement with exposure countdown styled in critical color
         return `
           <div class="status-row">
-            <div class="status-name">${escapeText(slot.id)} <span class="status-meta">${escapeText(dockMeta)}</span></div>
+            <div class="status-name">${escapeText(slot.id)} <span class="status-meta">${escapeText(dockMeta)}</span>${exposureHtml}</div>
             <div class="status-right">
               ${ship ? `<button class="btn-mini ${isDetailOpen ? "detail-open" : ""}" data-action="detail" data-id="${escapeText(ship.id)}">DTL</button>` : ""}
               ${canDecon ? `<button class="btn-mini approve" data-action="decon" data-id="${escapeText(ship.id)}">DECON</button>` : ""}
