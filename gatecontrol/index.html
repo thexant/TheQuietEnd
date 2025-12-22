@@ -1667,6 +1667,20 @@
     const SAVE_HASH_KEY = "save";
     const CLEAR_HASH_AFTER_LOAD = true;
 
+		function getShiftMs() {
+			return Math.max(0, Date.now() - runtime.shiftStart);
+		}
+
+		function loadShiftMsFromStorage() {
+			const raw = safeStorageGet(LS.shiftMs);
+			const n = raw ? parseInt(raw, 10) : 0;
+			return Number.isFinite(n) && n >= 0 ? n : 0;
+		}
+
+		function saveShiftMsToStorage() {
+			safeStorageSet(LS.shiftMs, String(getShiftMs()));
+		}
+
     function safeStorageGet(key) {
       try { return localStorage.getItem(key); } catch (_) { return null; }
     }
@@ -1816,7 +1830,8 @@
       gateStatePrefix: "tqe_gate_terminal_gate_state::",
       sfxEnabled: "tqe_gate_terminal_sfx_enabled",
       musicEnabled: "tqe_gate_terminal_music_enabled",
-      operatorCallsign: "tqe_gate_terminal_operator_callsign"
+      operatorCallsign: "tqe_gate_terminal_operator_callsign",
+			shiftMs: "tqe_gate_terminal_shift_ms"
     };
 
 	function buildGateList(count = 1) {
@@ -2431,6 +2446,7 @@
       runtime.severed = !!save.severed;
       runtime.lastSevered = save.lastSevered || null;
       runtime.resumeShiftMs = typeof save.shiftMs === "number" ? save.shiftMs : 0;
+			safeStorageSet(LS.shiftMs, String(runtime.resumeShiftMs || 0));
       runtime.operatorCallsign = typeof save.operatorCallsign === "string" ? save.operatorCallsign : "";
       safeStorageSet(LS.operatorCallsign, runtime.operatorCallsign);
       updateOperatorLabel();
@@ -3114,7 +3130,7 @@
       runtime.shiftStart = Date.now();
       runtime.severed = false;
       runtime.lastSevered = null;
-
+			localStorage.removeItem(LS.shiftMs);
       localStorage.setItem(LS.gateList, JSON.stringify(runtime.catalog));
       localStorage.setItem(LS.gateCurrent, newId);
       if (oldId) localStorage.removeItem(LS.gateStatePrefix + oldId);
@@ -4714,10 +4730,12 @@
     function tickAllGates() {
       if (runtime.severed) return;
       for (const g of runtime.gates.values()) tickGate(g);
-
       runtime.saveTick++;
       if (runtime.saveTick % 12 === 0) {
         for (const g of runtime.gates.values()) saveGateState(g);
+				saveShiftMsToStorage();
+				window.addEventListener("pagehide", saveShiftMsToStorage);
+				window.addEventListener("beforeunload", saveShiftMsToStorage);
       }
 
       renderAll();
@@ -5872,8 +5890,14 @@
       runtime.operatorCallsign = safeStorageGet(LS.operatorCallsign) || "";
       updateOperatorLabel();
       runtime.catalog = loadGateCatalog();
-      const resumeBoot = typeof runtime.resumeShiftMs === "number";
-      runtime.shiftStart = resumeBoot ? Date.now() - runtime.resumeShiftMs : Date.now();
+			const resumeBoot = typeof runtime.resumeShiftMs === "number";
+			const storedShiftMs = loadShiftMsFromStorage();
+
+			runtime.shiftStart = resumeBoot
+				? Date.now() - runtime.resumeShiftMs
+				: Date.now() - storedShiftMs;
+
+			runtime.resumeShiftMs = null;
       runtime.resumeShiftMs = null;
       const lastGate = localStorage.getItem(LS.gateCurrent);
       const initialGate = (lastGate && runtime.catalog.includes(lastGate)) ? lastGate : runtime.catalog[0];
