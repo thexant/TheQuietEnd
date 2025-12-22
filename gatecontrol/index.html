@@ -2730,6 +2730,7 @@
 
       const audio = {
         click: makeAudioPool("click.ogg", 5, 0.35),
+				clack: makeAudioPool("clack.ogg", 6, 0.28),
         beep: makeAudioPool("beep.ogg", 4, 0.55),
         blip: makeAudioPool("blip.ogg", 4, 0.4),
         restore: makeAudioPool("restore.ogg", 3, 0.5),
@@ -5815,23 +5816,32 @@
       });
     }
 
-    ui.cmd.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        unlockAudio();
-        playSfx("click");
-        const v = ui.cmd.value;
-        ui.cmd.value = "";
-        runtime.cmdHistory.push(v);
-        runtime.cmdPtr = runtime.cmdHistory.length;
-        runCommand(v);
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        runtime.cmdPtr = clamp(runtime.cmdPtr - 1, 0, runtime.cmdHistory.length);
-        ui.cmd.value = runtime.cmdHistory[runtime.cmdPtr] ?? "";
-      } else if (e.key === "Escape") {
-        ui.cmd.value = "";
-      }
-    });
+		const MODIFIER_ONLY = new Set(["Shift","Control","Alt","Meta","CapsLock"]);
+
+		ui.cmd.addEventListener("keydown", (e) => {
+			unlockAudio();
+
+			// If you truly want *literally* every key, delete the modifier-only check.
+			if (!MODIFIER_ONLY.has(e.key)) {
+				// Keep Enter as your "click" (below), so clack everything else:
+				if (e.key !== "Enter") playSfx("clack");
+			}
+
+			if (e.key === "Enter") {
+				playSfx("click");
+				const v = ui.cmd.value;
+				ui.cmd.value = "";
+				runtime.cmdHistory.push(v);
+				runtime.cmdPtr = runtime.cmdHistory.length;
+				runCommand(v);
+			} else if (e.key === "ArrowUp") {
+				e.preventDefault();
+				runtime.cmdPtr = clamp(runtime.cmdPtr - 1, 0, runtime.cmdHistory.length);
+				ui.cmd.value = runtime.cmdHistory[runtime.cmdPtr] ?? "";
+			} else if (e.key === "Escape") {
+				ui.cmd.value = "";
+			}
+		});
 
     // ---------------------------
     // Boot
