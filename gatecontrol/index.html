@@ -87,6 +87,22 @@
       --shadowText: rgba(79, 179, 255, 0.18); --shadowText2: rgba(79, 179, 255, 0.10);
       --stat: #d2a95a;
     }
+		:root[data-theme="purple"] {
+			--ink: #eadcff;
+			--muted: #a88bc7;
+			--signal: #b56bff;
+			--good: var(--signal);
+
+			--line: rgba(181, 107, 255, 0.18);
+			--grid: rgba(181, 107, 255, 0.05);
+			--glow: rgba(181, 107, 255, 0.35);
+			--bg-hi: #140d1a;
+
+			--shadowText: rgba(181, 107, 255, 0.18);
+			--shadowText2: rgba(181, 107, 255, 0.10);
+
+			--stat: #d2a95a;
+		}
     :root[data-theme="amber"] {
       --ink: #ffe9c2; --muted: #b79b63; --signal: #ffb84d;
       --good: var(--signal);
@@ -104,6 +120,75 @@
       --stat: #d2a95a;
     }
 
+		:root[data-theme="light"] {
+			color-scheme: light;
+
+			--deep: #f2f4f7;
+			--bg-hi: #ffffff;
+
+			--ink: #0b0d10;
+			--muted: #334155;
+			--signal: #1d4ed8;
+			--good: var(--signal);
+
+			--line: rgba(11, 13, 16, 0.18);
+			--grid: rgba(11, 13, 16, 0.05);
+			--glow: rgba(29, 78, 216, 0.22);
+
+			--shadowText: rgba(29, 78, 216, 0.08);
+			--shadowText2: rgba(29, 78, 216, 0.05);
+
+			--stat: #b45309;
+		}
+
+		/* Light-theme surface fixes (because many backgrounds are hard-coded dark rgba) */
+		:root[data-theme="light"] #game-container {
+			background: rgba(255,255,255,0.86);
+			box-shadow: 0 0 24px rgba(0,0,0,0.18), inset 0 0 0 1px rgba(0,0,0,0.06);
+		}
+
+		:root[data-theme="light"] .panel {
+			background: rgba(255,255,255,0.72);
+			box-shadow: inset 0 0 12px rgba(0,0,0,0.08);
+		}
+
+		:root[data-theme="light"] .panel::before {
+			background:
+				linear-gradient(transparent 70%, rgba(0,0,0,0.03) 70%),
+				radial-gradient(circle at 20% 0%, var(--grid) 0%, transparent 55%);
+		}
+
+		:root[data-theme="light"] .queue-section,
+		:root[data-theme="light"] .sys-block {
+			background: rgba(255,255,255,0.58);
+		}
+
+		:root[data-theme="light"] select,
+		:root[data-theme="light"] button,
+		:root[data-theme="light"] input,
+		:root[data-theme="light"] .gate-display,
+		:root[data-theme="light"] .breadcrumbs,
+		:root[data-theme="light"] .operator-callsign {
+			background: rgba(255,255,255,0.78);
+			box-shadow: inset 0 0 12px rgba(0,0,0,0.06);
+		}
+
+		:root[data-theme="light"] button:hover { background: rgba(0,0,0,0.04); }
+		:root[data-theme="light"] button:active { color: #fff; }
+
+		:root[data-theme="light"] th,
+		:root[data-theme="light"] td {
+			border-bottom: 1px solid rgba(0,0,0,0.06);
+		}
+
+		:root[data-theme="light"] .help-panel {
+			background: rgba(255,255,255,0.95);
+			box-shadow: 0 0 32px rgba(0,0,0,0.18), inset 0 0 0 1px rgba(0,0,0,0.05);
+		}
+
+		:root[data-theme="light"] .help-section {
+			background: rgba(0,0,0,0.03);
+		}
     * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
     html, body { height: 100%; }
 
@@ -1275,8 +1360,10 @@
               <option value="green">GREEN</option>
               <option value="red">RED</option>
               <option value="blue">BLUE</option>
+							<option value="purple">PURPLE</option>
               <option value="amber">AMBER</option>
               <option value="black">BLACK</option>
+							<option value="light">LIGHT</option>
             </select>
           </div>
           <button id="btn-share" aria-label="Share this session">SHARE</button>
@@ -2719,7 +2806,7 @@
       return { pool, index: 0 };
     }
 
-    function makeLoopAudio(src, volume = 0.8) {
+    function makeLoopAudio(src, volume = 1) {
       const audio = new Audio(src);
       audio.preload = "auto";
       audio.loop = true;
@@ -2774,7 +2861,7 @@
         purge: makeLoopAudio("purge.ogg", 0.6),
         reset: makeLoopAudio("reset.ogg", 0.6),
         scan: makeLoopAudio("scan.ogg", 1),
-      processing: makeLoopAudio("processing.ogg", 0.5),
+      processing: makeLoopAudio("processing.ogg", 0.6),
       ackalarm: makeLoopAudio("ackalarm.ogg", 0.65),
       music: makeLoopAudio("bgaudio.ogg", 0.40)
     };
@@ -3024,7 +3111,7 @@
       setTimeout(() => btn.classList.remove("btn-error"), 500);
     }
 
-    const THEME_OPTIONS = ["green", "red", "blue", "amber", "black"];
+    const THEME_OPTIONS = ["green", "red", "blue", "purple", "amber", "black", "light"];
 
     function pickRandomTheme(exclude) {
       const options = THEME_OPTIONS.filter((t) => t !== exclude);
@@ -5586,8 +5673,8 @@
 
       if (cmd === "THEME") {
         const t = (parts[1] || "").toLowerCase();
-        if (!["green","red","blue","amber","black"].includes(t)) {
-          consoleLine("USAGE: THEME GREEN|RED|BLUE|AMBER|BLACK", "warn");
+        if (!["green","red","blue","purple","amber","black","light"].includes(t)) {
+          consoleLine("USAGE: THEME GREEN|RED|BLUE|PURPLE|AMBER|BLACK|LIGHT", "warn");
           return;
         }
         setTheme(t);
