@@ -3051,8 +3051,8 @@
       while (!id || runtime.catalog.includes(id)) {
         const seed = strHash(`${Date.now()}::${Math.random()}`);
         const rng = mulberry32(seed);
-        const num = pad2(1 + Math.floor(rng() * 99));
-        const suffix = rng() < 0.35 ? "-" + pick(rng, ["K","M","R","V","S","T"]) : "";
+				const num = String(1 + Math.floor(rng() * 9999)).padStart(4, "0");
+				const suffix = rng() < 0.35 ? "-" + pick(rng, ["A","B","C","D","E","F","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z","ALPHA","BETA","GR","AL","CPLX","CPLR","RING","TRM","VTS","TEM","UC"]) : "";
         id = `GATE-${num}${suffix}`;
       }
       return id;
