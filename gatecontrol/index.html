@@ -3493,13 +3493,25 @@
       ui.concoursePill.textContent = concourse.text;
       ui.concourseStatus.textContent = `${concourse.text} (${Math.round(g.concourseLevel || 0)})`;
 
-      ui.dockList.innerHTML = (g.dockSlots || []).map(slot => {
+		ui.dockList.innerHTML = (g.dockSlots || []).map(slot => {
         const ship = slot.shipId ? findShipById(g, slot.shipId) : null;
         const shipName = ship ? ship.id : "--";
         const dockState = ship?.dockState || slot.state;
         const deconTime = deconCountdown(ship);
-        const dockMeta = `${shipName} / ${dockState}${deconTime ? ` / T-${deconTime}` : ""}`;
-          const canDecon = ship && ship.state === "WAITING DECON" && getFacility(g, "DECON")?.status === "ONLINE" && !shipHasEffect(ship, "VACUUM BLOOM");
+
+        // NEW: Calculate exposure countdown
+        let exposureStr = "";
+        if (ship && ship.state === "WAITING DECON" && ship.exposureDeadline) {
+           const left = Math.max(0, Math.ceil((ship.exposureDeadline - Date.now()) / 1000));
+           exposureStr = ` / EXP-${formatMMSS(left)}`;
+        }
+
+        // Add exposureStr to the display string
+        const dockMeta = `${shipName} / ${dockState}${deconTime ? ` / T-${deconTime}` : ""}${exposureStr}`;
+        
+        const canDecon = ship && ship.state === "WAITING DECON" && getFacility(g, "DECON")?.status === "ONLINE" && !shipHasEffect(ship, "VACUUM BLOOM");
+        
+        // (Return statement remains the same, just utilizing the updated dockMeta)
         return `
           <div class="status-row">
             <div class="status-name">${escapeText(slot.id)} <span class="status-meta">${escapeText(dockMeta)}</span></div>
@@ -4396,15 +4408,15 @@
       s.state = "WAITING DECON";
       s.dockState = "WAITING DECON";
       s.eta = 0;
+			// NEW: Set universal exposure deadline (30s to 120s)
+      s.exposureDeadline = Date.now() + randRange(30, 120) * 1000;
+
       if (shipHasEffect(s, "VACUUM BLOOM")) {
         if (g.id === runtime.activeGateId) eventLine(`DOCK BREACH: ${s.id}`, "bad");
         severGate("Vacuum Bloom Outbreak");
         return false;
       }
       if (s.shipmentType) applyShipmentDelivery(g, s);
-      if (shipHasDangerEffect(s)) {
-        s.hazardDeadline = Date.now() + randRange(30, 2 * 60) * 1000;
-      }
       if (g.id === runtime.activeGateId) playSfx("beep");
       return true;
     }
@@ -4442,9 +4454,9 @@
           slot.phaseEndsAt = 0;
           continue;
         }
-        if (ship.state === "WAITING DECON" && ship.hazardDeadline && now > ship.hazardDeadline) {
-          if (g.id === runtime.activeGateId) eventLine(`DECON BREACH: ${ship.id}`, "bad");
-          severGate(hazardLossCause(ship));
+				if (ship.state === "WAITING DECON" && ship.exposureDeadline && now > ship.exposureDeadline) {
+          if (g.id === runtime.activeGateId) eventLine(`RADIATION CRITICAL: ${ship.id}`, "bad");
+          severGate("GATE EXPOSURE TO RADIATION");
           return;
         }
         if (slot.state === "DECON" && now >= slot.phaseEndsAt) {
