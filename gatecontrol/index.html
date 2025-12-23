@@ -1261,6 +1261,36 @@ button.btn-error {
     .btn-mini.approve { color: var(--signal); }
     .btn-mini:active { background: rgba(255,255,255,0.06); color: var(--ink); }
 
+    /* Disabled buttons for finalized decisions */
+    .btn-mini.disabled {
+      opacity: 0.35;
+      color: #666;
+      border-color: rgba(100,100,100,0.25);
+      cursor: not-allowed;
+    }
+    .btn-mini.disabled:hover {
+      opacity: 0.35;
+      color: #666;
+    }
+    .btn-mini.disabled:active {
+      background: transparent;
+      color: #666;
+    }
+
+    /* Error animation for attempting to change finalized decisions */
+    @keyframes decisionLockedShake {
+      0%, 100% { transform: translateX(0); }
+      15% { transform: translateX(-6px); }
+      30% { transform: translateX(6px); }
+      45% { transform: translateX(-6px); }
+      60% { transform: translateX(6px); }
+      75% { transform: translateX(-3px); }
+    }
+    tr.decision-locked-error {
+      animation: decisionLockedShake 0.6s ease-in-out;
+      background: rgba(225,100,100,0.15);
+    }
+
     /* Inline ship detail panels (DTL / DETAIL) */
     .detail-row td { padding: 0 6px 8px; }
     .dock-inline-detail { margin: -2px 0 10px 0; padding-left: 10px; }
@@ -4555,7 +4585,7 @@ button.btn-error {
       return `<div class="dock-inline-detail">${shipInlineDetailPanel(s, { compact: true })}</div>`;
     }
 
-    function renderHoldButton(s) {
+    function renderHoldButton(s, isFinalized = false) {
       // If HOLD has been used and ship is no longer on HOLD, hide button
       if (s.holdUsed && s.state !== "HOLD") {
         return "";
@@ -4575,7 +4605,8 @@ button.btn-error {
       }
 
       // Normal HOLD button
-      return `<button class="btn-mini hold" data-action="hold" data-id="${escapeText(s.id)}">HOLD</button>`;
+      const disabledClass = isFinalized ? "disabled" : "";
+      return `<button class="btn-mini hold ${disabledClass}" data-action="hold" data-id="${escapeText(s.id)}">HOLD</button>`;
     }
 
     function shipRow(s) {
@@ -4592,6 +4623,8 @@ button.btn-error {
         const deconOnline = getFacility(g, "DECON")?.status === "ONLINE";
         const canDecon = s.dir === "IN" && s.state === "WAITING DECON" && deconOnline && !shipHasEffect(s, "VACUUM BLOOM");
         const isDetailOpen = runtime.inlineDetailId === s.id;
+        const isFinalized = isShipFinalized(s);
+        const disabledClass = isFinalized ? "disabled" : "";
         return `
           <tr class="${urgency}">
             <td class="code" data-label="Id" title="${escapeText(shipDisplayRequest(s))} / ${escapeText(shipDisplayTransponder(s))}">${escapeText(s.id)}${prio}${tr}${mask}${getDeadlineSymbol(s)}</td>
@@ -4607,9 +4640,9 @@ button.btn-error {
                 <button class="btn-mini ${isDetailOpen ? "detail-open" : ""}" data-action="detail" data-id="${escapeText(s.id)}">DTL</button>
                 ${canQuery ? `<button class="btn-mini hold" data-action="query" data-id="${escapeText(s.id)}">QRY</button>` : ""}
                 ${canDecon ? `<button class="btn-mini approve" data-action="decon" data-id="${escapeText(s.id)}">DECON</button>` : ""}
-                <button class="btn-mini approve" data-action="approve" data-id="${escapeText(s.id)}">APP</button>
-                ${renderHoldButton(s)}
-                <button class="btn-mini deny" data-action="deny" data-id="${escapeText(s.id)}">DENY</button>
+                <button class="btn-mini approve ${disabledClass}" data-action="approve" data-id="${escapeText(s.id)}">APP</button>
+                ${renderHoldButton(s, isFinalized)}
+                <button class="btn-mini deny ${disabledClass}" data-action="deny" data-id="${escapeText(s.id)}">DENY</button>
               </div>
             </td>
           </tr>
@@ -5405,6 +5438,11 @@ button.btn-error {
         }, delay);
       }
 
+    // Helper function to check if a ship decision has been finalized
+    function isShipFinalized(ship) {
+      return ship.state === "CLEARED" || ship.state === "DENIED";
+    }
+
     function handleAction(action, id) {
       const g = activeGate();
       const s = findShipById(g, id);
@@ -5429,6 +5467,20 @@ button.btn-error {
         if (startDecon(g, s)) {
           g.lastRefresh = Date.now();
           renderAll();
+        }
+        return;
+      }
+
+      // Prevent changing decisions that have been finalized
+      if (["approve", "deny", "hold"].includes(action) && isShipFinalized(s)) {
+        const finalState = s.state === "CLEARED" ? "APPROVED" : "DENIED";
+        consoleLine(`DECISION LOCKED: ${s.id} (ALREADY ${finalState})`, "warn");
+        playSfx("error");
+        // Add error shake animation to the ship row
+        const shipElement = document.querySelector(`tr:has([data-id="${s.id}"])`);
+        if (shipElement) {
+          shipElement.classList.add("decision-locked-error");
+          setTimeout(() => shipElement.classList.remove("decision-locked-error"), 600);
         }
         return;
       }
