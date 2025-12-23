@@ -26,6 +26,7 @@ class PlayerState {
     this.dndMsg = false;
     this.dndPing = false;
     this.dndAll = false;
+    this.gameActive = false; // true when in active game with running timer
   }
 
   toJSON() {
@@ -35,7 +36,8 @@ class PlayerState {
       connectedAt: this.connectedAt,
       shiftStart: this.shiftStart,
       dndMsg: this.dndMsg,
-      dndPing: this.dndPing
+      dndPing: this.dndPing,
+      gameActive: this.gameActive
     };
   }
 }
@@ -139,13 +141,13 @@ function handleConnect(ws, data) {
     }
   });
 
-  // Broadcast updated player list
-  broadcastPlayerList("join");
+  // Don't broadcast player list yet - wait for game_state_change to indicate player is active
+  // This prevents duplicate join messages with incorrect counts
 
   console.log(`Player connected: ${gateId} (${operatorCallsign}) - Total: ${players.size}`);
 }
 
-function handleDisconnect(gateId) {
+function handleDisconnect(gateId, reason = "disconnect") {
   const player = players.get(gateId);
   if (!player) return;
 
@@ -160,10 +162,10 @@ function handleDisconnect(gateId) {
   }
   keysToDelete.forEach(k => pingMatrix.delete(k));
 
-  // Broadcast updated player list
-  broadcastPlayerList("leave");
+  // Broadcast updated player list with reason and gateId
+  broadcastPlayerList("leave", reason, gateId);
 
-  console.log(`Player disconnected: ${gateId} - Total: ${players.size}`);
+  console.log(`Player disconnected: ${gateId} (${reason}) - Total: ${players.size}`);
 }
 
 function handlePingPlayer(data) {
@@ -232,7 +234,7 @@ function handleAckPlayer(data) {
 }
 
 function handleMessage(data) {
-  const { gateId, operatorCallsign, text } = data;
+  const { gateId, operatorCallsign, text, senderRelayScore } = data;
 
   // Validation
   if (!text || text.length > 160) {
@@ -261,7 +263,8 @@ function handleMessage(data) {
         gateId,
         operatorCallsign,
         text,
-        delay
+        delay,
+        senderRelayScore: senderRelayScore || 0
       }
     });
   }
@@ -284,6 +287,30 @@ function handleDndUpdate(data) {
   console.log(`DND update: ${gateId} - msg:${dndMsg} ping:${dndPing} all:${dndAll}`);
 }
 
+function handleGameStateChange(data) {
+  const { gateId, gameActive, reason } = data;
+
+  const player = players.get(gateId);
+  if (!player) return;
+
+  const previousState = player.gameActive;
+  player.gameActive = gameActive;
+
+  // Broadcast player list with appropriate change type
+  if (previousState && !gameActive) {
+    // Player stopped playing (went offline)
+    broadcastPlayerList("leave", reason || "disconnect", gateId);
+    console.log(`Player went offline: ${gateId} (gameActive: false, reason: ${reason || "disconnect"})`);
+  } else if (!previousState && gameActive) {
+    // Player started playing (went online)
+    broadcastPlayerList("join");
+    console.log(`Player went online: ${gateId} (gameActive: true)`);
+  } else {
+    // No change in online status
+    broadcastPlayerList("update");
+  }
+}
+
 function handleHeartbeat(gateId) {
   const player = players.get(gateId);
   if (player) {
@@ -291,16 +318,21 @@ function handleHeartbeat(gateId) {
   }
 }
 
-function broadcastPlayerList(changeType) {
-  const playerArray = Array.from(players.values()).map(p => p.toJSON());
+function broadcastPlayerList(changeType, reason = null, gateId = null) {
+  // Only include players who are actively playing (gameActive: true)
+  const activePlayerArray = Array.from(players.values())
+    .filter(p => p.gameActive)
+    .map(p => p.toJSON());
 
   broadcast({
     type: "player_list",
     timestamp: Date.now(),
     data: {
-      players: playerArray,
-      playerCount: players.size,
-      changeType
+      players: activePlayerArray,
+      playerCount: activePlayerArray.length,
+      changeType,
+      reason,
+      gateId
     }
   });
 }
@@ -338,7 +370,7 @@ wss.on("connection", (ws) => {
           handleConnect(ws, msg.data);
           break;
         case "disconnect":
-          if (gateId) handleDisconnect(gateId);
+          if (gateId) handleDisconnect(gateId, msg.data.reason);
           break;
         case "ping_player":
           handlePingPlayer(msg.data);
@@ -351,6 +383,9 @@ wss.on("connection", (ws) => {
           break;
         case "dnd_update":
           handleDndUpdate(msg.data);
+          break;
+        case "game_state_change":
+          handleGameStateChange(msg.data);
           break;
         case "heartbeat":
           handleHeartbeat(msg.data.gateId);

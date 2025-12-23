@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <base href="/gatecontrol/">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Gate Control Terminal // The Quiet End</title>
   <meta property="og:title" content="Gate Control Terminal // The Quiet End" />
@@ -177,6 +178,14 @@
       --shadowText: rgba(56, 246, 255, 0.18); --shadowText2: rgba(56, 246, 255, 0.10);
       --stat: #d2a95a;
     }
+		:root[data-theme="orange"] {
+      --ink: #ffd9b3; --muted: #b3804d; --signal: #ff8533;
+      --good: var(--signal);
+      --line: rgba(255, 133, 51, 0.18); --grid: rgba(255, 133, 51, 0.05);
+      --glow: rgba(255, 133, 51, 0.35); --bg-hi: #1a110d;
+      --shadowText: rgba(255, 133, 51, 0.18); --shadowText2: rgba(255, 133, 51, 0.10);
+      --stat: #d2a95a;
+    }
     :root[data-theme="black"] {
       --deep: #000; --bg-hi: #000;
       --ink: #eaeaea; --muted: #9a9a9a; --signal: #f2f2f2; --good: #4dff9a;
@@ -186,7 +195,7 @@
       --stat: #d2a95a;
     }
 
-		:root[data-theme="light"] {
+		:root[data-theme="lightblue"] {
 			color-scheme: light;
 
 			--deep: #f2f4f7;
@@ -207,52 +216,204 @@
 			--stat: #b45309;
 		}
 
+		:root[data-theme="lightred"] {
+			color-scheme: light;
+
+			--deep: #f7f2f2;
+			--bg-hi: #ffffff;
+
+			--ink: #0b0d10;
+			--muted: #334155;
+			--signal: #dc2626;
+			--good: var(--signal);
+
+			--line: rgba(11, 13, 16, 0.18);
+			--grid: rgba(11, 13, 16, 0.05);
+			--glow: rgba(220, 38, 38, 0.22);
+
+			--shadowText: rgba(220, 38, 38, 0.08);
+			--shadowText2: rgba(220, 38, 38, 0.05);
+
+			--stat: #b45309;
+		}
+
+		:root[data-theme="lightgreen"] {
+			color-scheme: light;
+
+			--deep: #f2f7f4;
+			--bg-hi: #ffffff;
+
+			--ink: #0b0d10;
+			--muted: #334155;
+			--signal: #16a34a;
+			--good: var(--signal);
+
+			--line: rgba(11, 13, 16, 0.18);
+			--grid: rgba(11, 13, 16, 0.05);
+			--glow: rgba(22, 163, 74, 0.22);
+
+			--shadowText: rgba(22, 163, 74, 0.08);
+			--shadowText2: rgba(22, 163, 74, 0.05);
+
+			--stat: #b45309;
+		}
+
+		:root[data-theme="paper"] {
+			color-scheme: light;
+
+			--deep: #faf9f7;
+			--bg-hi: #ffffff;
+
+			--ink: #1a1a1a;
+			--muted: #525252;
+			--signal: #262626;
+			--good: var(--signal);
+
+			--line: rgba(26, 26, 26, 0.18);
+			--grid: rgba(26, 26, 26, 0.05);
+			--glow: rgba(26, 26, 26, 0.12);
+
+			--shadowText: rgba(26, 26, 26, 0.08);
+			--shadowText2: rgba(26, 26, 26, 0.05);
+
+			--stat: #525252;
+		}
+
+		:root[data-theme="pinkblack"] {
+			--deep: #0a0008;
+			--bg-hi: #14000f;
+
+			--ink: #ffb3e6;
+			--muted: #b366a3;
+			--signal: #ff4dcc;
+			--good: #ff66d9;
+
+			--line: rgba(255, 77, 204, 0.18);
+			--grid: rgba(255, 77, 204, 0.05);
+			--glow: rgba(255, 77, 204, 0.35);
+
+			--shadowText: rgba(255, 77, 204, 0.18);
+			--shadowText2: rgba(255, 77, 204, 0.10);
+
+			--stat: #ff8cd9;
+		}
+
+		:root[data-theme="browngold"] {
+			--deep: #1a1410;
+			--bg-hi: #2a1f18;
+
+			--ink: #f5e6d3;
+			--muted: #b8997a;
+			--signal: #d4af37;
+			--good: #ffd700;
+
+			--line: rgba(212, 175, 55, 0.18);
+			--grid: rgba(212, 175, 55, 0.05);
+			--glow: rgba(212, 175, 55, 0.35);
+
+			--shadowText: rgba(212, 175, 55, 0.18);
+			--shadowText2: rgba(212, 175, 55, 0.10);
+
+			--stat: #ffb84d;
+		}
+
 		/* Light-theme surface fixes (because many backgrounds are hard-coded dark rgba) */
-		:root[data-theme="light"] #game-container {
+		:root[data-theme="lightblue"] #game-container,
+		:root[data-theme="lightred"] #game-container,
+		:root[data-theme="lightgreen"] #game-container,
+		:root[data-theme="paper"] #game-container {
 			background: rgba(255,255,255,0.86);
 			box-shadow: 0 0 24px rgba(0,0,0,0.18), inset 0 0 0 1px rgba(0,0,0,0.06);
 		}
 
-		:root[data-theme="light"] .panel {
+		:root[data-theme="lightblue"] .panel,
+		:root[data-theme="lightred"] .panel,
+		:root[data-theme="lightgreen"] .panel,
+		:root[data-theme="paper"] .panel {
 			background: rgba(255,255,255,0.72);
 			box-shadow: inset 0 0 12px rgba(0,0,0,0.08);
 		}
 
-		:root[data-theme="light"] .panel::before {
+		:root[data-theme="lightblue"] .panel::before,
+		:root[data-theme="lightred"] .panel::before,
+		:root[data-theme="lightgreen"] .panel::before,
+		:root[data-theme="paper"] .panel::before {
 			background:
 				linear-gradient(transparent 70%, rgba(0,0,0,0.03) 70%),
 				radial-gradient(circle at 20% 0%, var(--grid) 0%, transparent 55%);
 		}
 
-		:root[data-theme="light"] .queue-section,
-		:root[data-theme="light"] .sys-block {
+		:root[data-theme="lightblue"] .queue-section,
+		:root[data-theme="lightblue"] .sys-block,
+		:root[data-theme="lightred"] .queue-section,
+		:root[data-theme="lightred"] .sys-block,
+		:root[data-theme="lightgreen"] .queue-section,
+		:root[data-theme="lightgreen"] .sys-block,
+		:root[data-theme="paper"] .queue-section,
+		:root[data-theme="paper"] .sys-block {
 			background: rgba(255,255,255,0.58);
 		}
 
-		:root[data-theme="light"] select,
-		:root[data-theme="light"] button,
-		:root[data-theme="light"] input,
-		:root[data-theme="light"] .gate-display,
-		:root[data-theme="light"] .breadcrumbs,
-		:root[data-theme="light"] .operator-callsign {
+		:root[data-theme="lightblue"] select,
+		:root[data-theme="lightblue"] button,
+		:root[data-theme="lightblue"] input,
+		:root[data-theme="lightblue"] .gate-display,
+		:root[data-theme="lightblue"] .breadcrumbs,
+		:root[data-theme="lightblue"] .operator-callsign,
+		:root[data-theme="lightred"] select,
+		:root[data-theme="lightred"] button,
+		:root[data-theme="lightred"] input,
+		:root[data-theme="lightred"] .gate-display,
+		:root[data-theme="lightred"] .breadcrumbs,
+		:root[data-theme="lightred"] .operator-callsign,
+		:root[data-theme="lightgreen"] select,
+		:root[data-theme="lightgreen"] button,
+		:root[data-theme="lightgreen"] input,
+		:root[data-theme="lightgreen"] .gate-display,
+		:root[data-theme="lightgreen"] .breadcrumbs,
+		:root[data-theme="lightgreen"] .operator-callsign,
+		:root[data-theme="paper"] select,
+		:root[data-theme="paper"] button,
+		:root[data-theme="paper"] input,
+		:root[data-theme="paper"] .gate-display,
+		:root[data-theme="paper"] .breadcrumbs,
+		:root[data-theme="paper"] .operator-callsign {
 			background: rgba(255,255,255,0.78);
 			box-shadow: inset 0 0 12px rgba(0,0,0,0.06);
 		}
 
-		:root[data-theme="light"] button:hover { background: rgba(0,0,0,0.04); }
-		:root[data-theme="light"] button:active { color: #fff; }
+		:root[data-theme="lightblue"] button:hover,
+		:root[data-theme="lightred"] button:hover,
+		:root[data-theme="lightgreen"] button:hover,
+		:root[data-theme="paper"] button:hover { background: rgba(0,0,0,0.04); }
+		:root[data-theme="lightblue"] button:active,
+		:root[data-theme="lightred"] button:active,
+		:root[data-theme="lightgreen"] button:active,
+		:root[data-theme="paper"] button:active { color: #fff; }
 
-		:root[data-theme="light"] th,
-		:root[data-theme="light"] td {
+		:root[data-theme="lightblue"] th,
+		:root[data-theme="lightblue"] td,
+		:root[data-theme="lightred"] th,
+		:root[data-theme="lightred"] td,
+		:root[data-theme="lightgreen"] th,
+		:root[data-theme="lightgreen"] td,
+		:root[data-theme="paper"] th,
+		:root[data-theme="paper"] td {
 			border-bottom: 1px solid rgba(0,0,0,0.06);
 		}
 
-		:root[data-theme="light"] .help-panel {
+		:root[data-theme="lightblue"] .help-panel,
+		:root[data-theme="lightred"] .help-panel,
+		:root[data-theme="lightgreen"] .help-panel,
+		:root[data-theme="paper"] .help-panel {
 			background: rgba(255,255,255,0.95);
 			box-shadow: 0 0 32px rgba(0,0,0,0.18), inset 0 0 0 1px rgba(0,0,0,0.05);
 		}
 
-		:root[data-theme="light"] .help-section {
+		:root[data-theme="lightblue"] .help-section,
+		:root[data-theme="lightred"] .help-section,
+		:root[data-theme="lightgreen"] .help-section,
+		:root[data-theme="paper"] .help-section {
 			background: rgba(0,0,0,0.03);
 		}
     * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
@@ -284,6 +445,12 @@
       justify-content: center;
       background: radial-gradient(circle at center, var(--bg-hi) 0%, var(--deep) 100%);
       text-align: center;
+    }
+    #btn-start-help {
+      position: absolute;
+      top: calc(var(--frame-pad) + env(safe-area-inset-top) + 12px);
+      right: calc(var(--frame-pad) + env(safe-area-inset-right) + 12px);
+      z-index: 1;
     }
     .start-card {
       width: min(420px, 82vw);
@@ -738,7 +905,7 @@
       transform: translateY(-6px);
       pointer-events: none;
       transition: opacity 0.18s ease, transform 0.18s ease;
-      z-index: 150;
+      z-index: 240;
     }
     .help-panel.open {
       opacity: 1;
@@ -1642,7 +1809,7 @@ button.btn-error {
       backdrop-filter: blur(2px);
     }
 
-    .terminal-line { white-space: pre-wrap; word-break: break-word; }
+    .terminal-line { white-space: pre-wrap; word-break: break-word; text-transform: uppercase; }
     .terminal-line.dim { color: var(--muted); }
     .terminal-line.good { color: var(--good); }
     .terminal-line.warn { color: var(--stat); }
@@ -1851,6 +2018,7 @@ button.btn-error {
 <body>
   <div class="crt-overlay"></div>
   <div id="start-overlay" aria-hidden="false">
+    <button id="btn-start-help" aria-expanded="false" aria-controls="help-panel">HELP</button>
     <div class="start-card">
       <div class="start-sub">Awaiting Operator Input</div>
       <div id="start-name-slot" class="start-name-slot">
@@ -1858,7 +2026,7 @@ button.btn-error {
         <input id="start-name-input" class="start-name-input" type="text" maxlength="24" aria-label="Operator callsign" />
       </div>
       <button id="btn-start">START</button>
-      <button id="btn-start-resume">RESUME</button>
+      <button id="btn-start-resume">LOAD FROM FILE</button>
       <button id="btn-data-reset">RESET</button>
       <input id="start-resume-file" type="file" accept=".tqegate,application/json" hidden>
       <div id="start-loading-text" class="start-loading-text">LOADING: <span id="start-loading-name"></span><span class="start-loading-dots"></span></div>
@@ -1993,19 +2161,12 @@ button.btn-error {
           <div class="ctl">
             <label for="theme-select">Display</label>
             <select id="theme-select">
-              <option value="green">GREEN</option>
-              <option value="red">RED</option>
-              <option value="blue">BLUE</option>
-							<option value="purple">PURPLE</option>
-              <option value="amber">AMBER</option>
-							<option value="cyan">CYAN</option>
-              <option value="black">BLACK</option>
-							<option value="light">LIGHT</option>
+              <!-- Populated dynamically by populateThemeDropdown() -->
             </select>
           </div>
           <button id="btn-share" aria-label="Share this session">SHARE</button>
           <button id="btn-export" aria-label="Export this session">EXPORT</button>
-          <button id="btn-resume" aria-label="Resume from an exported save">RESUME</button>
+          <button id="btn-resume" aria-label="Load from an exported save">LOAD FILE</button>
           <button id="btn-sfx" aria-label="Toggle sound effects" aria-pressed="true">SFX: ON</button>
           <button id="btn-music" aria-label="Toggle background music" aria-pressed="true">MUSIC: ON</button>
           <button id="btn-vfx" aria-label="Toggle visual effects" aria-pressed="true">VFX: REG</button>
@@ -2014,146 +2175,6 @@ button.btn-error {
         </div>
 
         <input id="resume-file" type="file" accept=".tqegate,application/json" hidden>
-        <div id="help-panel" class="help-panel" aria-hidden="true">
-          <div class="help-head">
-            <div class="help-title">Help // Operator Quickstart</div>
-            <div class="help-sub">Local reference only</div>
-          </div>
-          <div class="help-body">
-            <div class="help-section">
-              <div class="help-section-title">Quickstart</div>
-              <div class="help-row">
-                <div class="help-key">What this is</div>
-                <div>This panel simulates a gate control terminal. You review inbound/outbound traffic, keep systems stable, and log actions in the console.</div>
-              </div>
-              <div class="help-row">
-                <div class="help-key">Workflow</div>
-                <div>
-                  <ol class="help-list">
-                    <li>Check Alerts and Systems for instability.</li>
-                    <li>Review inbound/outbound queues for risky requests.</li>
-                    <li>Approve, Hold, or Deny ships as needed.</li>
-                    <li>Run maintenance when alignment or sync drifts.</li>
-                  </ol>
-                </div>
-              </div>
-            </div>
-            <div class="help-section">
-              <div class="help-section-title">Navigation and UI</div>
-              <div class="help-row">
-                <div class="help-key">Display</div>
-                <div>Switches the palette (Green/Red/Blue/Amber/Black). It does not affect the simulation.</div>
-              </div>
-              <div class="help-row">
-                <div class="help-key">Share / Export / Resume</div>
-                <div>SHARE copies a URL snapshot. EXPORT downloads a .tqegate save named after the active gate. RESUME loads a .tqegate file to restore a session.</div>
-              </div>
-              <div class="help-row">
-                <div class="help-key">Audio toggles</div>
-                <div>SFX and MUSIC toggle sound effects and background audio for this terminal.</div>
-              </div>
-              <div class="help-row">
-                <div class="help-key">VFX toggle</div>
-                <div>VFX toggles between REG (regular) and LOW (reduced animations/glows) visual effects modes for better performance.</div>
-              </div>
-              <div class="help-row">
-                <div class="help-key">Hard reset</div>
-                <div>RESET (top right) reboots the node, clears logs, starts a new shift, and assigns a fresh gate ID.</div>
-              </div>
-              <div class="help-row">
-                <div class="help-key">Top stats</div>
-                <div>Shift Time tracks how long the session has been running. Wage shows credits earned this shift. Alerts counts active issues.</div>
-              </div>
-              <div class="help-row">
-                <div class="help-key">Quick keys</div>
-                <div>Enter submits a command. ArrowUp recalls the last command. Esc clears the input. Esc also dismisses this panel.</div>
-              </div>
-            </div>
-            <div class="help-section">
-              <div class="help-section-title">Traffic Control</div>
-              <div class="help-row">
-                <div class="help-key">Traffic queue</div>
-                <div>Inbound and outbound tables show ships waiting to pass. Each row has actions: Approve (allow), Hold (delay for review), Deny (reject).</div>
-              </div>
-              <div class="help-row">
-                <div class="help-key">Ship detail</div>
-                <div>DETAIL &lt;ID&gt; reveals state, ETA, dock slot, transponder, priority flag, effects, and notes. NOTE &lt;ID&gt; &lt;TEXT&gt; saves operator notes.</div>
-              </div>
-              <div class="help-row">
-                <div class="help-key">Decon</div>
-                <div>DECON START &lt;ID&gt; begins decontamination. Ships that dock will usually require DECON. If you do not within 1-3 minutes, exposure may occur.</div>
-              </div>
-              <div class="help-row">
-                <div class="help-key">Manual actions</div>
-                <div>APPROVE &lt;ID&gt; / HOLD &lt;ID&gt; / DENY &lt;ID&gt; mirror the row buttons when you want to stay in the console.</div>
-              </div>
-            </div>
-            <div class="help-section">
-              <div class="help-section-title">Systems and Maintenance</div>
-              <div class="help-row">
-                <div class="help-key">Systems panel</div>
-                <div>Shows gate health, beacon state, alignment, sync, corridors, and facility status. Degraded or offline systems can trigger alerts and slow traffic.</div>
-              </div>
-              <div class="help-row">
-                <div class="help-key">Sync state</div>
-                <div>Sync can slip to ASYNC or FAULT during drift, relay instability, or failed restores. Maintenance Reset and healthy relays help return to SYNC.</div>
-              </div>
-              <div class="help-row">
-                <div class="help-key">Maintenance</div>
-                <div>Realign improves alignment, Reset reestablishes handshake and can recover the beacon, Purge clears low-priority queue entries, Scan looks for anomalies and reveals hidden effects.</div>
-              </div>
-              <div class="help-row">
-                <div class="help-key">Resources</div>
-                <div>Fuel drains over time. Supplies drain during work orders and decon. Orders can be placed any time, and the amount sets both cost and shipment size.</div>
-              </div>
-            </div>
-            <div class="help-section">
-              <div class="help-section-title">Console Commands</div>
-              <div class="help-row">
-                <div class="help-key">Status views</div>
-                <div>STATUS shows node health. LINKS lists corridor links. LIST INBOUND/OUTBOUND prints quick ship lists. RELAYS shows repeater status and ACK timers.</div>
-              </div>
-              <div class="help-row">
-                <div class="help-key">Diagnostics</div>
-                <div>PING &lt;RELAY-ID&gt; checks a relay. ACK &lt;RELAY-ID&gt; clears pending acknowledgments before they expire. RESTORE &lt;RELAY-ID&gt; can recover a FAULT or WEAK relay but may backfire.</div>
-              </div>
-              <div class="help-row">
-                <div class="help-key">Work orders</div>
-                <div>WORKORDER &lt;SYSTEM&gt; queues repairs on offline facility systems and consumes supplies until the work order resolves.</div>
-              </div>
-              <div class="help-row">
-                <div class="help-key">Packets + orders</div>
-                <div>PACKETS shows recent transmission chatter. ORDER &lt;AMOUNT&gt; FUEL or ORDER &lt;AMOUNT&gt; SUPPLY queues resupply for the requested amount.</div>
-              </div>
-              <div class="help-row">
-                <div class="help-key">Audio</div>
-                <div>SFX ON|OFF|TOGGLE and MUSIC ON|OFF|TOGGLE control sound effects and background music.</div>
-              </div>
-              <div class="help-row">
-                <div class="help-key">VFX</div>
-                <div>VFX REG|LOW|TOGGLE controls visual effects. LOW mode reduces animations and glows for better performance.</div>
-              </div>
-              <div class="help-row">
-                <div class="help-key">Theme + help</div>
-                <div>THEME GREEN|RED|BLUE|AMBER|BLACK swaps the display. HELP or ? lists all commands.</div>
-              </div>
-            </div>
-            <div class="help-section">
-              <div class="help-section-title">Logs and Cleanup</div>
-              <div class="help-row">
-                <div class="help-key">Event log</div>
-                <div>Right-hand log shows automated activity and system changes. Use it to spot problems without opening each row.</div>
-              </div>
-              <div class="help-row">
-                <div class="help-key">Clear logs</div>
-                <div>CLEAR wipes the console output. CLEAR EVENTS wipes the event log.</div>
-              </div>
-            </div>
-          </div>
-          <div class="help-actions">
-            <button id="btn-help-dismiss">Dismiss</button>
-          </div>
-        </div>
 
         <div class="stats">
           <div class="stat-row">
@@ -2415,6 +2436,340 @@ button.btn-error {
     </footer>
   </div>
 
+  <div id="help-panel" class="help-panel" aria-hidden="true">
+    <div class="help-head">
+      <div class="help-title">Help // Operator Quickstart</div>
+      <div class="help-sub">Local reference only</div>
+    </div>
+    <div class="help-body">
+      <div class="help-section">
+        <div class="help-section-title">1. What You're Looking At</div>
+        <div class="help-row">
+          <div class="help-key">Your Role</div>
+          <div>You manage a gate; a transit hub where ships travel between distant locations. Ships arrive constantly requesting passage. Your job is to process them safely while keeping gate systems operational.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">What is a Gate?</div>
+          <div>A gate is a transit hub built to stabilize corridor routes and connect locations throughout the galaxy. Ships use gates to jump between distant star systems that would otherwise be unreachable. Your gate has multiple systems (power, docking, decontamination, communications) that degrade over time and must be maintained.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">Success</div>
+          <div>You earn credits by processing ships and surviving your shift. One critical mistake: approving a hazardous ship, running out of fuel, losing all relays — will SEVER your gate connection. GAME OVER. Your shift officially ends at 8 hours, but you can continue indefinitely if you stay vigilant.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">What is Severing?</div>
+          <div>When your gate loses power, communications fail completely, or a catastrophic event occurs, the gate SEVERS from the network. This ends your session. All severing conditions are preventable if you maintain systems and check ships carefully.</div>
+        </div>
+      </div>
+      <div class="help-section">
+        <div class="help-section-title">2. Your Interface</div>
+        <div class="help-row">
+          <div class="help-key">Top Bar</div>
+          <div>Shows your operator callsign (editable), gate ID, current credits earned, shift time, and alert count. The right side has controls for theme, sound, visual effects, HELP, and RESET (danger — wipes your session).</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">TRAFFIC Panel</div>
+          <div>Two queues: INBOUND (ships arriving at your gate) and OUTBOUND (ships departing from your gate). Each ship shows ID, priority, type, cargo, status, and action buttons (DTL, QRY, DECON, APP, DENY). Ships with CRITICAL priority have strict deadlines — missing them can SEVER your gate.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">SYSTEMS Panel</div>
+          <div>Monitors your gate's health across 7 subsections: Gate Systems (beacon, alignment, sync), Corridor Systems (transit links to other gates), Facility Systems (decon bay, fuel manifold, dock clamps), Resources (fuel and supply levels), Concourse (current ship population), Relays (communication network), and Maintenance (active work orders). Systems show ONLINE (green), DEGRADED (yellow), or OFFLINE (red).</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">TERMINAL Panel</div>
+          <div>Bottom section with three parts: Console Log (command output), Events Log (automatic notifications), and Command Input (where you type commands like STATUS or APPROVE V-9012). Four maintenance buttons sit above the input: REALIGN, RESET, PURGE, SCAN.</div>
+        </div>
+      </div>
+      <div class="help-section">
+        <div class="help-section-title">3. What You Do First</div>
+        <div class="help-row">
+          <div class="help-key">First 2 Minutes</div>
+          <div>
+            <ol class="help-list">
+              <li>Ships will appear in TRAFFIC immediately. Check the INBOUND queue first.</li>
+              <li>Click DTL (Detail) on the first ship to see full information: cargo, transponder status, effects/hazards.</li>
+              <li>Look for warnings in red text or hazard flags like "CORRIDOR RADIATION", "VACUUM BLOOM", "RAIDERS", "PIRATES".</li>
+              <li>If the ship is clean (no hazards, valid transponder), click APP (Approve). If hazardous, click DENY and select the appropriate reason.</li>
+              <li>Glance at SYSTEMS panel. If anything shows DEGRADED or FAULT, you'll need to address it soon.</li>
+            </ol>
+          </div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">Basic Loop</div>
+          <div>Process ships as they arrive, monitor system health, acknowledge relay pings, order fuel when low, repair degraded facilities. The game never pauses. Systems degrade randomly. Ships keep coming. Stay active.</div>
+        </div>
+      </div>
+      <div class="help-section">
+        <div class="help-section-title">4. Ship Management</div>
+        <div class="help-row">
+          <div class="help-key">APPROVE (APP)</div>
+          <div>Clears a ship for transit through your gate. You earn +4 credits. Ship enters the Concourse (increases population). <strong>WARNING:</strong> Approving an INBOUND ship with VACUUM BLOOM, RAIDERS, or PIRATES will <strong>INSTANTLY SEVER YOUR GATE</strong> and end the game.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">DENY</div>
+          <div>Refuses ship entry/exit. Correct denials earn +3 credits. Incorrect denials (denying a safe ship without valid cause) cost -2 credits. When denying, you must provide a reason like "QUARANTINE REQUIRED" or "AUTHORITIES NOTIFIED". Denying won't end your game, but approving the wrong ship will.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">HOLD</div>
+          <div>Pauses a ship for 30-60 seconds. Use this when you need time to investigate, run SCAN, or QUERY a ship. Each ship can only be held ONCE. Use it wisely.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">QUERY (QRY)</div>
+          <div>Requests ship identification. Use on ships showing UNKNOWN or MISMATCH transponder status. Ship will respond after a delay. Some ships won't respond or will respond with false information — use SCAN to detect deception.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">DECON</div>
+          <div>Starts decontamination procedure. Ships with CORRIDOR RADIATION must be decontaminated before approval (inbound) or must be denied (outbound — you cannot decon outbound ships safely). Requires DECON BAY facility to be ONLINE. Costs supply.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">DETAIL (DTL)</div>
+          <div>Shows complete ship information: ID, state, cargo, transponder status, priority level, effects/hazards, notes, ETA, dock slot. <strong>ALWAYS CHECK DETAIL BEFORE APPROVING.</strong> One missed hazard = instant game over.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">Ship Hazards Reference</div>
+          <div>
+            <table style="width:100%; border-collapse: collapse; margin-top: 0.5em;">
+              <tr style="border-bottom: 1px solid currentColor;">
+                <th style="text-align:left; padding: 0.25em;">Hazard</th>
+                <th style="text-align:left; padding: 0.25em;">Where</th>
+                <th style="text-align:left; padding: 0.25em;">Correct Action</th>
+                <th style="text-align:left; padding: 0.25em;">If Wrong</th>
+              </tr>
+              <tr>
+                <td style="padding: 0.25em;">Vacuum Bloom</td>
+                <td style="padding: 0.25em;">Inbound</td>
+                <td style="padding: 0.25em;">DENY: QUARANTINE REQUIRED</td>
+                <td style="padding: 0.25em;"><strong>GAME OVER</strong></td>
+              </tr>
+              <tr>
+                <td style="padding: 0.25em;">Corridor Radiation</td>
+                <td style="padding: 0.25em;">Inbound</td>
+                <td style="padding: 0.25em;">DECON, then APPROVE</td>
+                <td style="padding: 0.25em;">Contamination risk</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.25em;">Corridor Radiation</td>
+                <td style="padding: 0.25em;">Outbound</td>
+                <td style="padding: 0.25em;">DENY: RADIATION HAZARD</td>
+                <td style="padding: 0.25em;"><strong>GAME OVER</strong></td>
+              </tr>
+              <tr>
+                <td style="padding: 0.25em;">Raiders / Pirates</td>
+                <td style="padding: 0.25em;">Any</td>
+                <td style="padding: 0.25em;">DENY: AUTHORITIES NOTIFIED</td>
+                <td style="padding: 0.25em;"><strong>GAME OVER</strong></td>
+              </tr>
+              <tr>
+                <td style="padding: 0.25em;">MISMATCH transponder</td>
+                <td style="padding: 0.25em;">Any</td>
+                <td style="padding: 0.25em;">QUERY first, then decide</td>
+                <td style="padding: 0.25em;">Risk of hidden threat</td>
+              </tr>
+              <tr>
+                <td style="padding: 0.25em;">UNKNOWN transponder</td>
+                <td style="padding: 0.25em;">Any</td>
+                <td style="padding: 0.25em;">QUERY + SCAN recommended</td>
+                <td style="padding: 0.25em;">Risk of hidden threat</td>
+              </tr>
+              <tr style="border-bottom: 1px solid currentColor;">
+                <td style="padding: 0.25em;">Hidden threats</td>
+                <td style="padding: 0.25em;">Any</td>
+                <td style="padding: 0.25em;">Use SCAN to detect</td>
+                <td style="padding: 0.25em;">Approve unknowingly = disaster</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">Outbound Deadlines</div>
+          <div>Outbound ships have departure deadlines (countdown timers). CRITICAL priority ships must be processed quickly - missing their deadline will SEVER your gate. URGENT ships cause credit penalties if delayed. STANDARD ships are lower risk but still cost credits if you miss their window.</div>
+        </div>
+      </div>
+      <div class="help-section">
+        <div class="help-section-title">5. Systems Maintenance</div>
+        <div class="help-row">
+          <div class="help-key">Beacon</div>
+          <div>Status: ONLINE / FAULT / OFFLINE. Your gate's visibility signal to the network. If OFFLINE, other gates can't see you and fewer ships will arrive. No direct fix — use RESET command which can sometimes restore it. Degrades randomly.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">Alignment</div>
+          <div>Status: WITHIN TOLERANCE / DRIFTING / OUT OF TOLERANCE. Gate positioning accuracy for safe transit. If OUT OF TOLERANCE, ships cannot transit safely. <strong>Fix:</strong> Type REALIGN command or click REALIGN button (15-second cooldown). Use preventively when showing DRIFTING.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">Sync</div>
+          <div>Status: SYNC / ASYNC / FAULT. Network synchronization state. If FAULT, gate connection becomes unstable and may lead to severing. <strong>Fix:</strong> Type RESET command or click RESET button (15-second cooldown). Healthy relays also help maintain sync.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">Corridors (Links)</div>
+          <div>Status: STABLE / DEGRADED / INTERMITTENT / OFFLINE. Transit paths connecting your gate to others (usually 3-4 links labeled A, B, C, D). Like highways between cities. If <strong>ALL corridors go OFFLINE</strong>, your gate loses network connection and <strong>SEVERS (GAME OVER)</strong>. No direct fix — corridors degrade and recover randomly. Maintain overall gate health to reduce risk.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">Facilities</div>
+          <div>Status: ONLINE / DEGRADED / OFFLINE. Gate station equipment (DECON BAY for decontamination, FUEL MANIFOLD for refueling, DOCK CLAMP ARRAY for docking, BEACON AMPLIFIER for signal strength, etc.). <strong>WARNING:</strong> DEGRADED facilities automatically fail to OFFLINE after 2-5 minutes if not repaired. If <strong>ALL facilities are OFFLINE</strong> with no active work orders, gate <strong>SEVERS (GAME OVER)</strong>. Different facilities being offline will have different impacts on gameplay.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">Repairing Facilities</div>
+          <div><strong>Option 1 (Quick):</strong> Type REPAIR [system name] or click REPAIR button. 70% success rate, instant if successful, 5-second cooldown. <strong>Option 2 (Guaranteed):</strong> Click WO (Work Order) button. 100% success, takes 1-3 minutes, costs supply. Issue work orders on critical facilities to guarantee repair.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">Relays</div>
+          <div>Status: ONLINE / WEAK / FAULT / OFFLINE. Communication stations (2-3 per gate, labeled R-XXXX) that maintain your connection to the network. Relays periodically send PING requests. <strong>You MUST click ACK or type ACK [relay-id] within 10 seconds</strong> of a relay ping. Unacknowledged pings degrade relay health. If <strong>ALL relays go OFFLINE</strong> for 10+ seconds, gate <strong>SEVERS (GAME OVER)</strong>. Enable audio to hear ping alerts.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">Relay Commands</div>
+          <div>ACK [relay-id]: Acknowledge relay ping (CRITICAL! Do this ASAP!). PING [relay-id]: Test relay connection manually. RESTORE [relay-id]: Attempt to repair FAULT/WEAK relay (risky, can backfire). Click ACK button on relay when it shows pending ping.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">FUEL</div>
+          <div>Drains continuously, when it reaches 25% or less it will show CRITICAL warning. <strong>At 0% your gate loses power and SEVERS (GAME OVER)</strong>. <strong>Fix:</strong> Click ORDER buttons under Resources or type ORDER FUEL [amount] (e.g., ORDER FUEL 50). Costs credits, takes time to deliver. <strong>Order fuel at 30-40%, not when critical.</strong></div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">SUPPLY</div>
+          <div>Used for work orders and decontamination operations. Doesn't drain passively. Running out means you cannot issue work orders or decon ships. <strong>Fix:</strong> Click ORDER buttons or type ORDER SUPPLY [amount]. Order supply when below 30% if you have active maintenance needs.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">Concourse</div>
+          <div>Shows current ship population at your gate (6-26+). Increases when you approve ships, decreases over time. High concourse levels (overcrowding) can cause issues. <strong>Fix:</strong> Type PURGE command or click PURGE button to clear low-priority traffic (15-second cooldown).</div>
+        </div>
+      </div>
+      <div class="help-section">
+        <div class="help-section-title">6. Commands You'll Need</div>
+        <div class="help-row">
+          <div class="help-key">Essential Commands</div>
+          <div>
+            STATUS — Show overall gate health summary<br>
+            DETAIL [ship-id] — View ship details (e.g., DETAIL V-9012)<br>
+            APPROVE [ship-id] — Clear ship for transit (e.g., APPROVE V-9012)<br>
+            DENY [ship-id] — Refuse ship (e.g., DENY V-9012)<br>
+            SCAN — Detect hidden hazards on ships (15s cooldown, use every 60-90s)<br>
+            REALIGN — Fix gate alignment (15s cooldown)<br>
+            RESET — Fix sync issues (15s cooldown)<br>
+            PURGE — Clear concourse congestion (15s cooldown)<br>
+            ACK [relay-id] — Acknowledge relay ping (e.g., ACK R-7701) CRITICAL<br>
+            REPAIR [system] — Quick repair facility (e.g., REPAIR DECON BAY)<br>
+            ORDER FUEL [amount] — Buy fuel (e.g., ORDER FUEL 50)<br>
+            ORDER SUPPLY [amount] — Buy supplies (e.g., ORDER SUPPLY 30)
+          </div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">Info Commands</div>
+          <div>
+            HELP or ? — Show command list<br>
+            LINKS — View corridor status<br>
+            LIST or LIST INBOUND or LIST OUTBOUND — List ships in queues<br>
+            RELAYS — Show relay network status and pending ACKs<br>
+            PACKETS — Show recent transmission activity<br>
+            WORKORDER [system] — Issue guaranteed work order for facility
+          </div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">Ship Commands</div>
+          <div>
+            DETAIL [id] — Full ship information<br>
+            QUERY [id] — Request ship identification<br>
+            HOLD [id] — Pause ship for 30-60s (one-time use per ship)<br>
+            DECON [id] or DECON START [id] — Start decontamination<br>
+            NOTE [id] [text] — Add operator notes to ship record
+          </div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">Relay Commands</div>
+          <div>
+            ACK [relay-id] — Acknowledge relay ping (MUST DO WITHIN 10 SECONDS)<br>
+            PING [relay-id] — Test relay connection<br>
+            RESTORE [relay-id] — Attempt to repair FAULT/WEAK relay
+          </div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">Utility Commands</div>
+          <div>
+            THEME [color] — Change color (green/red/blue/purple/amber/cyan/orange/black/light)<br>
+            SFX or SFX ON|OFF|TOGGLE — Control sound effects<br>
+            MUSIC or MUSIC ON|OFF|TOGGLE — Control background music<br>
+            VFX or VFX REG|LOW|TOGGLE — Control visual effects<br>
+            CLEAR — Clear console text<br>
+            CLEAR EVENTS — Clear event log<br>
+            ZOOM [up/down/reset/N%] — Adjust text size
+          </div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">Quick Keys</div>
+          <div>Enter — Submit command. ArrowUp — Recall last command. Esc — Clear input or dismiss this panel.</div>
+        </div>
+      </div>
+      <div class="help-section">
+        <div class="help-section-title">7. How You Lose (SEVERING)</div>
+        <div class="help-row">
+          <div class="help-key">1. FUEL DEPLETION</div>
+          <div>FUEL reaches 0% → Power loss → <strong>SEVERED</strong>. Why: You didn't order fuel in time or ran out of credits. Prevention: Order fuel when below 30%, keep credits available, monitor fuel constantly.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">2. RELAY FAILURE</div>
+          <div>All relays offline for 10+ seconds → Network disconnected → <strong>SEVERED</strong>. Why: You ignored relay PING requests or didn't ACK them within 10 seconds. Prevention: ACK relay pings IMMEDIATELY when they appear. Enable audio to hear ping alerts.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">3. CORRIDOR COLLAPSE</div>
+          <div>All corridor links offline → Lost network connection → <strong>SEVERED</strong>. Why: Random degradation, no direct fix available. Prevention: Maintain overall gate health, keep systems stable to reduce corridor degradation risk.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">4. FACILITY FAILURE</div>
+          <div>All facilities offline with no active work orders → System failure → <strong>SEVERED</strong>. Why: You let facilities degrade from DEGRADED to OFFLINE (happens in 2-5 min) without repairing them. Prevention: Issue work orders or use REPAIR command when facilities show DEGRADED.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">5. VACUUM BLOOM</div>
+          <div>Approved inbound ship with Vacuum Bloom reaches gate → Outbreak → <strong>INSTANT SEVERED</strong>. Why: You approved a hazardous ship without checking DETAIL. Prevention: ALWAYS check ship DETAIL before approving. DENY any ship with Vacuum Bloom using reason "QUARANTINE REQUIRED".</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">6. RAIDERS/PIRATES</div>
+          <div>Approved ship with Raiders or Pirates reaches gate → Attack → <strong>INSTANT SEVERED</strong>. Why: You approved hostile ships. Prevention: Use SCAN command regularly (every 60-90s) to detect hidden threats. DENY with reason "AUTHORITIES NOTIFIED" when detected.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">7. RADIATION EXPOSURE</div>
+          <div>Approved outbound ship with Corridor Radiation departs → Gate exposure → <strong>INSTANT SEVERED</strong>. Why: You let a contaminated ship depart from your gate. Prevention: DECON inbound ships with radiation before approval. DENY any outbound ship showing radiation with reason "RADIATION HAZARD".</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">8. CRITICAL DEADLINE</div>
+          <div>Failed to process CRITICAL priority ship (emergency TOW request) on time → Ship lost → <strong>INSTANT SEVERED</strong>. Why: You didn't prioritize high-urgency ships. Prevention: Process CRITICAL priority ships first, watch countdown timers, use HOLD if you need time to verify safety.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">9. ENTERING DEBT</div>
+          <div>Reaching 0 (or less) total wage after an action that costs CR (incorrect approvals/denies, spending on resources, etc) → <strong>INSTANT SEVERED</strong>. Why: You didn't manage your incoming wage versus spending or made too many small mistakes that added up to cost you in the end. Keep an eye on WAGE and be careful!</div>
+        </div>
+      </div>
+      <div class="help-section">
+        <div class="help-section-title">8. Tips for Survival</div>
+        <div class="help-row">
+          <div class="help-key">Critical Habits</div>
+          <div>
+            <ul class="help-list">
+              <li>Check DETAIL on EVERY ship before approving. One hazard missed = instant game over.</li>
+              <li>Use SCAN command every 60-90 seconds to detect hidden threats on ships.</li>
+              <li>ACK relay pings IMMEDIATELY when they appear. Set audio ON to hear alerts.</li>
+              <li>Order FUEL when below 40%, not when critical. Fuel takes time to deliver.</li>
+              <li>Repair facilities at DEGRADED status. Don't wait for OFFLINE (harder to fix).</li>
+              <li>Watch outbound ship deadlines. CRITICAL priority ships can SEVER your gate if missed.</li>
+              <li>When in doubt, use HOLD to pause a ship, then SCAN and DETAIL to investigate.</li>
+              <li>Incorrect DENYs cost credits but won't end your game. Incorrect APPROVEs will.</li>
+              <li>Use REALIGN, RESET, PURGE preventively (they have 15s cooldowns).</li>
+              <li>You earn 0.25 credits per minute + credits per action. </li>
+            </ul>
+          </div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">Save/Load/Share</div>
+          <div>SHARE copies a URL snapshot of your session. EXPORT downloads a .tqegate save file. LOAD FILE restores a saved session. Use these to preserve long successful shifts.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">Interface Settings</div>
+          <div>THEME changes colors (12 options). SFX/MUSIC toggle audio (recommend ON for relay ping alerts). VFX toggles visual effects (use LOW on low performance devices). RESET button (top right) wipes your session completely.</div>
+        </div>
+      </div>
+    </div>
+    <div class="help-actions">
+      <button id="btn-help-dismiss">Dismiss</button>
+    </div>
+  </div>
+
   <script>
     // ---------------------------
     // Utilities
@@ -2639,7 +2994,9 @@ button.btn-error {
 		shiftCompleteShown: "tqe_gate_terminal_shift_complete_shown",
       collapsedPanels: "tqe_gate_terminal_collapsed_panels",
       multiplayerServer: "tqe_gate_terminal_multiplayer_server",
-      multiplayerEnabled: "tqe_gate_terminal_multiplayer_enabled"
+      multiplayerEnabled: "tqe_gate_terminal_multiplayer_enabled",
+      fontScale: "tqe_gate_terminal_font_scale",
+      unlockedThemes: "tqe_gate_terminal_unlocked_themes"
     };
 
 	function buildGateList(count = 1) {
@@ -2737,7 +3094,7 @@ button.btn-error {
       { id: "SUPPLY", name: "SUPPLY", startMin: 75, startMax: 95, restockMin: 30, restockMax: 50, request: "RESUPPLY", pricePerUnit: 1 }
     ];
     const RESOURCE_ORDER_THRESHOLD = 25;
-    const RESOURCE_CRITICAL_THRESHOLD = 10;
+    const RESOURCE_CRITICAL_THRESHOLD = 25;
     const RESOURCE_ORDER_MIN = 1;
     const RESOURCE_ORDER_MAX = 100;
     const RESOURCE_ORDER_PHASES = [
@@ -2750,20 +3107,20 @@ button.btn-error {
     const RATES = {
       maxIn: 6,
       maxOut: 6,
-      spawnInChance: 0.0056,   // ~1 every 2.7 min
-      spawnOutChance: 0.0053,  // ~1 every 3.3 min
+      spawnInChance: 0.0054,   // ~1 every 2.7 min
+      spawnOutChance: 0.0052,  // ~1 every 3.3 min
       reportChance: 0.018,    // sparse ambient chatter
       flavorChance: 0.0025,   // rare ambient flavor text
       driftChance: 0.015,     // alignment drift
       syncDriftChance: 0.006, // sync slips to ASYNC/FAULT
-      syncRecoverChance: 0.015, // sync recovers to SYNC (with healthy relays)
+      syncRecoverChance: 0.02, // sync recovers to SYNC (with healthy relays)
       wobbleChance: 0.010,    // corridor wobble
       facilityFaultChance: 0.00085, // rare subsystem faults
       facilityWorsenChance: 0.00015,
       relayPacketChance: 0.0045,
       relayShiftChance: 0.0012,
-      relayPingChance: 0.0010,
-      relayDropChance: 0.00035,
+      relayPingChance: 0.0018,
+      relayDropChance: 0.00025,
       concourseFade: 0.08,
       fuelDrain: 0.015,
       supplyDrainWorkOrder: 0.045,
@@ -2815,14 +3172,15 @@ button.btn-error {
 
     // ETA ranges in seconds (slow but not ridiculous)
     const ETA = { min: 30, max: 600 }; // 0:30-10:00 minutes
-    const RELAY_ACK_WINDOW_MS = 30_000;
+    const RELAY_ACK_WINDOW_MS = 10_000;
     const RELAY_HEARTBEAT_MIN_MS = 1_200;
     const RELAY_HEARTBEAT_MAX_MS = 3_200;
     const RELAY_HEARTBEAT_STALE_WARN_SEC = 6;
     const RELAY_HEARTBEAT_STALE_CRIT_SEC = 12;
     const RELAY_HICCUP_RECOVERABLE_CHANCE = 0.55;
     const RELAY_HICCUP_JOSTLE_DECAY_SEC = 18;
-    const RELAY_SEVER_GRACE_MS = 6_000;
+    const RELAY_SEVER_GRACE_MS = 10_000;
+    const RELAY_CRITICAL_GRACE_MS = 45_000;
 
     function dailySalt() {
       const d = new Date();
@@ -2878,6 +3236,7 @@ button.btn-error {
         clearingEndsAt: 0,
         wasCleared: false,
         queryPending: false,
+        servicingBlocked: false,
         effects,
         hazardDeadline: 0,
         obscured,
@@ -3048,6 +3407,14 @@ button.btn-error {
         lastResetAt: 0,
         lastPurgeAt: 0,
         relayFailureSince: 0,
+        relayHealth: {
+          degradedSince: 0,
+          criticalSince: 0,
+          lastHealthState: "HEALTHY",
+          unackedPings: 0,
+          lastWarningAt: 0,
+          totalRelayCount: relayCount
+        },
         beacon,
         alignment,
         sync,
@@ -3060,8 +3427,6 @@ button.btn-error {
         dockSlots,
         relays,
         packets: [],
-        inboundGatePings: [],
-        nextInboundGatePingAt: Date.now() + randRange(150 * 1000, 420 * 1000),
         resources: makeResources(rng),
         alerts: [],
         reports: [],
@@ -3077,7 +3442,8 @@ button.btn-error {
             relayAcks: 0,
           maintenanceOps: 0,
           resourceOrders: 0,
-          resourceOrderSpend: 0
+          resourceOrderSpend: 0,
+          inboundTimeouts: 0
         },
         tech: {
           driftSuppressedUntil: 0,
@@ -3116,7 +3482,8 @@ button.btn-error {
         resourceOrderSpend: 0,
         repairAttempts: 0,
         repairSuccesses: 0,
-        repairFailures: 0
+        repairFailures: 0,
+        inboundTimeouts: 0
       };
         g.stats.approved = typeof g.stats.approved === "number" ? g.stats.approved : 0;
         g.stats.denied = typeof g.stats.denied === "number" ? g.stats.denied : 0;
@@ -3263,6 +3630,23 @@ button.btn-error {
         r.offlineSince = typeof r.offlineSince === "number" ? r.offlineSince : 0;
         if (r.offline && !r.hiddenOffline) r.status = "OFFLINE";
       }
+
+      // Initialize relayHealth for existing gates
+      g.relayHealth ||= {
+        degradedSince: 0,
+        criticalSince: 0,
+        lastHealthState: "HEALTHY",
+        unackedPings: 0,
+        lastWarningAt: 0,
+        totalRelayCount: g.relays.length
+      };
+      g.relayHealth.totalRelayCount = g.relays.length;
+      g.relayHealth.degradedSince = typeof g.relayHealth.degradedSince === "number" ? g.relayHealth.degradedSince : 0;
+      g.relayHealth.criticalSince = typeof g.relayHealth.criticalSince === "number" ? g.relayHealth.criticalSince : 0;
+      g.relayHealth.lastHealthState ||= "HEALTHY";
+      g.relayHealth.unackedPings = typeof g.relayHealth.unackedPings === "number" ? g.relayHealth.unackedPings : 0;
+      g.relayHealth.lastWarningAt = typeof g.relayHealth.lastWarningAt === "number" ? g.relayHealth.lastWarningAt : 0;
+
       g.packets ||= [];
 
       g.inbound ||= [];
@@ -3281,6 +3665,7 @@ button.btn-error {
         s.clearingEndsAt ||= 0;
         s.wasCleared ||= false;
         s.queryPending ||= false;
+        s.servicingBlocked ||= false;
         s.effects ||= [];
         for (const ef of s.effects) {
           ef.hidden = typeof ef.hidden === "boolean" ? ef.hidden : false;
@@ -3483,6 +3868,7 @@ button.btn-error {
       startOverlay: document.getElementById("start-overlay"),
       btnStart: document.getElementById("btn-start"),
       btnStartResume: document.getElementById("btn-start-resume"),
+      btnStartHelp: document.getElementById("btn-start-help"),
       startResumeInput: document.getElementById("start-resume-file"),
       startNameSlot: document.getElementById("start-name-slot"),
       startNameLabel: document.getElementById("start-name-label"),
@@ -3614,6 +4000,7 @@ button.btn-error {
         pendingPings: new Map()
       },
       inlineDetailId: null,
+      fontScale: 1.0,
       collapsedPanels: {
         // Main panels
         traffic: false,
@@ -3824,24 +4211,26 @@ button.btn-error {
     };
 
       const audio = {
-        click: makeAudioPool("click.ogg", 5, 0.35),
-				clack: makeAudioPool("clack.ogg", 6, 0.28),
-        beep: makeAudioPool("beep.ogg", 4, 0.55),
-        blip: makeAudioPool("blip.ogg", 4, 0.4),
-        restore: makeAudioPool("restore.ogg", 3, 0.5),
-        startup: makeAudioPool("startup.ogg", 1, 0.65),
-        offline: makeAudioPool("offline.ogg", 2, 0.65),
-        error: makeAudioPool("error.ogg", 2, 0.6),
-        charged: makeAudioPool("charged.ogg", 2, 0.55),
-        severed: makeAudioPool("severed.ogg", 1, 0.7),
-        shiftcomplete: makeAudioPool("shiftcomplete.ogg", 1, 0.7),
-        showhide: makeAudioPool("showhide.ogg", 3, 0.45),
-        purge: makeLoopAudio("purge.ogg", 0.75),
-        reset: makeLoopAudio("reset.ogg", 0.65),
-        scan: makeLoopAudio("scan.ogg", 1),
-      processing: makeLoopAudio("processing.ogg", 0.65),
-      ackalarm: makeLoopAudio("ackalarm.ogg", 0.65),
-      music: makeLoopAudio("bgaudio.ogg", 0.32)
+        click: makeAudioPool("/gatecontrol/click.ogg", 5, 0.35),
+				clack: makeAudioPool("/gatecontrol/clack.ogg", 6, 0.28),
+        beep: makeAudioPool("/gatecontrol/beep.ogg", 4, 0.55),
+        blip: makeAudioPool("/gatecontrol/blip.ogg", 4, 0.4),
+        msg: makeAudioPool("/gatecontrol/msg.ogg", 3, 0.6),
+        ping: makeAudioPool("/gatecontrol/ping.ogg", 3, 0.6),
+        restore: makeAudioPool("/gatecontrol/restore.ogg", 3, 0.5),
+        startup: makeAudioPool("/gatecontrol/startup.ogg", 1, 0.65),
+        offline: makeAudioPool("/gatecontrol/offline.ogg", 2, 0.65),
+        error: makeAudioPool("/gatecontrol/error.ogg", 2, 0.6),
+        charged: makeAudioPool("/gatecontrol/charged.ogg", 2, 0.55),
+        severed: makeAudioPool("/gatecontrol/severed.ogg", 1, 0.7),
+        shiftcomplete: makeAudioPool("/gatecontrol/shiftcomplete.ogg", 1, 0.7),
+        showhide: makeAudioPool("/gatecontrol/showhide.ogg", 3, 0.45),
+        purge: makeLoopAudio("/gatecontrol/purge.ogg", 0.75),
+        reset: makeLoopAudio("/gatecontrol/reset.ogg", 0.65),
+        scan: makeLoopAudio("/gatecontrol/scan.ogg", 1),
+      processing: makeLoopAudio("/gatecontrol/processing.ogg", 0.65),
+      ackalarm: makeLoopAudio("/gatecontrol/ackalarm.ogg", 0.65),
+      music: makeLoopAudio("/gatecontrol/bgaudio.ogg", 0.32)
     };
 		
 		audio.clack.pitch = { min: 0.8, max: 1.20 }; // try 0.98–1.02 if you want it *very* subtle
@@ -4005,6 +4394,63 @@ button.btn-error {
 
     function activeGate() { return getGate(runtime.activeGateId); }
 
+    function corruptMessageText(text, combinedScore) {
+      // Map combined score to corruption rate
+      let corruptionRate;
+      if (combinedScore <= 1) {
+        corruptionRate = 0;
+      } else if (combinedScore <= 4) {
+        corruptionRate = 0.10;
+      } else if (combinedScore <= 8) {
+        corruptionRate = 0.30;
+      } else {
+        corruptionRate = 0.60;
+      }
+
+      if (corruptionRate === 0) return text;
+
+      const symbols = ['#', '$', '!', '@', '%', '^', '&', '*'];
+      const chars = text.split('');
+
+      for (let i = 0; i < chars.length; i++) {
+        if (Math.random() < corruptionRate) {
+          if (Math.random() < 0.70) {
+            // 70% replace with symbol
+            chars[i] = symbols[Math.floor(Math.random() * symbols.length)];
+          } else {
+            // 30% delete
+            chars[i] = '';
+          }
+        }
+      }
+
+      return chars.join('');
+    }
+
+    function calculateMessageDelayMs(basePingMs, senderScore, receiverScore) {
+      let additionalDelay = 0;
+
+      // Sender degradation delay
+      if (senderScore === 2) {
+        additionalDelay += 1000 + Math.random() * 1000; // +1-2s
+      } else if (senderScore === 3) {
+        additionalDelay += 2000 + Math.random() * 2000; // +2-4s
+      } else if (senderScore === 4) {
+        additionalDelay += 3000 + Math.random() * 3000; // +3-6s
+      }
+
+      // Receiver degradation delay
+      if (receiverScore === 2) {
+        additionalDelay += 1000 + Math.random() * 1000; // +1-2s
+      } else if (receiverScore === 3) {
+        additionalDelay += 2000 + Math.random() * 2000; // +2-4s
+      } else if (receiverScore === 4) {
+        additionalDelay += 3000 + Math.random() * 3000; // +3-6s
+      }
+
+      return Math.round(basePingMs + additionalDelay);
+    }
+
     function ensureGateStats(g) {
         if (!g.stats || typeof g.stats !== "object") {
           g.stats = {
@@ -4023,7 +4469,8 @@ button.btn-error {
             deadlinesMet: 0,
             deadlinesMissed: 0,
             criticalMisses: 0,
-            urgentMisses: 0
+            urgentMisses: 0,
+            inboundTimeouts: 0
           };
         }
         if (typeof g.stats.approved !== "number") g.stats.approved = 0;
@@ -4042,6 +4489,7 @@ button.btn-error {
       if (typeof g.stats.deadlinesMissed !== "number") g.stats.deadlinesMissed = 0;
       if (typeof g.stats.criticalMisses !== "number") g.stats.criticalMisses = 0;
       if (typeof g.stats.urgentMisses !== "number") g.stats.urgentMisses = 0;
+      if (typeof g.stats.inboundTimeouts !== "number") g.stats.inboundTimeouts = 0;
       return g.stats;
     }
 
@@ -4071,7 +4519,8 @@ button.btn-error {
         - ((safe.deadlinesMissed || 0) * 3)
         - ((safe.criticalMisses || 0) * 5)
         - ((safe.urgentMisses || 0) * 2)
-        - ((safe.operatorErrors || 0) * 3);
+        - ((safe.operatorErrors || 0) * 3)
+        - ((safe.inboundTimeouts || 0) * 5);
       return Math.max(0, Math.floor(credits));
     }
 
@@ -4142,10 +4591,12 @@ button.btn-error {
       setTimeout(() => btn.classList.remove("btn-error"), 500);
     }
 
-    const THEME_OPTIONS = ["green", "red", "blue", "purple", "amber", "cyan", "black", "light"];
+    const THEME_OPTIONS = ["green", "red", "blue", "purple", "amber", "cyan", "orange", "black", "lightblue", "lightred", "lightgreen", "paper"];
+    const UNLOCKABLE_THEMES = ["pinkblack", "browngold"];
 
     function pickRandomTheme(exclude) {
-      const options = THEME_OPTIONS.filter((t) => t !== exclude && t !== "light");
+      const lightThemes = ["lightblue", "lightred", "lightgreen", "paper"];
+      const options = THEME_OPTIONS.filter((t) => t !== exclude && !lightThemes.includes(t));
       const pool = options.length ? options : THEME_OPTIONS;
       return pool[Math.floor(Math.random() * pool.length)];
     }
@@ -4174,6 +4625,121 @@ button.btn-error {
       const hasGateList = !!safeStorageGet(LS.gateList);
       const initial = hasGateList ? "green" : pickRandomTheme();
       setTheme(initial, true);
+    }
+
+    function getUnlockedThemes() {
+      const raw = safeStorageGet(LS.unlockedThemes);
+      if (!raw) return [];
+      try {
+        return JSON.parse(raw);
+      } catch (_) {
+        return [];
+      }
+    }
+
+    function unlockTheme(themeId) {
+      const unlocked = getUnlockedThemes();
+      if (unlocked.includes(themeId)) return false;
+      unlocked.push(themeId);
+      safeStorageSet(LS.unlockedThemes, JSON.stringify(unlocked));
+      return true;
+    }
+
+    function isThemeUnlocked(themeId) {
+      if (THEME_OPTIONS.includes(themeId)) return true;
+      return getUnlockedThemes().includes(themeId);
+    }
+
+    function getAllAvailableThemes() {
+      return [...THEME_OPTIONS, ...getUnlockedThemes()];
+    }
+
+    function populateThemeDropdown() {
+      const available = getAllAvailableThemes();
+      const themeNames = {
+        green: "GREEN",
+        red: "RED",
+        blue: "BLUE",
+        purple: "PURPLE",
+        amber: "AMBER",
+        cyan: "CYAN",
+        orange: "ORANGE",
+        black: "BLACK",
+        lightblue: "LIGHT - BLUE",
+        lightred: "LIGHT - RED",
+        lightgreen: "LIGHT - GREEN",
+        paper: "PAPER",
+        pinkblack: "PINK & BLACK",
+        browngold: "BROWN & GOLD"
+      };
+      ui.themeSelect.innerHTML = available
+        .map(id => `<option value="${id}">${themeNames[id] || id.toUpperCase()}</option>`)
+        .join("");
+      const current = document.documentElement.dataset.theme || safeStorageGet(LS.theme) || "green";
+      ui.themeSelect.value = current;
+    }
+
+    function applyFontScale(scale, silent = false) {
+      // Clamp scale between 0.5 and 2.0
+      scale = Math.max(0.5, Math.min(2.0, scale));
+      // Round to 1 decimal place to avoid floating point precision issues
+      scale = Math.round(scale * 10) / 10;
+      runtime.fontScale = scale;
+
+      // Apply font-size to html root element so it cascades naturally
+      document.documentElement.style.fontSize = `${scale * 100}%`;
+
+      safeStorageSet(LS.fontScale, String(scale));
+      if (!silent) {
+        const percent = Math.round(scale * 100);
+        consoleLine(`ZOOM: ${percent}%`, "dim");
+      }
+    }
+
+    function loadFontScale() {
+      const stored = safeStorageGet(LS.fontScale);
+      if (stored) {
+        const scale = parseFloat(stored);
+        if (!isNaN(scale)) {
+          applyFontScale(scale, true);
+        }
+      }
+    }
+
+    function cmdFontUp() {
+      // Round to avoid floating point precision issues
+      const newScale = Math.round((runtime.fontScale + 0.1) * 10) / 10;
+      if (newScale > 2.0) {
+        consoleLine("ZOOM: MAX (200%)", "warn");
+        playSfx("error");
+        return;
+      }
+      applyFontScale(newScale);
+    }
+
+    function cmdFontDown() {
+      // Round to avoid floating point precision issues
+      const newScale = Math.round((runtime.fontScale - 0.1) * 10) / 10;
+      if (newScale < 0.5) {
+        consoleLine("ZOOM: MIN (50%)", "warn");
+        playSfx("error");
+        return;
+      }
+      applyFontScale(newScale);
+    }
+
+    function cmdFontReset() {
+      applyFontScale(1.0);
+    }
+
+    function cmdFontSet(percent) {
+      const scale = percent / 100;
+      if (scale < 0.5 || scale > 2.0) {
+        consoleLine("ZOOM: RANGE 50%-200%", "warn");
+        playSfx("error");
+        return;
+      }
+      applyFontScale(scale);
     }
 
     function setGateById(gateId, silent = false) {
@@ -4254,6 +4820,9 @@ button.btn-error {
       if (oldId && oldId === runtime.activeGateId) {
         eventLine(`GATE SEVERED: ${reason}`, "bad");
       }
+
+      // Notify multiplayer that this operator is now offline
+      sendGameStateChange(false, "severed");
     }
 
     function triggerShiftComplete() {
@@ -4284,40 +4853,95 @@ button.btn-error {
       playSfx(audio.shiftcomplete);
       document.body.classList.add("shiftcomplete");
       eventLine("SHIFT COMPLETE: 8 HOUR MARK REACHED", "good");
+
+      // Notify multiplayer that this operator is now offline
+      sendGameStateChange(false, "shift_complete");
     }
 
     function continueAfterShiftComplete() {
       document.body.classList.remove("shiftcomplete");
       consoleLine("CONTINUING EXTENDED SHIFT", "good");
       // Shift complete flag remains true - don't show again
+
+      // Notify multiplayer that this operator is now online again
+      sendGameStateChange(true);
     }
 
     function restartGate() {
-      const oldId = runtime.activeGateId;
-      const newId = generateGateId();
-      runtime.catalog = [newId];
-      runtime.gateIndex = 0;
-      runtime.activeGateId = newId;
+      // Log disconnection message before reset
+      eventLine("OPERATOR DISCONNECTED: CONNECTION RESET", "warn");
+
+      // Notify multiplayer that this operator is going offline with reset reason
+      sendGameStateChange(false, "reset");
+
+      // Stop all game timers
+      if (runtime.tickTimer) {
+        clearInterval(runtime.tickTimer);
+        runtime.tickTimer = null;
+      }
+      if (runtime.uiTimer) {
+        clearInterval(runtime.uiTimer);
+        runtime.uiTimer = null;
+      }
+
+      // Clear all maintenance timers
+      for (const kind in runtime.maintenance) {
+        const maint = runtime.maintenance[kind];
+        if (maint.timer) clearTimeout(maint.timer);
+        if (maint.tick) clearInterval(maint.tick);
+        if (maint.progressTick) clearInterval(maint.progressTick);
+      }
+      runtime.maintenance = {};
+
+      // Stop all sound effects
+      stopMaintenanceSfx();
+      runtime.processingCount = 0;
+      updateProcessingSound();
+      setAckAlarm(false);
+      if (audio.music) {
+        audio.music.pause();
+        audio.music.currentTime = 0;
+      }
+
+      // Clean up multiplayer connection
+      cleanupMultiplayer("reset");
+
+      // Preserve audio and VFX preferences
+      const sfxEnabled = localStorage.getItem(LS.sfxEnabled);
+      const musicEnabled = localStorage.getItem(LS.musicEnabled);
+      const vfxEnabled = localStorage.getItem(LS.vfxEnabled);
+
+      // Clear all localStorage
+      localStorage.clear();
+
+      // Restore audio and VFX preferences
+      if (sfxEnabled !== null) localStorage.setItem(LS.sfxEnabled, sfxEnabled);
+      if (musicEnabled !== null) localStorage.setItem(LS.musicEnabled, musicEnabled);
+      if (vfxEnabled !== null) localStorage.setItem(LS.vfxEnabled, vfxEnabled);
+
+      // Reset runtime state
       runtime.gates.clear();
-      runtime.shiftStart = Date.now();
       runtime.severed = false;
       runtime.lastSevered = null;
       runtime.shiftCompleteShown = false;
-			localStorage.removeItem(LS.shiftMs);
-		localStorage.removeItem(LS.shiftCompleteShown);
-      localStorage.setItem(LS.gateList, JSON.stringify(runtime.catalog));
-      localStorage.setItem(LS.gateCurrent, newId);
-      if (oldId) localStorage.removeItem(LS.gateStatePrefix + oldId);
+      runtime.operatorCallsign = "";
 
+      // Update start screen state
+      updateStartNameLabel();
+      updateDataResetButtonVisibility();
+
+      // Randomize theme
+      randomizeTheme();
+
+      // Reset to start screen
+      didBoot = false;
+      startInProgress = false;
+      document.body.classList.remove("started");
       document.body.classList.remove("severed");
       document.body.classList.remove("shiftcomplete");
-      clearLog(ui.events);
-      clearLog(ui.console);
-      setGateById(newId, true);
-      randomizeTheme();
-      eventLine("EVENT LOG: ACTIVE", "dim");
-      consoleLine(`NODE RESET: ${newId}`, "warn");
-      requestStartupSound();
+      ui.startOverlay?.setAttribute("aria-hidden", "false");
+      ui.btnStart?.removeAttribute("disabled");
+      ui.btnStart?.focus();
     }
 
     function pillForHealth(health) {
@@ -4478,6 +5102,54 @@ button.btn-error {
       return !!r.offline;
     }
 
+    function computeRelayHealthState(g) {
+      const relays = g.relays || [];
+      if (relays.length < 2) return { state: "HEALTHY", reason: null, score: 0 };
+
+      // Count relays by state
+      const offline = relays.filter(r => relayIsDown(r)).length;
+      const fault = relays.filter(r => !relayIsDown(r) && r.status === "FAULT").length;
+      const weak = relays.filter(r => !relayIsDown(r) && r.status === "WEAK").length;
+      const healthy = relays.filter(r => !relayIsDown(r) && r.status === "ONLINE").length;
+
+      // Check for unacked PINGs
+      const unackedPings = relays.filter(r => r.awaitingAck && !r.offline).length;
+
+      // 2-relay configuration
+      if (relays.length === 2) {
+        // SEVERING: Both relays offline
+        if (offline === 2) {
+          return { state: "SEVERING", reason: "ALL_RELAYS_OFFLINE", score: 4 };
+        }
+        // CRITICAL: One offline + one FAULT/WEAK, OR both FAULT
+        if ((offline === 1 && (fault + weak >= 1)) || fault === 2) {
+          return { state: "CRITICAL", reason: "IMMINENT_FAILURE", score: 3 };
+        }
+        // DEGRADED: One offline OR one FAULT OR 2+ unacked PINGs
+        if (offline === 1 || fault === 1 || unackedPings >= 2) {
+          return { state: "DEGRADED", reason: "REDUCED_REDUNDANCY", score: 2 };
+        }
+      }
+
+      // 3-relay configuration
+      if (relays.length === 3) {
+        // SEVERING: All three offline
+        if (offline === 3) {
+          return { state: "SEVERING", reason: "ALL_RELAYS_OFFLINE", score: 4 };
+        }
+        // CRITICAL: 2 offline OR (1 offline + 2 FAULT/WEAK)
+        if (offline >= 2 || (offline === 1 && (fault + weak >= 2))) {
+          return { state: "CRITICAL", reason: "IMMINENT_FAILURE", score: 3 };
+        }
+        // DEGRADED: 1 offline OR 2 FAULT OR 3+ unacked PINGs
+        if (offline === 1 || fault >= 2 || unackedPings >= 3) {
+          return { state: "DEGRADED", reason: "REDUCED_REDUNDANCY", score: 2 };
+        }
+      }
+
+      return { state: "HEALTHY", reason: null, score: 0 };
+    }
+
     function relaysFunctional(g) {
       const relays = g.relays || [];
       if (relays.length < 2) return false;
@@ -4505,8 +5177,16 @@ button.btn-error {
     function gateSeverReason(g) {
       const fuelLevel = ensureResources(g).FUEL?.level ?? 100;
       if (fuelLevel <= 0) return "Gate Power Loss";
+
+      // Check if operator has entered debt
+      const wageCredits = availableWageCredits(g);
+      if (wageCredits <= 0) return "OPERATOR ENTERED DEBT";
+
       if (g.relayFailureSince && (Date.now() - g.relayFailureSince) >= RELAY_SEVER_GRACE_MS) {
-        return "Gate Relay Disconnected";
+        const healthState = computeRelayHealthState(g);
+        if (healthState.state === "SEVERING") {
+          return "Gate Relay Disconnected";
+        }
       }
       if (allCorridorsOffline(g)) return "Losing Connection to the Corridor Network";
       if (allFacilityOffline(g) && !hasActiveWorkOrders(g)) return "Gate System Failure";
@@ -4519,7 +5199,11 @@ button.btn-error {
       if (st.includes("WAITING TO DOCK")) return ["WAITING TO DOCK", "warn"];
       if (st.includes("WAITING DECON")) return ["WAITING DECON", "warn"];
       if (st === "DECON") return ["DECON", "warn"];
-      if (st.includes("SERVICING")) return ["SERVICING", "ok"];
+      if (st.includes("SERVICING")) {
+        // Show warning if servicing is blocked due to FUEL MANIFOLD being offline
+        if (s.servicingBlocked) return ["CANNOT REFUEL", "warn"];
+        return ["SERVICING", "ok"];
+      }
       if (st.includes("CLEARING")) return ["CLEARING", "warn"];
       if (st.includes("COMPLETE")) return ["COMPLETE - DEPARTING GATE", "ok"];
       if (st.includes("DEN")) return ["DENIED", "bad"];
@@ -4715,9 +5399,9 @@ button.btn-error {
                 <button class="btn-mini ${isDetailOpen ? "detail-open" : ""}" data-action="detail" data-id="${escapeText(s.id)}">DTL</button>
                 ${canQuery ? `<button class="btn-mini hold" data-action="query" data-id="${escapeText(s.id)}">QRY</button>` : ""}
                 ${canDecon ? `<button class="btn-mini approve" data-action="decon" data-id="${escapeText(s.id)}">DECON</button>` : ""}
-                <button class="btn-mini approve ${disabledClass}" data-action="approve" data-id="${escapeText(s.id)}">APP</button>
-                ${renderHoldButton(s, isFinalized)}
-                <button class="btn-mini deny ${disabledClass}" data-action="deny" data-id="${escapeText(s.id)}">DENY</button>
+                ${s.state !== "DEPARTED" ? `<button class="btn-mini approve ${disabledClass}" data-action="approve" data-id="${escapeText(s.id)}">APP</button>` : ""}
+                ${s.state !== "DEPARTED" ? renderHoldButton(s, isFinalized) : ""}
+                ${s.state !== "DEPARTED" ? `<button class="btn-mini deny ${disabledClass}" data-action="deny" data-id="${escapeText(s.id)}">DENY</button>` : ""}
               </div>
             </td>
           </tr>
@@ -4892,7 +5576,11 @@ button.btn-error {
 		ui.dockList.innerHTML = (g.dockSlots || []).map(slot => {
         const ship = slot.shipId ? findShipById(g, slot.shipId) : null;
         const shipName = ship ? ship.id : "--";
-        const dockState = ship?.dockState || slot.state;
+        let dockState = ship?.dockState || slot.state;
+        // If ship is blocked in servicing, show special message
+        if (ship?.servicingBlocked && dockState === "SERVICING") {
+          dockState = "CANNOT REFUEL - FUEL MANIFOLD OFFLINE";
+        }
         const deconTime = deconCountdown(ship);
 
         // NEW: Calculate exposure countdown
@@ -4921,7 +5609,28 @@ button.btn-error {
         `;
       }).join("");
 
-        ui.relayList.innerHTML = (g.relays || []).map(r => {
+        // Add relay health banner before relay list
+        const healthState = computeRelayHealthState(g);
+        let healthBanner = "";
+        if (healthState.state !== "HEALTHY") {
+          const healthCls = healthState.state === "CRITICAL" || healthState.state === "SEVERING" ? "bad" : "warn";
+          const age = healthState.state === "CRITICAL" ?
+            Math.floor((Date.now() - g.relayHealth.criticalSince) / 1000) : 0;
+          const remaining = healthState.state === "CRITICAL" ?
+            Math.max(0, Math.ceil((RELAY_CRITICAL_GRACE_MS - (age * 1000)) / 1000)) : 0;
+
+          healthBanner = `
+            <div class="status-row health-warning ${healthCls}">
+              <div class="status-name">RELAY NETWORK HEALTH</div>
+              <div class="status-right">
+                <span class="pill ${healthCls}">${healthState.state}</span>
+                ${healthState.state === "CRITICAL" ? `<span class="status-meta">${remaining}s TO FAILURE</span>` : ""}
+              </div>
+            </div>
+          `;
+        }
+
+        ui.relayList.innerHTML = healthBanner + (g.relays || []).map(r => {
           const displayStatus = (r.offline && !r.hiddenOffline) ? "OFFLINE" : r.status;
           const pr = pillForState(RELAY_STATES, displayStatus);
           const ackMeta = r.awaitingAck ? `<span class="status-meta">ACK REQUIRED</span>` : "";
@@ -5049,13 +5758,13 @@ button.btn-error {
 
       if (!runtime.multiplayer.enabled) {
         light.className = "connection-light offline";
-        text.textContent = "OFFLINE MODE";
+        text.textContent = "GATE NETWORK DISCONNECTED // LOCAL MONITORING ONLY";
         return;
       }
 
       const count = runtime.multiplayer.playerCount;
       light.className = "connection-light online";
-      text.textContent = `CONNECTED NODES: ${String(count).padStart(2, "0")}`;
+      text.textContent = `GATE NETWORK ONLINE // CONNECTED NODES: ${String(count).padStart(2, "0")}`;
 
       // Flash based on change type
       if (changeType === "join" && count > runtime.multiplayer.lastPlayerCount) {
@@ -5230,6 +5939,7 @@ button.btn-error {
         clearingEndsAt: 0,
         wasCleared: false,
         queryPending: false,
+        servicingBlocked: false,
         effects: [],
         hazardDeadline: 0,
         obscured: false,
@@ -5593,6 +6303,25 @@ button.btn-error {
       }
 
       if (action === "approve") {
+        // Check if DOCKING CLAMP ARRAY is online for inbound ships
+        if (s.dir === "IN") {
+          const dockClamp = getFacility(g, "DOCK");
+          if (!dockClamp || dockClamp.status !== "ONLINE") {
+            consoleLine(`APPROVAL REFUSED: DOCKING CLAMP ARRAY OFFLINE`, "warn");
+            if (g.id === runtime.activeGateId) {
+              eventLine(`CANNOT APPROVE FOR DOCK - DOCKING CLAMP ARRAY OFFLINE`, "warn");
+            }
+            playSfx("error");
+            // Add error shake animation to the ship row
+            const shipElement = document.querySelector(`tr:has([data-id="${s.id}"])`);
+            if (shipElement) {
+              shipElement.classList.add("decision-locked-error");
+              setTimeout(() => shipElement.classList.remove("decision-locked-error"), 600);
+            }
+            return;
+          }
+        }
+
         if (s.transponder !== "VALID") {
           s.state = "CLEARED";
           s.reason = "TRANSPONDER OVERRIDE";
@@ -6154,6 +6883,24 @@ button.btn-error {
           slot.phaseEndsAt = now + randRange(3 * 60, 8 * 60) * 1000;
           if (g.id === runtime.activeGateId) eventLine(`DECON COMPLETE: ${ship.id} (SERVICING)`, "dim");
         } else if (slot.state === "SERVICING" && now >= slot.phaseEndsAt) {
+          // Check if FUEL MANIFOLD is online before allowing servicing to complete
+          const fuelManifold = getFacility(g, "FUEL");
+          if (!fuelManifold || fuelManifold.status !== "ONLINE") {
+            // Keep ship stuck in SERVICING until FUEL MANIFOLD comes online
+            if (!ship.servicingBlocked) {
+              // First time blocked - show event
+              ship.servicingBlocked = true;
+              if (g.id === runtime.activeGateId) {
+                eventLine(`SERVICING BLOCKED: ${ship.id} (FUEL MANIFOLD OFFLINE)`, "warn");
+              }
+            }
+            continue;
+          }
+          // FUEL MANIFOLD is online - check if ship was previously blocked
+          if (ship.servicingBlocked && g.id === runtime.activeGateId) {
+            eventLine(`SERVICING RESUMED: ${ship.id} (FUEL MANIFOLD ONLINE)`, "dim");
+          }
+          ship.servicingBlocked = false;
           slot.state = "CLEARING";
           ship.state = "CLEARING";
           ship.dockState = "CLEARING";
@@ -6219,6 +6966,7 @@ button.btn-error {
           r.awaitingAck = true;
           r.ackDueAt = now + RELAY_ACK_WINDOW_MS;
           r.lastRelayPingAt = now;
+          g.relayHealth.unackedPings = (g.relays || []).filter(r => r.awaitingAck && !r.offline).length;
           pushPacket(g, `PING ${r.id}`);
           if (g.id === runtime.activeGateId) eventLine(`RELAY ${r.id}: PING`, "warn");
         }
@@ -6261,7 +7009,12 @@ button.btn-error {
       g.packets ||= [];
       g.packets.push({ ts: Date.now(), text });
       g.packets = g.packets.slice(-8);
-      if (g.id === runtime.activeGateId) playSfx("blip");
+      if (g.id === runtime.activeGateId) {
+        // Play "ping" for relay PING/ACK packets, "blip" for everything else
+        const isPingPacket = /^(PING|ACK)\s+(RELAY-\d+|GATE-\d+)|^(RELAY-\d+|GATE-\d+)\s+(PING|ACK)/i.test(text) ||
+                             /PING FROM/.test(text);
+        playSfx(isPingPacket ? "ping" : "blip");
+      }
     }
 
     function checkOutboundDeadlines(g, s) {
@@ -6546,9 +7299,12 @@ button.btn-error {
                 if (g.id === runtime.activeGateId) eventLine(`WAITING TO DOCK: ${s.id} (NO SLOT)`, "warn");
               }
             } else {
-              s.state = "HOLD";
-              s.reason = s.reason || "NO CLEARANCE";
-              if (g.id === runtime.activeGateId) eventLine(`AUTO HOLD: ${s.id} (NO CLEARANCE)`, "warn");
+              // Inbound ship timer expired without approval/denial - remove from queue with -5 CR penalty
+              s.state = "DENIED";
+              s.reason = "TIMEOUT";
+              s.doneAt = Date.now();
+              bumpStat(g, "inboundTimeouts");
+              // No event message - penalty applied silently, visible only in wage total
             }
           } else {
             if (s.state === "CLEARED") {
@@ -6582,42 +7338,6 @@ button.btn-error {
     }
 
     
-    // ---------------------------
-    // Flavor: inbound gate pings (optional ACKNOWLEDGE, no gameplay effect)
-    // ---------------------------
-    function scheduleNextInboundGatePing(g, now) {
-      // "Occasional" = every ~2.5–7 minutes on average
-      g.nextInboundGatePingAt = now + randRange(150 * 1000, 420 * 1000);
-    }
-
-    function pickOtherGateId(excludeId) {
-      const pool = (runtime.catalog || []).filter(id => id && id !== excludeId);
-      if (pool.length) return pool[Math.floor(Math.random() * pool.length)];
-      // Fallback: generate a plausible id if we're in a weird state with a single-node catalog.
-      let id = generateGateId();
-      let tries = 0;
-      while (id === excludeId && tries < 5) { id = generateGateId(); tries++; }
-      return id;
-    }
-
-    function maybeInboundGatePing(g, now) {
-      // Only surface these on the currently viewed node to avoid spamming the shared event log.
-      if (g.id !== runtime.activeGateId) return;
-
-      if (!g.nextInboundGatePingAt) scheduleNextInboundGatePing(g, now);
-      if (now < g.nextInboundGatePingAt) return;
-
-      const fromId = pickOtherGateId(g.id);
-      (g.inboundGatePings ||= []).push({ from: fromId, at: now, acknowledged: false });
-      if (g.inboundGatePings.length > 12) g.inboundGatePings.splice(0, g.inboundGatePings.length - 12);
-
-      eventLine(`INBOUND PING: ${fromId} -> ${g.id}`, "dim");
-      pushPacket(g, `PING FROM ${fromId}`);
-      playSfx("beep");
-
-      scheduleNextInboundGatePing(g, now);
-    }
-
     function checkUrgentDeadlineAudio(g) {
       if (g.id !== runtime.activeGateId) return;
 
@@ -6662,13 +7382,87 @@ function tickGate(g) {
       tickResources(g);
       driftConcourse(g);
       driftRelays(g);
-      maybeInboundGatePing(g, now);
-      const relaysDown = allRelaysDown(g) && !hasActiveRelayWorkOrders(g);
-      if (relaysDown) {
-        if (!g.relayFailureSince) g.relayFailureSince = now;
-      } else {
-        g.relayFailureSince = 0;
+
+      // Enhanced relay health state tracking
+      const healthState = computeRelayHealthState(g);
+
+      // Track state transitions
+      if (g.relayHealth.lastHealthState !== healthState.state) {
+        const prevState = g.relayHealth.lastHealthState;
+        g.relayHealth.lastHealthState = healthState.state;
+
+        // State change logic
+        if (healthState.state === "DEGRADED" && !g.relayHealth.degradedSince) {
+          g.relayHealth.degradedSince = now;
+          if (g.id === runtime.activeGateId) {
+            eventLine("RELAY HEALTH: DEGRADED (REDUCED REDUNDANCY)", "warn");
+            playSfx("error");
+          }
+        } else if (healthState.state === "CRITICAL") {
+          if (!g.relayHealth.criticalSince) {
+            g.relayHealth.criticalSince = now;
+            if (g.id === runtime.activeGateId) {
+              eventLine("RELAY HEALTH: CRITICAL (IMMINENT FAILURE)", "bad");
+              playSfx("offline");
+            }
+          }
+          // Warning at 30s and 15s before loss
+          const criticalAge = now - g.relayHealth.criticalSince;
+          const warningInterval = 15000; // 15 seconds
+          if (criticalAge > 0 && (criticalAge % warningInterval < 1200)) { // Within one tick window
+            if (now - g.relayHealth.lastWarningAt > 14000) { // Don't spam
+              const remaining = Math.max(0, Math.ceil((RELAY_CRITICAL_GRACE_MS - criticalAge) / 1000));
+              if (g.id === runtime.activeGateId) {
+                eventLine(`RELAY FAILURE WARNING: ${remaining}s TO DISCONNECT`, "bad");
+                playSfx("error");
+              }
+              g.relayHealth.lastWarningAt = now;
+            }
+          }
+        } else if (healthState.state === "SEVERING") {
+          if (!g.relayFailureSince) {
+            g.relayFailureSince = now;
+            if (g.id === runtime.activeGateId) {
+              eventLine("RELAY NETWORK: ALL RELAYS OFFLINE", "bad");
+              playSfx("offline");
+            }
+          }
+        } else if (healthState.state === "HEALTHY") {
+          // Recovery
+          if (prevState !== "HEALTHY" && g.id === runtime.activeGateId) {
+            eventLine("RELAY HEALTH: RESTORED", "good");
+            playSfx("restore");
+          }
+          g.relayHealth.degradedSince = 0;
+          g.relayHealth.criticalSince = 0;
+          g.relayFailureSince = 0;
+        }
       }
+
+      // CRITICAL state with timer (work orders don't prevent this)
+      if (healthState.state === "CRITICAL") {
+        const criticalAge = now - g.relayHealth.criticalSince;
+        if (criticalAge >= RELAY_CRITICAL_GRACE_MS) {
+          // Transition to SEVERING after critical grace period expires
+          g.relayFailureSince = now;
+          if (g.id === runtime.activeGateId) {
+            eventLine("RELAY NETWORK: CRITICAL FAILURE TIMEOUT", "bad");
+          }
+        }
+      }
+
+      // SEVERING state final countdown
+      if (healthState.state === "SEVERING") {
+        if (!g.relayFailureSince) g.relayFailureSince = now;
+      }
+
+      // Reset failure timer if not in SEVERING state
+      if (healthState.state !== "SEVERING") {
+        if (healthState.state !== "CRITICAL" || (now - g.relayHealth.criticalSince) < RELAY_CRITICAL_GRACE_MS) {
+          g.relayFailureSince = 0;
+        }
+      }
+
       maybeGenerateReport(g);
       maybeFlavorEvent(g);
       recomputeHealth(g);
@@ -7168,7 +7962,7 @@ function tickGate(g) {
 
     function cmdPingPlayer(targetGateId) {
       if (!runtime.multiplayer.enabled) {
-        consoleLine("MULTIPLAYER: OFFLINE", "warn");
+        consoleLine("GATE NETWORK: OFFLINE", "warn");
         return;
       }
 
@@ -7177,7 +7971,7 @@ function tickGate(g) {
       // Validate target exists
       const targetPlayer = runtime.multiplayer.players.find(p => p.gateId === targetGateId);
       if (!targetPlayer) {
-        consoleLine(`PLAYER NOT FOUND: ${targetGateId}`, "bad");
+        consoleLine(`OPERATOR NOT FOUND: ${targetGateId}`, "bad");
         return;
       }
 
@@ -7220,7 +8014,7 @@ function tickGate(g) {
 
     function cmdAckPlayer(sourceGateId) {
       if (!runtime.multiplayer.enabled) {
-        consoleLine("MULTIPLAYER: OFFLINE", "warn");
+        consoleLine("GATE NETWORK: OFFLINE", "warn");
         return;
       }
 
@@ -7397,7 +8191,6 @@ function tickGate(g) {
 
     
     function cmdPingGate(gateIdRaw) {
-      const g = activeGate();
       const gateId = (gateIdRaw || "").toUpperCase().trim();
 
       // Accept the same general pattern your generator uses, plus common two-letter suffixes (e.g. GATE-1234-AA).
@@ -7409,21 +8202,11 @@ function tickGate(g) {
         return;
       }
 
-      // Gate pings simulate cross-corridor routing: much higher latency than local relay pings.
-      const latency = randRange(2400, 9800);
-
-      consoleLine(`PING SENT: ${gateId}`, "dim");
-      pushPacket(g, `PING GATE ${gateId}`);
-
-      setTimeout(() => {
-        consoleLine(`PING ACK: ${gateId} (${latency}ms)`, "good");
-        pushPacket(g, `ACK GATE ${gateId} ${latency}ms`);
-      }, latency);
+      // Delegate to player PING handler
+      return cmdPingPlayer(gateId);
     }
 
     function cmdAckGate(gateId) {
-      const g = activeGate();
-
       // Validate gate ID pattern
       const valid = /^GATE-\d{4}(?:-[A-Z]{1,8})?$/.test(gateId);
       if (!valid) {
@@ -7432,22 +8215,8 @@ function tickGate(g) {
         return;
       }
 
-      // Mark as acknowledged in inboundGatePings array
-      const list = (g.inboundGatePings || []);
-      const hit = [...list].reverse().find(p => p && String(p.from || "").toUpperCase() === gateId && !p.acknowledged)
-               || [...list].reverse().find(p => p && String(p.from || "").toUpperCase() === gateId);
-      if (hit) hit.acknowledged = true;
-
-      consoleLine(`ACKNOWLEDGED: ${gateId}`, "good");
-      eventLine(`ACKNOWLEDGED: ${gateId}`, "dim");
-      pushPacket(g, `ACKNOWLEDGE ${gateId}`);
-
-      // Simulate connection time response (2400-9800ms)
-      const connectionTime = randRange(2400, 9800);
-      setTimeout(() => {
-        consoleLine(`CONNECTION TIME RESPONSE: ${gateId} (${connectionTime}ms)`, "good");
-        pushPacket(g, `CONNECTION TIME ${gateId} ${connectionTime}ms`);
-      }, connectionTime);
+      // Delegate to player ACK handler
+      return cmdAckPlayer(gateId);
     }
 
 function cmdPingRelay(id) {
@@ -7549,6 +8318,7 @@ function cmdPingRelay(id) {
         relay.ackDueAt = 0;
         relay.lastAckAt = now;
         bumpStat(g, "relayAcks");
+        g.relayHealth.unackedPings = (g.relays || []).filter(r => r.awaitingAck && !r.offline).length;
       }
       consoleLine(`ACK SENT: ${relay.id}`, "dim");
       pushPacket(g, `ACK ${relay.id}`);
@@ -7642,7 +8412,9 @@ function cmdPingRelay(id) {
       consoleLine("  SFX ON|OFF|TOGGLE", "dim");
       consoleLine("  MUSIC ON|OFF|TOGGLE", "dim");
       consoleLine("  VFX REG|LOW|TOGGLE", "dim");
-      consoleLine("  THEME GREEN|RED|BLUE|PURPLE|AMBER|CYAN|BLACK|LIGHT", "dim");
+      consoleLine("  THEME GREEN|RED|BLUE|PURPLE|AMBER|CYAN|ORANGE|BLACK|LIGHTBLUE|LIGHTRED|LIGHTGREEN|PAPER", "dim");
+      consoleLine("  CODE - USE WITH ACCESS CODE", "dim");
+      consoleLine("  ZOOM UP | ZOOM DOWN | ZOOM RESET | ZOOM <50-200>%", "dim");
       consoleLine("  CLEAR (console)", "dim");
       consoleLine("  CLEAR EVENTS", "dim");
     }
@@ -7983,13 +8755,66 @@ function cmdPingRelay(id) {
         return;
       }
 
+      if (cmd === "CODE") {
+        const code = (parts[1] || "").toUpperCase();
+        if (!code) {
+          consoleLine("USAGE: CODE <ACCESS CODE>", "warn");
+          return;
+        }
+
+        const codeMap = {
+          "1024": { type: "theme", value: "pinkblack", name: "PINK & BLACK" },
+          "14UC": { type: "theme", value: "browngold", name: "BROWN & GOLD" }
+        };
+
+        const unlock = codeMap[code];
+        if (!unlock) {
+          consoleLine("ACCESS CODE INVALID", "bad");
+          playSfx("error");
+          return;
+        }
+
+        if (unlock.type === "theme") {
+          const wasUnlocked = unlockTheme(unlock.value);
+          if (wasUnlocked) {
+            consoleLine(`THEME UNLOCKED: ${unlock.name}`, "good");
+            consoleLine(`USE 'THEME ${unlock.value.toUpperCase()}' TO ACTIVATE`, "dim");
+            populateThemeDropdown();
+            playSfx("charged");
+          } else {
+            consoleLine(`THEME ALREADY UNLOCKED: ${unlock.name}`, "dim");
+          }
+        }
+        return;
+      }
+
       if (cmd === "THEME") {
         const t = (parts[1] || "").toLowerCase();
-        if (!["green","red","blue","purple","amber","black","light"].includes(t)) {
-          consoleLine("USAGE: THEME GREEN|RED|BLUE|PURPLE|AMBER|CYAN|BLACK|LIGHT", "warn");
+        if (!isThemeUnlocked(t)) {
+          const available = getAllAvailableThemes().map(id => id.toUpperCase()).join("|");
+          consoleLine(`USAGE: THEME ${available}`, "warn");
           return;
         }
         setTheme(t);
+        populateThemeDropdown();
+        return;
+      }
+
+      if (cmd === "ZOOM") {
+        const arg = (parts[1] || "").toUpperCase();
+        if (arg === "UP") {
+          return cmdFontUp();
+        } else if (arg === "DOWN") {
+          return cmdFontDown();
+        } else if (arg === "RESET") {
+          return cmdFontReset();
+        } else if (arg.endsWith("%")) {
+          const percent = parseInt(arg.slice(0, -1), 10);
+          if (!isNaN(percent)) {
+            return cmdFontSet(percent);
+          }
+        }
+        consoleLine("USAGE: ZOOM UP | ZOOM DOWN | ZOOM RESET | ZOOM <50-200>%", "warn");
         return;
       }
 
@@ -8006,7 +8831,7 @@ function cmdPingRelay(id) {
 
       if (cmd === "ACTIVE") {
         if (!runtime.multiplayer.enabled) {
-          consoleLine("MULTIPLAYER: OFFLINE", "warn");
+          consoleLine("GATE NETWORK: OFFLINE", "warn");
           return;
         }
 
@@ -8027,7 +8852,7 @@ function cmdPingRelay(id) {
 
       if (cmd === "MSG") {
         if (!runtime.multiplayer.enabled) {
-          consoleLine("MULTIPLAYER: OFFLINE", "warn");
+          consoleLine("GATE NETWORK: OFFLINE", "warn");
           return;
         }
 
@@ -8044,6 +8869,8 @@ function cmdPingRelay(id) {
         }
 
         const g = activeGate();
+        const senderHealthState = computeRelayHealthState(g);
+        const senderScore = senderHealthState.score;
         const msg = {
           type: "message",
           timestamp: Date.now(),
@@ -8051,7 +8878,8 @@ function cmdPingRelay(id) {
             gateId: g.id,
             operatorCallsign: runtime.operatorCallsign || "OPERATOR",
             text: text,
-            recipients: "all"
+            recipients: "all",
+            senderRelayScore: senderScore
           }
         };
 
@@ -8063,7 +8891,7 @@ function cmdPingRelay(id) {
 
       if (cmd === "DND") {
         if (!runtime.multiplayer.enabled) {
-          consoleLine("MULTIPLAYER: OFFLINE", "warn");
+          consoleLine("GATE NETWORK: OFFLINE", "warn");
           return;
         }
 
@@ -8379,8 +9207,21 @@ function cmdPingRelay(id) {
     }
 
     function severedRestart() {
+      // Notify multiplayer that this operator is going offline
+      sendGameStateChange(false);
+
+      // Preserve audio and VFX preferences
+      const sfxEnabled = localStorage.getItem(LS.sfxEnabled);
+      const musicEnabled = localStorage.getItem(LS.musicEnabled);
+      const vfxEnabled = localStorage.getItem(LS.vfxEnabled);
+
       // Clear all localStorage
       localStorage.clear();
+
+      // Restore audio and VFX preferences
+      if (sfxEnabled !== null) localStorage.setItem(LS.sfxEnabled, sfxEnabled);
+      if (musicEnabled !== null) localStorage.setItem(LS.musicEnabled, musicEnabled);
+      if (vfxEnabled !== null) localStorage.setItem(LS.vfxEnabled, vfxEnabled);
 
       // Randomize theme
       randomizeTheme();
@@ -8408,6 +9249,7 @@ function cmdPingRelay(id) {
     if (ui.btnShiftcompleteReset) ui.btnShiftcompleteReset.addEventListener("click", () => setResetConfirmOpen(true));
 
     loadTheme();
+    loadFontScale();
 
     let didBoot = false;
     let startInProgress = false;
@@ -8461,10 +9303,15 @@ function cmdPingRelay(id) {
     updateDataResetButtonVisibility();
 
     function setHelpOpen(open) {
-      if (!ui.helpPanel || !ui.btnHelp) return;
+      if (!ui.helpPanel) return;
       ui.helpPanel.classList.toggle("open", open);
       ui.helpPanel.setAttribute("aria-hidden", open ? "false" : "true");
-      ui.btnHelp.setAttribute("aria-expanded", open ? "true" : "false");
+      if (ui.btnHelp) {
+        ui.btnHelp.setAttribute("aria-expanded", open ? "true" : "false");
+      }
+      if (ui.btnStartHelp) {
+        ui.btnStartHelp.setAttribute("aria-expanded", open ? "true" : "false");
+      }
     }
 
     function setResetConfirmOpen(open) {
@@ -8535,12 +9382,18 @@ function cmdPingRelay(id) {
         }
         keysToRemove.forEach(key => localStorage.removeItem(key));
 
-        // Clear other saved data (but keep operator name, theme, and audio preferences)
+        // Clear other saved data (but keep audio and VFX preferences)
         localStorage.removeItem(LS.shiftMs);
         localStorage.removeItem(LS.shiftCompleteShown);
         localStorage.removeItem(LS.gateList);
         localStorage.removeItem(LS.gateCurrent);
         localStorage.removeItem(LS.collapsedPanels);
+        localStorage.removeItem(LS.unlockedThemes);
+        localStorage.removeItem(LS.operatorCallsign);
+        localStorage.removeItem(LS.theme);
+
+        // Randomize theme
+        randomizeTheme();
 
         // Update button visibility
         updateDataResetButtonVisibility();
@@ -8554,13 +9407,18 @@ function cmdPingRelay(id) {
         setHelpOpen(!ui.helpPanel.classList.contains("open"));
       });
     }
+    if (ui.btnStartHelp && ui.helpPanel) {
+      ui.btnStartHelp.addEventListener("click", () => {
+        setHelpOpen(!ui.helpPanel.classList.contains("open"));
+      });
+    }
     if (ui.helpDismiss) {
       ui.helpDismiss.addEventListener("click", () => setHelpOpen(false));
     }
     document.addEventListener("click", (e) => {
       if (!ui.helpPanel || !ui.btnHelp) return;
       if (!ui.helpPanel.classList.contains("open")) return;
-      if (ui.helpPanel.contains(e.target) || ui.btnHelp.contains(e.target)) return;
+      if (ui.helpPanel.contains(e.target) || ui.btnHelp.contains(e.target) || (ui.btnStartHelp && ui.btnStartHelp.contains(e.target))) return;
       setHelpOpen(false);
     });
     document.addEventListener("keydown", (e) => {
@@ -8674,6 +9532,8 @@ function cmdPingRelay(id) {
     async function boot() {
       await loadSaveFromHash();
       loadTheme();
+      populateThemeDropdown();
+      loadFontScale();
       loadCollapsedPanels();
       runtime.operatorCallsign = safeStorageGet(LS.operatorCallsign) || "";
       updateOperatorLabel();
@@ -8743,7 +9603,7 @@ function cmdPingRelay(id) {
     // ---------------------------
 
     function initMultiplayer() {
-      const serverUrl = safeStorageGet(LS.multiplayerServer) || "ws://localhost:8080";
+      const serverUrl = safeStorageGet(LS.multiplayerServer) || "wss://thequietend.com/ws";
       runtime.multiplayer.serverUrl = serverUrl;
 
       try {
@@ -8781,7 +9641,7 @@ function cmdPingRelay(id) {
       if (runtime.multiplayer.heartbeatTimer) clearInterval(runtime.multiplayer.heartbeatTimer);
       runtime.multiplayer.heartbeatTimer = setInterval(sendHeartbeat, 30000);
 
-      eventLine("MULTIPLAYER: CONNECTED", "good");
+      eventLine("GATE NETWORK: CONNECTED", "good");
     }
 
     function onMultiplayerMessage(event) {
@@ -8805,7 +9665,7 @@ function cmdPingRelay(id) {
       }
 
       updateConnectionIndicator();
-      eventLine("MULTIPLAYER: DISCONNECTED", "warn");
+      eventLine("GATE NETWORK: DISCONNECTED", "warn");
 
       // Auto-reconnect
       attemptReconnect();
@@ -8817,14 +9677,14 @@ function cmdPingRelay(id) {
 
     function attemptReconnect() {
       if (runtime.multiplayer.reconnectAttempts >= 3) {
-        eventLine("MULTIPLAYER: RECONNECT FAILED", "bad");
+        eventLine("GATE NETWORK: RECONNECT FAILED", "bad");
         return;
       }
 
       runtime.multiplayer.reconnectAttempts++;
       const delay = Math.min(5000 * runtime.multiplayer.reconnectAttempts, 15000);
 
-      eventLine(`MULTIPLAYER: RECONNECTING IN ${delay/1000}s`, "dim");
+      eventLine(`GATE NETWORK: RECONNECTING IN ${delay/1000}s`, "dim");
 
       runtime.multiplayer.reconnectTimer = setTimeout(() => {
         initMultiplayer();
@@ -8839,6 +9699,23 @@ function cmdPingRelay(id) {
         type: "heartbeat",
         timestamp: Date.now(),
         data: { gateId: g.id }
+      };
+
+      runtime.multiplayer.ws.send(JSON.stringify(msg));
+    }
+
+    function sendGameStateChange(gameActive, reason = null) {
+      if (!runtime.multiplayer.ws || runtime.multiplayer.ws.readyState !== WebSocket.OPEN) return;
+
+      const g = activeGate();
+      const msg = {
+        type: "game_state_change",
+        timestamp: Date.now(),
+        data: {
+          gateId: g.id,
+          gameActive: gameActive,
+          reason: reason
+        }
       };
 
       runtime.multiplayer.ws.send(JSON.stringify(msg));
@@ -8875,7 +9752,13 @@ function cmdPingRelay(id) {
       runtime.multiplayer.pingMatrix = data.pingMatrix || {};
 
       updateConnectionIndicator();
-      eventLine(`MULTIPLAYER: ACTIVE (${data.playerCount} NODES)`, "good");
+      eventLine(`GATE NETWORK: ACTIVE (${data.playerCount} NODES)`, "good");
+
+      // Send game state: active if game is started and not severed/completed
+      const isGameActive = document.body.classList.contains("started") &&
+                          !runtime.severed &&
+                          !runtime.shiftCompleteShown;
+      sendGameStateChange(isGameActive);
     }
 
     function handlePlayerList(data) {
@@ -8886,9 +9769,21 @@ function cmdPingRelay(id) {
       updateConnectionIndicator(data.changeType);
 
       if (data.changeType === "join") {
-        eventLine(`PLAYER JOINED (${data.playerCount} NODES)`, "dim");
+        eventLine(`OPERATOR CONNECTED (${data.playerCount} NODES)`, "dim");
       } else if (data.changeType === "leave") {
-        eventLine(`PLAYER LEFT (${data.playerCount} NODES)`, "dim");
+        // Display different messages based on disconnect reason
+        let message;
+        if (data.reason === "shift_complete") {
+          message = `OPERATOR SHIFT COMPLETE: ${data.gateId}`;
+        } else if (data.reason === "severed") {
+          message = `OPERATOR CONNECTION LOST: ${data.gateId} SEVERED`;
+        } else if (data.reason === "reset") {
+          message = `OPERATOR DISCONNECTED: CONNECTION RESET`;
+        } else {
+          // Default message for normal disconnects (page close, refresh, timeout, etc.)
+          message = `OPERATOR DISCONNECTED (${data.playerCount} NODES)`;
+        }
+        eventLine(message, "dim");
       }
     }
 
@@ -8898,7 +9793,7 @@ function cmdPingRelay(id) {
       const g = activeGate();
       eventLine(`PING RECEIVED: ${data.sourceGateId} (${data.sourceOperator})`, "warn");
       pushPacket(g, `PING FROM ${data.sourceGateId}`);
-      playSfx("beep");
+      playSfx("ping");
 
       // Store pending ping for manual ACK
       if (!g.pendingPlayerPings) g.pendingPlayerPings = [];
@@ -8939,30 +9834,91 @@ function cmdPingRelay(id) {
         runtime.multiplayer.pendingPings.delete(data.sourceGateId);
       }
     }
+		// --- Multiplayer: deterministic per-pair "link ping" (1000–9000ms, symmetric) ---
+		function getGatePairPingMs(gateA, gateB) {
+			const a = String(gateA || "").toUpperCase();
+			const b = String(gateB || "").toUpperCase();
+			if (!a || !b || a === b) return 0;
 
+			// 1) If your server provided a pingMatrix, try to use it first (stays consistent with server-side values)
+			const pm = runtime.multiplayer?.pingMatrix || {};
+			const g1 = a < b ? a : b;
+			const g2 = a < b ? b : a;
+
+			const candidates = [
+				pm?.[a]?.[b],
+				pm?.[b]?.[a],
+				pm?.[`${g1}|${g2}`],
+				pm?.[`${g1}-${g2}`],
+				pm?.[`${g1}:${g2}`],
+			];
+
+			for (const v of candidates) {
+				if (typeof v === "number" && Number.isFinite(v)) {
+					const ms = Math.round(v);
+					return Math.max(1000, Math.min(9000, ms));
+				}
+			}
+
+			// 2) Fallback: deterministic hash of the unordered pair => same result on both ends
+			const s = `${g1}|${g2}|TQE_LINKPING`;
+			let h = 2166136261; // FNV-1a
+			for (let i = 0; i < s.length; i++) {
+				h ^= s.charCodeAt(i);
+				h = Math.imul(h, 16777619);
+			}
+			const u = (h >>> 0);
+
+			// 1000..9000 inclusive => 8001 values
+			return 1000 + (u % 8001);
+		}
     function handleMessageReceived(data) {
       if (runtime.multiplayer.dnd.msg || runtime.multiplayer.dnd.all) return;
 
-      // Simulate transmission delay
+      const g = activeGate();
+      const myGateId = g?.id || runtime.activeGateId;
+
+      // Get receiver's relay health score
+      const receiverHealthState = computeRelayHealthState(g);
+      const receiverScore = receiverHealthState.score;
+
+      // Get sender's relay health score
+      const senderScore = data.senderRelayScore || 0;
+
+      // Calculate combined score and apply corruption
+      const combinedScore = senderScore + receiverScore;
+      const corruptedText = corruptMessageText(data.text, combinedScore);
+
+      // Calculate base delay with jitter
+      const baseMs = getGatePairPingMs(myGateId, data.gateId);
+      const jitterMs = Math.round((Math.random() * 200) - 100);
+      const basePingMs = Math.max(1000, Math.min(9000, baseMs + jitterMs));
+
+      // Calculate degradation delay
+      const delayMs = calculateMessageDelayMs(basePingMs, senderScore, receiverScore);
+
       setTimeout(() => {
-        const displayText = `${data.gateId} - ${data.operatorCallsign} - ${data.text}`;
+        const displayText = `${data.gateId} - ${data.operatorCallsign} - ${corruptedText} (${delayMs}ms)`;
         consoleLine(displayText, "dim");
-        eventLine(`MSG FROM ${data.gateId}`, "dim");
-        playSfx("beep");
-      }, data.delay || 0);
+        eventLine(`MSG FROM ${data.gateId} (${delayMs}ms)`, "dim");
+        playSfx("msg");
+      }, delayMs);
     }
 
     function handleMultiplayerError(data) {
-      consoleLine(`MULTIPLAYER ERROR: ${data.message}`, "bad");
+      consoleLine(`GATE NETWORK ERROR: ${data.message}`, "bad");
     }
 
-    function cleanupMultiplayer() {
+    function cleanupMultiplayer(reason = "disconnect") {
       if (runtime.multiplayer.ws && runtime.multiplayer.ws.readyState === WebSocket.OPEN) {
         const g = activeGate();
         const msg = {
           type: "disconnect",
           timestamp: Date.now(),
-          data: { gateId: g.id }
+          data: {
+            gateId: g.id,
+            reason: reason
+          }
         };
         runtime.multiplayer.ws.send(JSON.stringify(msg));
         runtime.multiplayer.ws.close();
@@ -8981,7 +9937,10 @@ function cmdPingRelay(id) {
 
     if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js").catch(() => {});
+        navigator.serviceWorker.register("./sw.js").then(reg => {
+          // Force update check (helps Firefox pick up new version)
+          reg.update();
+        }).catch(() => {});
       });
     }
   </script>
