@@ -1461,6 +1461,57 @@ button.btn-error {
       background: var(--alert);
       box-shadow: 0 0 12px rgba(225, 100, 100, 0.45);
     }
+    /* Connection Indicator */
+    .connection-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-title);
+      letter-spacing: 0.08em;
+    }
+    .connection-light {
+      display: inline-block;
+      width: 8px;
+      height: 6px;
+      border-radius: 2px;
+      background: var(--muted);
+      box-shadow: 0 0 8px rgba(128, 128, 128, 0.3);
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+    .connection-light.online {
+      background: var(--signal);
+      box-shadow: 0 0 10px var(--glow);
+    }
+    .connection-light.offline {
+      background: var(--muted);
+      box-shadow: 0 0 6px rgba(128, 128, 128, 0.2);
+    }
+    .connection-light.flash-yellow {
+      animation: flashYellow 0.6s ease-out;
+    }
+    .connection-light.flash-red {
+      animation: flashRed 0.6s ease-out;
+    }
+    @keyframes flashYellow {
+      0%, 100% {
+        background: var(--signal);
+        box-shadow: 0 0 10px var(--glow);
+      }
+      50% {
+        background: var(--stat);
+        box-shadow: 0 0 16px rgba(210, 169, 90, 0.6);
+      }
+    }
+    @keyframes flashRed {
+      0%, 100% {
+        background: var(--signal);
+        box-shadow: 0 0 10px var(--glow);
+      }
+      50% {
+        background: var(--alert);
+        box-shadow: 0 0 16px rgba(225, 100, 100, 0.6);
+      }
+    }
     .status-right {
       display: inline-flex;
       gap: 6px;
@@ -1927,7 +1978,10 @@ button.btn-error {
       <div class="brand">
         <div class="breadcrumbs"><a href="../">Homepage</a> // Gate Control Terminal</div>
         <h1>Gate Control Terminal</h1>
-        <div class="sub">v.0.23 // LOCAL MONITORING ONLY // RESTRICTED ACCESS</div>
+        <div id="connection-indicator" class="sub connection-indicator">
+          <span class="connection-light"></span>
+          <span id="connection-text">OFFLINE MODE</span>
+        </div>
       </div>
 
       <div class="header-right">
@@ -2583,7 +2637,9 @@ button.btn-error {
       operatorCallsign: "tqe_gate_terminal_operator_callsign",
 			shiftMs: "tqe_gate_terminal_shift_ms",
 		shiftCompleteShown: "tqe_gate_terminal_shift_complete_shown",
-      collapsedPanels: "tqe_gate_terminal_collapsed_panels"
+      collapsedPanels: "tqe_gate_terminal_collapsed_panels",
+      multiplayerServer: "tqe_gate_terminal_multiplayer_server",
+      multiplayerEnabled: "tqe_gate_terminal_multiplayer_enabled"
     };
 
 	function buildGateList(count = 1) {
@@ -3538,6 +3594,25 @@ button.btn-error {
       resumeShiftMs: null,
       skipHashLoad: false,
       operatorCallsign: "",
+      multiplayer: {
+        enabled: false,
+        ws: null,
+        playerId: null,
+        players: [],
+        playerCount: 0,
+        lastPlayerCount: 0,
+        pingMatrix: {},
+        serverUrl: "ws://localhost:8080",
+        reconnectAttempts: 0,
+        reconnectTimer: null,
+        heartbeatTimer: null,
+        dnd: {
+          msg: false,
+          ping: false,
+          all: false
+        },
+        pendingPings: new Map()
+      },
       inlineDetailId: null,
       collapsedPanels: {
         // Main panels
@@ -4964,6 +5039,32 @@ button.btn-error {
       });
 
       ui.alertCount.textContent = String(computeAlerts(g).length);
+    }
+
+    function updateConnectionIndicator(changeType) {
+      const light = document.querySelector(".connection-light");
+      const text = document.getElementById("connection-text");
+
+      if (!light || !text) return;
+
+      if (!runtime.multiplayer.enabled) {
+        light.className = "connection-light offline";
+        text.textContent = "OFFLINE MODE";
+        return;
+      }
+
+      const count = runtime.multiplayer.playerCount;
+      light.className = "connection-light online";
+      text.textContent = `CONNECTED NODES: ${String(count).padStart(2, "0")}`;
+
+      // Flash based on change type
+      if (changeType === "join" && count > runtime.multiplayer.lastPlayerCount) {
+        light.classList.add("flash-yellow");
+        setTimeout(() => light.classList.remove("flash-yellow"), 600);
+      } else if (changeType === "leave" && count < runtime.multiplayer.lastPlayerCount) {
+        light.classList.add("flash-red");
+        setTimeout(() => light.classList.remove("flash-red"), 600);
+      }
     }
 
     function renderAll() {
@@ -6591,7 +6692,10 @@ function tickGate(g) {
         for (const g of runtime.gates.values()) saveGateState(g);
 				saveShiftMsToStorage();
 				window.addEventListener("pagehide", saveShiftMsToStorage);
-				window.addEventListener("beforeunload", saveShiftMsToStorage);
+				window.addEventListener("beforeunload", () => {
+					saveShiftMsToStorage();
+					cleanupMultiplayer();
+				});
       }
 
       renderAll();
@@ -7060,6 +7164,112 @@ function tickGate(g) {
     // ---------------------------
     function findRelay(g, id) {
       return (g.relays || []).find(r => r.id === id) || null;
+    }
+
+    function cmdPingPlayer(targetGateId) {
+      if (!runtime.multiplayer.enabled) {
+        consoleLine("MULTIPLAYER: OFFLINE", "warn");
+        return;
+      }
+
+      const g = activeGate();
+
+      // Validate target exists
+      const targetPlayer = runtime.multiplayer.players.find(p => p.gateId === targetGateId);
+      if (!targetPlayer) {
+        consoleLine(`PLAYER NOT FOUND: ${targetGateId}`, "bad");
+        return;
+      }
+
+      // Check DND
+      if (targetPlayer.dndPing || targetPlayer.dndAll) {
+        consoleLine(`PING FAILED: ${targetGateId} (DND)`, "warn");
+        return;
+      }
+
+      // Send ping to server
+      const msg = {
+        type: "ping_player",
+        timestamp: Date.now(),
+        data: {
+          sourceGateId: g.id,
+          targetGateId: targetGateId
+        }
+      };
+
+      runtime.multiplayer.ws.send(JSON.stringify(msg));
+      consoleLine(`PING SENT: ${targetGateId}`, "dim");
+      pushPacket(g, `PING ${targetGateId}`);
+
+      // Track pending ping with 30-second timeout
+      const timeout = setTimeout(() => {
+        const pending = runtime.multiplayer.pendingPings.get(targetGateId);
+        if (pending && !pending.acked) {
+          runtime.multiplayer.pendingPings.delete(targetGateId);
+          consoleLine(`NO RESPONSE: ${targetGateId}`, "warn");
+          eventLine(`PING TIMEOUT: ${targetGateId}`, "warn");
+        }
+      }, 30000);
+
+      runtime.multiplayer.pendingPings.set(targetGateId, {
+        sentAt: Date.now(),
+        timeout: timeout,
+        acked: false
+      });
+    }
+
+    function cmdAckPlayer(sourceGateId) {
+      if (!runtime.multiplayer.enabled) {
+        consoleLine("MULTIPLAYER: OFFLINE", "warn");
+        return;
+      }
+
+      const g = activeGate();
+
+      // Find pending ping from this source
+      if (!g.pendingPlayerPings) g.pendingPlayerPings = [];
+      const ping = g.pendingPlayerPings.find(p =>
+        p.sourceGateId === sourceGateId && !p.acked
+      );
+
+      if (!ping) {
+        consoleLine(`NO PENDING PING: ${sourceGateId}`, "warn");
+        return;
+      }
+
+      // Mark as ACKed
+      ping.acked = true;
+
+      // Send ACK to server
+      sendPlayerAck(sourceGateId, ping.expectedLatency);
+    }
+
+    function sendPlayerAck(targetGateId, expectedLatency) {
+      if (!runtime.multiplayer.enabled) return;
+
+      const g = activeGate();
+      const actualLatency = expectedLatency + randRange(-20, 20); // Jitter
+
+      const msg = {
+        type: "ack_player",
+        timestamp: Date.now(),
+        data: {
+          sourceGateId: g.id,
+          targetGateId: targetGateId,
+          latency: actualLatency
+        }
+      };
+
+      runtime.multiplayer.ws.send(JSON.stringify(msg));
+      consoleLine(`ACK SENT: ${targetGateId}`, "dim");
+    }
+
+    function getPingLatency(sourceGate, targetGate) {
+      const matrix = runtime.multiplayer.pingMatrix[sourceGate];
+      if (matrix && matrix[targetGate]) {
+        return matrix[targetGate].outbound;
+      }
+      return 300; // Default
     }
 
     function cmdRestoreRelay(id) {
@@ -7619,12 +7829,21 @@ function cmdPingRelay(id) {
         // Backward compatibility: PING GATE <GATE-ID> (deprecated syntax)
         if (arg1 === "GATE" && arg2) {
           consoleLine("NOTE: Use 'PING <GATE-ID>' instead of 'PING GATE <GATE-ID>'", "dim");
+          // Check if multiplayer and if it's a player gate
+          if (runtime.multiplayer.enabled && arg2.startsWith("GATE-")) {
+            return cmdPingPlayer(arg2);
+          }
           return cmdPingGate(arg2);
         }
 
         // No argument provided
         if (!arg1) {
           return consoleLine("USAGE: PING <GATE-ID> | PING <RELAY-ID>", "warn");
+        }
+
+        // NEW: Check if player gate ID (multiplayer)
+        if (arg1.startsWith("GATE-") && runtime.multiplayer.enabled) {
+          return cmdPingPlayer(arg1);
         }
 
         // Resolve the target ID
@@ -7682,6 +7901,11 @@ function cmdPingRelay(id) {
         // Require ID
         if (!arg1) {
           return consoleLine("USAGE: ACK <GATE-ID> | ACK <RELAY-ID>", "warn");
+        }
+
+        // NEW: Check if player gate ID (multiplayer)
+        if (arg1.startsWith("GATE-") && runtime.multiplayer.enabled) {
+          return cmdAckPlayer(arg1);
         }
 
         // Resolve the target ID
@@ -7777,6 +8001,129 @@ function cmdPingRelay(id) {
           clearLog(ui.console);
           consoleLine("CONSOLE CLEARED", "dim");
         }
+        return;
+      }
+
+      if (cmd === "ACTIVE") {
+        if (!runtime.multiplayer.enabled) {
+          consoleLine("MULTIPLAYER: OFFLINE", "warn");
+          return;
+        }
+
+        const players = runtime.multiplayer.players || [];
+        const now = Date.now();
+
+        consoleLine(`ACTIVE NODES (${players.length})`, "dim");
+
+        for (const p of players) {
+          const shiftMs = now - p.shiftStart;
+          const shiftTime = formatHMS(shiftMs);
+          const operator = p.operatorCallsign || "UNKNOWN";
+          consoleLine(`  ${p.gateId} - ${operator} - ${shiftTime}`, "dim");
+        }
+
+        return;
+      }
+
+      if (cmd === "MSG") {
+        if (!runtime.multiplayer.enabled) {
+          consoleLine("MULTIPLAYER: OFFLINE", "warn");
+          return;
+        }
+
+        const text = parts.slice(1).join(" ").trim();
+
+        if (!text) {
+          consoleLine("USAGE: MSG <TEXT>", "warn");
+          return;
+        }
+
+        if (text.length > 160) {
+          consoleLine("MESSAGE TOO LONG (MAX 160 CHARS)", "bad");
+          return;
+        }
+
+        const g = activeGate();
+        const msg = {
+          type: "message",
+          timestamp: Date.now(),
+          data: {
+            gateId: g.id,
+            operatorCallsign: runtime.operatorCallsign || "OPERATOR",
+            text: text,
+            recipients: "all"
+          }
+        };
+
+        runtime.multiplayer.ws.send(JSON.stringify(msg));
+        consoleLine("MESSAGE SENT", "dim");
+
+        return;
+      }
+
+      if (cmd === "DND") {
+        if (!runtime.multiplayer.enabled) {
+          consoleLine("MULTIPLAYER: OFFLINE", "warn");
+          return;
+        }
+
+        const arg = (parts[1] || "").toUpperCase();
+
+        if (!arg) {
+          // Show current DND status
+          const status = [];
+          if (runtime.multiplayer.dnd.all) status.push("ALL");
+          else {
+            if (runtime.multiplayer.dnd.msg) status.push("MSG");
+            if (runtime.multiplayer.dnd.ping) status.push("PING");
+          }
+          const statusText = status.length ? status.join(", ") : "NONE";
+          consoleLine(`DND STATUS: ${statusText}`, "dim");
+          return;
+        }
+
+        let updated = false;
+
+        if (arg === "MSG") {
+          runtime.multiplayer.dnd.msg = !runtime.multiplayer.dnd.msg;
+          runtime.multiplayer.dnd.all = false;
+          updated = true;
+        } else if (arg === "PING") {
+          runtime.multiplayer.dnd.ping = !runtime.multiplayer.dnd.ping;
+          runtime.multiplayer.dnd.all = false;
+          updated = true;
+        } else if (arg === "ALL") {
+          runtime.multiplayer.dnd.all = !runtime.multiplayer.dnd.all;
+          if (runtime.multiplayer.dnd.all) {
+            runtime.multiplayer.dnd.msg = false;
+            runtime.multiplayer.dnd.ping = false;
+          }
+          updated = true;
+        } else {
+          consoleLine("USAGE: DND [MSG|PING|ALL]", "warn");
+          return;
+        }
+
+        if (updated) {
+          const msg = {
+            type: "dnd_update",
+            timestamp: Date.now(),
+            data: {
+              gateId: activeGate().id,
+              dndMsg: runtime.multiplayer.dnd.msg,
+              dndPing: runtime.multiplayer.dnd.ping,
+              dndAll: runtime.multiplayer.dnd.all
+            }
+          };
+          runtime.multiplayer.ws.send(JSON.stringify(msg));
+
+          const status = runtime.multiplayer.dnd.all ? "ALL" :
+                         (runtime.multiplayer.dnd.msg && runtime.multiplayer.dnd.ping ? "MSG, PING" :
+                          runtime.multiplayer.dnd.msg ? "MSG" :
+                          runtime.multiplayer.dnd.ping ? "PING" : "NONE");
+          consoleLine(`DND SET: ${status}`, "dim");
+        }
+
         return;
       }
 
@@ -8385,7 +8732,249 @@ function cmdPingRelay(id) {
         updateMaintenanceCooldownUI();
       }, 250);
 
+      // Initialize multiplayer connection
+      initMultiplayer();
+
       setTimeout(() => ui.cmd.focus(), 150);
+    }
+
+    // ---------------------------
+    // Multiplayer: WebSocket Connection
+    // ---------------------------
+
+    function initMultiplayer() {
+      const serverUrl = safeStorageGet(LS.multiplayerServer) || "ws://localhost:8080";
+      runtime.multiplayer.serverUrl = serverUrl;
+
+      try {
+        const ws = new WebSocket(serverUrl);
+        runtime.multiplayer.ws = ws;
+
+        ws.addEventListener("open", onMultiplayerOpen);
+        ws.addEventListener("message", onMultiplayerMessage);
+        ws.addEventListener("close", onMultiplayerClose);
+        ws.addEventListener("error", onMultiplayerError);
+
+      } catch (err) {
+        console.warn("Multiplayer connection failed:", err);
+        runtime.multiplayer.enabled = false;
+        updateConnectionIndicator();
+      }
+    }
+
+    function onMultiplayerOpen() {
+      const g = activeGate();
+      const msg = {
+        type: "connect",
+        timestamp: Date.now(),
+        data: {
+          gateId: g.id,
+          operatorCallsign: runtime.operatorCallsign || "OPERATOR",
+          shiftStart: runtime.shiftStart
+        }
+      };
+
+      runtime.multiplayer.ws.send(JSON.stringify(msg));
+      runtime.multiplayer.reconnectAttempts = 0;
+
+      // Start heartbeat
+      if (runtime.multiplayer.heartbeatTimer) clearInterval(runtime.multiplayer.heartbeatTimer);
+      runtime.multiplayer.heartbeatTimer = setInterval(sendHeartbeat, 30000);
+
+      eventLine("MULTIPLAYER: CONNECTED", "good");
+    }
+
+    function onMultiplayerMessage(event) {
+      try {
+        const msg = JSON.parse(event.data);
+        handleMultiplayerMessage(msg);
+      } catch (err) {
+        console.error("Failed to parse multiplayer message:", err);
+      }
+    }
+
+    function onMultiplayerClose() {
+      runtime.multiplayer.enabled = false;
+      runtime.multiplayer.playerId = null;
+      runtime.multiplayer.players = [];
+      runtime.multiplayer.playerCount = 0;
+
+      if (runtime.multiplayer.heartbeatTimer) {
+        clearInterval(runtime.multiplayer.heartbeatTimer);
+        runtime.multiplayer.heartbeatTimer = null;
+      }
+
+      updateConnectionIndicator();
+      eventLine("MULTIPLAYER: DISCONNECTED", "warn");
+
+      // Auto-reconnect
+      attemptReconnect();
+    }
+
+    function onMultiplayerError(err) {
+      console.warn("Multiplayer error:", err);
+    }
+
+    function attemptReconnect() {
+      if (runtime.multiplayer.reconnectAttempts >= 3) {
+        eventLine("MULTIPLAYER: RECONNECT FAILED", "bad");
+        return;
+      }
+
+      runtime.multiplayer.reconnectAttempts++;
+      const delay = Math.min(5000 * runtime.multiplayer.reconnectAttempts, 15000);
+
+      eventLine(`MULTIPLAYER: RECONNECTING IN ${delay/1000}s`, "dim");
+
+      runtime.multiplayer.reconnectTimer = setTimeout(() => {
+        initMultiplayer();
+      }, delay);
+    }
+
+    function sendHeartbeat() {
+      if (!runtime.multiplayer.ws || runtime.multiplayer.ws.readyState !== WebSocket.OPEN) return;
+
+      const g = activeGate();
+      const msg = {
+        type: "heartbeat",
+        timestamp: Date.now(),
+        data: { gateId: g.id }
+      };
+
+      runtime.multiplayer.ws.send(JSON.stringify(msg));
+    }
+
+    function handleMultiplayerMessage(msg) {
+      switch (msg.type) {
+        case "welcome":
+          handleWelcome(msg.data);
+          break;
+        case "player_list":
+          handlePlayerList(msg.data);
+          break;
+        case "ping_received":
+          handlePingReceived(msg.data);
+          break;
+        case "ack_received":
+          handleAckReceived(msg.data);
+          break;
+        case "message_received":
+          handleMessageReceived(msg.data);
+          break;
+        case "error":
+          handleMultiplayerError(msg.data);
+          break;
+      }
+    }
+
+    function handleWelcome(data) {
+      runtime.multiplayer.enabled = true;
+      runtime.multiplayer.playerId = data.playerId;
+      runtime.multiplayer.playerCount = data.playerCount;
+      runtime.multiplayer.lastPlayerCount = data.playerCount;
+      runtime.multiplayer.pingMatrix = data.pingMatrix || {};
+
+      updateConnectionIndicator();
+      eventLine(`MULTIPLAYER: ACTIVE (${data.playerCount} NODES)`, "good");
+    }
+
+    function handlePlayerList(data) {
+      runtime.multiplayer.players = data.players || [];
+      runtime.multiplayer.lastPlayerCount = runtime.multiplayer.playerCount;
+      runtime.multiplayer.playerCount = data.playerCount;
+
+      updateConnectionIndicator(data.changeType);
+
+      if (data.changeType === "join") {
+        eventLine(`PLAYER JOINED (${data.playerCount} NODES)`, "dim");
+      } else if (data.changeType === "leave") {
+        eventLine(`PLAYER LEFT (${data.playerCount} NODES)`, "dim");
+      }
+    }
+
+    function handlePingReceived(data) {
+      if (runtime.multiplayer.dnd.ping || runtime.multiplayer.dnd.all) return;
+
+      const g = activeGate();
+      eventLine(`PING RECEIVED: ${data.sourceGateId} (${data.sourceOperator})`, "warn");
+      pushPacket(g, `PING FROM ${data.sourceGateId}`);
+      playSfx("beep");
+
+      // Store pending ping for manual ACK
+      if (!g.pendingPlayerPings) g.pendingPlayerPings = [];
+      g.pendingPlayerPings.push({
+        sourceGateId: data.sourceGateId,
+        sourceOperator: data.sourceOperator,
+        receivedAt: Date.now(),
+        expectedLatency: data.expectedLatency,
+        acked: false
+      });
+
+      // 30-second timeout - show "PING IGNORED" if not ACKed
+      setTimeout(() => {
+        const ping = g.pendingPlayerPings.find(p =>
+          p.sourceGateId === data.sourceGateId && !p.acked
+        );
+        if (ping) {
+          ping.acked = true; // Mark as timed out
+          consoleLine(`PING IGNORED: ${data.sourceGateId}`, "warn");
+          eventLine(`TIMEOUT: PING FROM ${data.sourceGateId}`, "warn");
+        }
+      }, 30000);
+    }
+
+    function handleAckReceived(data) {
+      const pendingPing = runtime.multiplayer.pendingPings.get(data.sourceGateId);
+
+      if (pendingPing && !pendingPing.acked) {
+        clearTimeout(pendingPing.timeout);
+        pendingPing.acked = true;
+
+        const actualRTT = Date.now() - pendingPing.sentAt;
+        consoleLine(`PING ACK: ${data.sourceGateId} (${actualRTT}ms)`, "good");
+
+        const g = activeGate();
+        pushPacket(g, `ACK ${data.sourceGateId} ${actualRTT}ms`);
+
+        runtime.multiplayer.pendingPings.delete(data.sourceGateId);
+      }
+    }
+
+    function handleMessageReceived(data) {
+      if (runtime.multiplayer.dnd.msg || runtime.multiplayer.dnd.all) return;
+
+      // Simulate transmission delay
+      setTimeout(() => {
+        const displayText = `${data.gateId} - ${data.operatorCallsign} - ${data.text}`;
+        consoleLine(displayText, "dim");
+        eventLine(`MSG FROM ${data.gateId}`, "dim");
+        playSfx("beep");
+      }, data.delay || 0);
+    }
+
+    function handleMultiplayerError(data) {
+      consoleLine(`MULTIPLAYER ERROR: ${data.message}`, "bad");
+    }
+
+    function cleanupMultiplayer() {
+      if (runtime.multiplayer.ws && runtime.multiplayer.ws.readyState === WebSocket.OPEN) {
+        const g = activeGate();
+        const msg = {
+          type: "disconnect",
+          timestamp: Date.now(),
+          data: { gateId: g.id }
+        };
+        runtime.multiplayer.ws.send(JSON.stringify(msg));
+        runtime.multiplayer.ws.close();
+      }
+
+      if (runtime.multiplayer.heartbeatTimer) clearInterval(runtime.multiplayer.heartbeatTimer);
+      if (runtime.multiplayer.reconnectTimer) clearTimeout(runtime.multiplayer.reconnectTimer);
+
+      runtime.multiplayer.enabled = false;
+      runtime.multiplayer.ws = null;
+      runtime.multiplayer.players = [];
+      runtime.multiplayer.playerCount = 0;
     }
 
     // Boot is deferred until the operator presses START.
