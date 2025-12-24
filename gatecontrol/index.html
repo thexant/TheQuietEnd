@@ -340,6 +340,25 @@
 			--stat: #ffb3b3;
 		}
 
+		:root[data-theme="halloween"] {
+			--deep: #0a0a0a;
+			--bg-hi: #1a1000;
+
+			--ink: #66ff66;
+			--muted: #88cc66;
+			--signal: #ff8800;
+			--good: #66ff66;
+
+			--line: rgba(255, 136, 0, 0.25);
+			--grid: rgba(102, 255, 102, 0.08);
+			--glow: rgba(255, 136, 0, 0.35);
+
+			--shadowText: rgba(255, 136, 0, 0.18);
+			--shadowText2: rgba(102, 255, 102, 0.12);
+
+			--stat: #ffaa44;
+		}
+
 		/* Light-theme surface fixes (because many backgrounds are hard-coded dark rgba) */
 		:root[data-theme="lightblue"] #game-container,
 		:root[data-theme="lightred"] #game-container,
@@ -469,11 +488,36 @@
       background: radial-gradient(circle at center, var(--bg-hi) 0%, var(--deep) 100%);
       text-align: center;
     }
-    #btn-start-help {
+    .start-controls {
       position: absolute;
       top: calc(var(--frame-pad) + env(safe-area-inset-top) + 12px);
       right: calc(var(--frame-pad) + env(safe-area-inset-right) + 12px);
-      z-index: 1;
+      z-index: 221;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    #start-theme-select {
+      padding: 6px 10px;
+      background: var(--bg-hi);
+      color: var(--fg);
+      border: 1px solid var(--line);
+      font-family: var(--font-mono);
+      font-size: 13px;
+      text-transform: uppercase;
+      cursor: pointer;
+      z-index: 222;
+    }
+    #start-theme-select:hover {
+      background: var(--bg);
+      border-color: var(--accent);
+    }
+    #start-theme-select:focus {
+      outline: 1px solid var(--accent);
+      outline-offset: 2px;
+    }
+    #btn-start-help {
+      z-index: 221;
     }
     .start-card {
       width: min(420px, 82vw);
@@ -572,6 +616,29 @@
       display: none;
     }
     body.start-loading .start-name-label {
+      display: none;
+    }
+    .start-shift-error {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-family: var(--font-title);
+      color: var(--alert);
+      text-align: center;
+      min-height: 1.2em;
+      padding: 8px 12px;
+      margin: 4px 0;
+      display: block;
+      width: 100%;
+      background: rgba(225, 100, 100, 0.1);
+      border: 1px solid rgba(225, 100, 100, 0.3);
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .start-shift-error:empty {
+      display: none;
+    }
+    body.start-loading .start-shift-error {
       display: none;
     }
     .start-loading-text {
@@ -778,7 +845,7 @@
       align-items: center;
       justify-content: center;
       background: radial-gradient(circle at center, rgba(10, 6, 8, 0.92) 0%, rgba(0,0,0,0.98) 70%);
-      z-index: 180;
+      z-index: 240;
     }
     body.resetting #confirm-reset-overlay { display: flex; }
 
@@ -889,6 +956,114 @@
       background: rgba(255, 68, 68, 0.1);
       border: 1px solid rgba(255, 68, 68, 0.3);
       border-radius: 4px;
+    }
+
+    /* Shift Time Modal */
+    #shift-time-modal-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, rgba(10, 6, 8, 0.92) 0%, rgba(0,0,0,0.98) 70%);
+      z-index: 225;
+    }
+    body.shift-time-modal-open #shift-time-modal-overlay { display: flex; }
+
+    .shift-time-presets {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 16px 0;
+    }
+
+    .shift-time-preset-btn {
+      min-width: 90px;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      background: rgba(var(--signal-rgb, 100, 180, 255), 0.15);
+      border: 1px solid rgba(var(--signal-rgb, 100, 180, 255), 0.3);
+      color: var(--signal);
+      cursor: pointer;
+      transition: all 0.15s;
+      border-radius: var(--radius);
+    }
+    .shift-time-preset-btn:hover {
+      background: rgba(var(--signal-rgb, 100, 180, 255), 0.25);
+      border-color: var(--signal);
+    }
+    .shift-time-preset-btn.selected {
+      background: rgba(var(--signal-rgb, 100, 180, 255), 0.35);
+      border-color: var(--signal);
+    }
+
+    .shift-time-custom {
+      margin: 20px 0 16px 0;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius);
+    }
+
+    .shift-time-custom-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--signal);
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .shift-time-custom-input-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .shift-time-custom-input {
+      width: 60px;
+      padding: 10px;
+      font-family: var(--font-title);
+      font-size: 1.1rem;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(var(--signal-rgb, 100, 180, 255), 0.3);
+      color: var(--signal);
+      border-radius: var(--radius);
+      transition: all 0.15s;
+    }
+    .shift-time-custom-input:focus {
+      outline: none;
+      border-color: var(--signal);
+      background: rgba(0, 0, 0, 0.5);
+    }
+    .shift-time-custom-input::placeholder {
+      color: rgba(var(--signal-rgb, 100, 180, 255), 0.3);
+    }
+
+    .shift-time-custom-separator {
+      font-size: 0.9rem;
+      color: var(--signal);
+      opacity: 0.6;
+    }
+
+    .shift-time-error {
+      color: #ff4444;
+      font-size: 0.8rem;
+      text-align: center;
+      margin-top: 12px;
+      min-height: 1.2em;
+    }
+
+    #btn-shift-time {
+      display: none;
+    }
+    #btn-shift-time.visible {
+      display: block;
     }
 
     /* Break Screen */
@@ -1282,6 +1457,21 @@
     button { cursor: pointer; transition: all 0.12s; }
     button:hover { background: rgba(255,255,255,0.05); box-shadow: 0 0 14px var(--glow); }
     button:active { background: var(--signal); color: #000; box-shadow: 0 0 18px var(--signal); }
+    button:disabled,
+    button[disabled] {
+      cursor: not-allowed;
+      opacity: 0.4;
+      color: rgba(255,255,255,0.3);
+      border-color: rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+    }
+    button.btn-disabled {
+      cursor: not-allowed;
+      opacity: 0.4;
+      color: rgba(255,255,255,0.3);
+      border-color: rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.05);
+    }
 
     /* Keyboard navigation selection highlight */
     .kb-selected {
@@ -1652,6 +1842,21 @@ button.btn-error {
     @keyframes pulse-urgent {
       0%, 100% { background-color: rgba(225, 100, 100, 0.08); }
       50% { background-color: rgba(225, 100, 100, 0.15); }
+    }
+
+    /* Dock congestion pulse animation */
+    .status-row.congested-pulse {
+      animation: congestedPulse 1.8s ease-in-out infinite;
+    }
+    @keyframes congestedPulse {
+      0%, 100% {
+        background-color: rgba(210, 169, 90, 0.08);
+        box-shadow: 0 0 6px rgba(210, 169, 90, 0.2);
+      }
+      50% {
+        background-color: rgba(210, 169, 90, 0.16);
+        box-shadow: 0 0 12px rgba(210, 169, 90, 0.35);
+      }
     }
 
     /* Critical exposure pulse animation for docked slots */
@@ -2307,6 +2512,10 @@ button.btn-error {
       animation: none !important;
     }
 
+    body.vfx-low .congested-pulse {
+      animation: none !important;
+    }
+
     body.vfx-low .help-panel,
     body.vfx-low .confirm-overlay {
       backdrop-filter: none !important;
@@ -2327,7 +2536,12 @@ button.btn-error {
 <body>
   <div class="crt-overlay"></div>
   <div id="start-overlay" aria-hidden="false">
-    <button id="btn-start-help" aria-expanded="false" aria-controls="help-panel">HELP</button>
+    <div class="start-controls">
+      <select id="start-theme-select" aria-label="Display theme">
+        <!-- Populated dynamically by populateThemeDropdown() -->
+      </select>
+      <button id="btn-start-help" aria-expanded="false" aria-controls="help-panel">HELP</button>
+    </div>
     <div class="start-card">
       <div class="start-sub">Awaiting Operator Input</div>
       <div id="start-name-slot" class="start-name-slot">
@@ -2335,8 +2549,10 @@ button.btn-error {
         <input id="start-name-input" class="start-name-input" type="text" maxlength="24" aria-label="Operator callsign" />
       </div>
       <button id="btn-start">START</button>
+      <button id="btn-shift-time">SHIFT TIME</button>
       <button id="btn-start-resume">LOAD FROM FILE</button>
       <button id="btn-data-reset">RESET</button>
+      <div id="start-shift-error" class="start-shift-error"></div>
       <input id="start-resume-file" type="file" accept=".tqegate,application/json" hidden>
       <div id="start-loading-text" class="start-loading-text">LOADING: <span id="start-loading-name"></span><span class="start-loading-dots"></span></div>
       <div class="start-status" aria-live="polite">INITIALIZING...</div>
@@ -2352,6 +2568,34 @@ button.btn-error {
       <div class="confirm-actions">
         <button id="btn-data-reset-confirm" class="btn-danger">YES</button>
         <button id="btn-data-reset-cancel">NO</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="shift-time-modal-overlay" aria-hidden="true">
+    <div class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="shift-time-modal-title">
+      <div id="shift-time-modal-title" class="confirm-title">SELECT SHIFT DURATION</div>
+      <div class="shift-time-presets">
+        <button class="shift-time-preset-btn" data-minutes="10">10 MIN</button>
+        <button class="shift-time-preset-btn" data-minutes="30">30 MIN</button>
+        <button class="shift-time-preset-btn" data-minutes="60">1 HR</button>
+        <button class="shift-time-preset-btn" data-minutes="120">2 HR</button>
+        <button class="shift-time-preset-btn" data-minutes="240">4 HR</button>
+        <button class="shift-time-preset-btn" data-minutes="480">8 HR</button>
+      </div>
+      <div class="shift-time-custom">
+        <div class="shift-time-custom-label">CUSTOM DURATION</div>
+        <div class="shift-time-custom-input-wrapper">
+          <input id="shift-time-custom-hours" type="number" min="0" max="23" placeholder="00" maxlength="2" class="shift-time-custom-input" aria-label="Hours" />
+          <span class="shift-time-custom-separator">h</span>
+          <input id="shift-time-custom-minutes" type="number" min="0" max="59" placeholder="00" maxlength="2" class="shift-time-custom-input" aria-label="Minutes" />
+          <span class="shift-time-custom-separator">m</span>
+        </div>
+        <div id="shift-time-error" class="shift-time-error"></div>
+      </div>
+      <div class="confirm-actions">
+        <button id="btn-shift-time-confirm">CONFIRM</button>
+        <button id="btn-shift-time-cancel">CANCEL</button>
       </div>
     </div>
   </div>
@@ -2399,7 +2643,7 @@ button.btn-error {
   <div id="shiftcomplete-overlay">
     <div class="shiftcomplete-card">
       <div class="shiftcomplete-title">Shift Complete</div>
-      <div class="shiftcomplete-sub">Standard 8-Hour Shift Summary</div>
+      <div class="shiftcomplete-sub">Shift Summary</div>
       <div class="shiftcomplete-grid">
         <div class="shiftcomplete-stat">
           <span class="label">Gate</span>
@@ -3032,6 +3276,16 @@ button.btn-error {
             ZOOM [up/down/reset/N%] — Adjust text size
           </div>
         </div>
+				<div class="help-row">
+          <div class="help-key">GATE NETWORK (Multiplayer) Commands</div>
+          <div>
+            MSG [message] — Send a message to the GATE NETWORK<br>
+            ACTIVE — Display connected Gate operators<br>
+            PING GATE-ID — Ping another GATE OPERATOR<br>
+            ACK GATE-ID — Acknowledge a ping from other GATE OPERATORS<br>
+            DND PING|MSG|ALL — Toggle Do Not Disturb mode for Messages, Pings, or both
+          </div>
+        </div>
         <div class="help-row">
           <div class="help-key">Quick Keys</div>
           <div>Enter — Submit command. ArrowUp — Recall last command. Esc — Clear input or dismiss this panel.</div>
@@ -3189,7 +3443,7 @@ button.btn-error {
     // Version & Cache Busting
     // ---------------------------
     const APP_VERSION = "v2.5-2025-24-12";
-    console.log(`%c🛰️ GATE CONTROL TERMINAL ${APP_VERSION}`, "color: #00ff00; font-weight: bold; font-size: 14px;");
+    console.log(`%cGATE CONTROL ${APP_VERSION}`, "color: #00ff00; font-weight: bold; font-size: 14px;");
 
     // ---------------------------
     // Utilities
@@ -3416,6 +3670,7 @@ button.btn-error {
       operatorCallsign: "tqe_gate_terminal_operator_callsign",
 			shiftMs: "tqe_gate_terminal_shift_ms",
 		shiftCompleteShown: "tqe_gate_terminal_shift_complete_shown",
+      shiftDurationMs: "tqe_gate_terminal_shift_duration_ms",
       collapsedPanels: "tqe_gate_terminal_collapsed_panels",
       multiplayerServer: "tqe_gate_terminal_multiplayer_server",
       multiplayerEnabled: "tqe_gate_terminal_multiplayer_enabled",
@@ -3493,6 +3748,7 @@ button.btn-error {
 
     const FACILITY_STATES = [
       { key: "ONLINE", cls: "ok" },
+      { key: "CONGESTED", cls: "warn" },
       { key: "DEGRADED", cls: "warn" },
       { key: "OFFLINE", cls: "bad" }
     ];
@@ -3543,9 +3799,9 @@ button.btn-error {
       facilityWorsenChance: 0.00015,
       relayPacketChance: 0.0045,
       relayShiftChance: 0.0012,
-      relayPingChance: 0.0018,
+      relayPingChance: 0.0020,
       relayDropChance: 0.00025,
-      concourseFade: 0.08,
+      concourseFade: 0.05,
       fuelDrain: 0.010,
       supplyDrainWorkOrder: 0.045,
       supplyDrainDecon: 0.015
@@ -4140,6 +4396,19 @@ button.btn-error {
         s.deconEndsAt ||= 0;
         s.serviceEndsAt ||= 0;
         s.clearingEndsAt ||= 0;
+        s.exposureDeadline ||= 0;
+        s.departureDeadline ||= 0;
+        s.deadlineWarningAt ||= 0;
+        s.deadlineType ||= null;
+        s.urgencyLevel = typeof s.urgencyLevel === "number" ? s.urgencyLevel : 0;
+        s.missedDeadline = typeof s.missedDeadline === "boolean" ? s.missedDeadline : false;
+        s.penaltyApplied = typeof s.penaltyApplied === "boolean" ? s.penaltyApplied : false;
+        s.deadlineWarning = typeof s.deadlineWarning === "boolean" ? s.deadlineWarning : false;
+        s.criticalAudioPlayed = typeof s.criticalAudioPlayed === "boolean" ? s.criticalAudioPlayed : false;
+        s.finalWarningPlayed = typeof s.finalWarningPlayed === "boolean" ? s.finalWarningPlayed : false;
+        s.holdUsed = typeof s.holdUsed === "boolean" ? s.holdUsed : false;
+        s.holdStartTime = typeof s.holdStartTime === "number" ? s.holdStartTime : 0;
+        s.holdDuration = typeof s.holdDuration === "number" ? s.holdDuration : 0;
         s.wasCleared ||= false;
         s.queryPending ||= false;
         s.servicingBlocked ||= false;
@@ -4192,12 +4461,14 @@ button.btn-error {
         return serializeGateForSave(g);
       });
       const shiftMs = Math.max(0, Date.now() - runtime.shiftStart);
+      const shiftDurationMs = loadShiftDuration();
       return {
         v: 1,
         theme: document.documentElement.dataset.theme || localStorage.getItem(LS.theme) || "green",
         gateList,
         activeGateId,
         shiftMs,
+        shiftDurationMs,
         operatorCallsign: runtime.operatorCallsign || "",
         gates,
         severed: !!runtime.severed,
@@ -4221,6 +4492,9 @@ button.btn-error {
       runtime.lastSevered = save.lastSevered || null;
       runtime.resumeShiftMs = typeof save.shiftMs === "number" ? save.shiftMs : 0;
 			safeStorageSet(LS.shiftMs, String(runtime.resumeShiftMs || 0));
+      if (typeof save.shiftDurationMs === "number" && save.shiftDurationMs > 0) {
+        safeStorageSet(LS.shiftDurationMs, String(save.shiftDurationMs));
+      }
       runtime.operatorCallsign = typeof save.operatorCallsign === "string" ? save.operatorCallsign : "";
       safeStorageSet(LS.operatorCallsign, runtime.operatorCallsign);
       updateOperatorLabel();
@@ -4318,6 +4592,16 @@ button.btn-error {
       runtime.skipHashLoad = true;
       safeReplaceState(location.pathname + location.search);
       updateStartNameLabel();
+
+      // Apply the loaded theme to the UI (both selectors and document)
+      const loadedTheme = safeStorageGet(LS.theme);
+      if (loadedTheme) {
+        document.documentElement.dataset.theme = loadedTheme;
+        if (ui.startThemeSelect) ui.startThemeSelect.value = loadedTheme;
+        if (ui.themeSelect) ui.themeSelect.value = loadedTheme;
+        populateThemeDropdown();
+      }
+
       return true;
     }
 
@@ -4350,7 +4634,9 @@ button.btn-error {
       startNameSlot: document.getElementById("start-name-slot"),
       startNameLabel: document.getElementById("start-name-label"),
       startNameInput: document.getElementById("start-name-input"),
+      startShiftError: document.getElementById("start-shift-error"),
       gateDisplay: document.getElementById("gate-display"),
+      startThemeSelect: document.getElementById("start-theme-select"),
       themeSelect: document.getElementById("theme-select"),
       btnShare: document.getElementById("btn-share"),
       btnExport: document.getElementById("btn-export"),
@@ -4393,6 +4679,14 @@ button.btn-error {
       dataResetOverlay: document.getElementById("confirm-data-reset-overlay"),
       btnDataResetCancel: document.getElementById("btn-data-reset-cancel"),
       btnDataResetConfirm: document.getElementById("btn-data-reset-confirm"),
+
+      btnShiftTime: document.getElementById("btn-shift-time"),
+      shiftTimeModalOverlay: document.getElementById("shift-time-modal-overlay"),
+      shiftTimeCustomHours: document.getElementById("shift-time-custom-hours"),
+      shiftTimeCustomMinutes: document.getElementById("shift-time-custom-minutes"),
+      shiftTimeError: document.getElementById("shift-time-error"),
+      btnShiftTimeConfirm: document.getElementById("btn-shift-time-confirm"),
+      btnShiftTimeCancel: document.getElementById("btn-shift-time-cancel"),
 
       operatorSlot: document.getElementById("operator-slot"),
       operatorLabel: document.getElementById("operator-label"),
@@ -5244,7 +5538,7 @@ button.btn-error {
       setTimeout(() => btn.classList.remove("btn-error"), 500);
     }
 
-    const THEME_OPTIONS = ["green", "red", "blue", "purple", "amber", "cyan", "orange", "black", "lightblue", "lightred", "lightgreen", "paper", "pinkblack", "browngold"];
+    const THEME_OPTIONS = ["green", "red", "blue", "purple", "amber", "cyan", "orange", "pinkblack", "browngold", "black", "lightblue", "lightred", "lightgreen", "paper"];
     const UNLOCKABLE_THEMES = [];
 
     function pickRandomTheme(exclude) {
@@ -5254,30 +5548,38 @@ button.btn-error {
       return pool[Math.floor(Math.random() * pool.length)];
     }
 
-    function setTheme(theme, silent = false) {
+    function setTheme(theme, silent = false, saveToStorage = true) {
       document.documentElement.dataset.theme = theme;
-      ui.themeSelect.value = theme;
-      safeStorageSet(LS.theme, theme);
+      if (ui.themeSelect) ui.themeSelect.value = theme;
+      if (ui.startThemeSelect) ui.startThemeSelect.value = theme;
+      if (saveToStorage) {
+        safeStorageSet(LS.theme, theme);
+      }
       if (!silent) consoleLine(`DISPLAY SET: ${theme.toUpperCase()}`, "dim");
     }
 
-    function randomizeTheme(silent = false) {
+    function randomizeTheme(silent = false, saveToStorage = true) {
       const current = document.documentElement.dataset.theme || safeStorageGet(LS.theme);
       const next = pickRandomTheme(current);
-      setTheme(next, silent);
+      setTheme(next, silent, saveToStorage);
       return next;
     }
 
     function loadTheme() {
       const stored = safeStorageGet(LS.theme);
-      if (stored) {
+      const hasData = hasSavedData();
+
+      if (stored && hasData) {
+        // If there's saved data, use the stored theme
         document.documentElement.dataset.theme = stored;
-        ui.themeSelect.value = stored;
+        if (ui.themeSelect) ui.themeSelect.value = stored;
+        if (ui.startThemeSelect) ui.startThemeSelect.value = stored;
         return;
       }
-      const hasGateList = !!safeStorageGet(LS.gateList);
-      const initial = hasGateList ? "green" : pickRandomTheme();
-      setTheme(initial, true);
+
+      // If no saved data, randomize theme without saving to storage
+      const initial = pickRandomTheme();
+      setTheme(initial, true, false);
     }
 
     function getUnlockedThemes() {
@@ -5311,6 +5613,16 @@ button.btn-error {
         }
       }
 
+      // Check if Halloween theme is available
+      if (themeId === "halloween") {
+        const now = new Date();
+        const month = now.getMonth();
+        const day = now.getDate();
+        if (month === 9 && day === 31) {
+          return true;
+        }
+      }
+
       return getUnlockedThemes().includes(themeId);
     }
 
@@ -5323,6 +5635,11 @@ button.btn-error {
       const day = now.getDate();
       if (month === 11 && (day === 24 || day === 25)) {
         themes.push("christmas");
+      }
+
+      // Add Halloween theme only on Oct 31
+      if (month === 9 && day === 31) {
+        themes.push("halloween");
       }
 
       return themes;
@@ -5338,20 +5655,30 @@ button.btn-error {
         amber: "AMBER",
         cyan: "CYAN",
         orange: "ORANGE",
+			  pinkblack: "PINK",
+        browngold: "YELLOW",
         black: "BLACK",
         lightblue: "LIGHT - BLUE",
         lightred: "LIGHT - RED",
         lightgreen: "LIGHT - GREEN",
         paper: "PAPER",
-        pinkblack: "PINK",
-        browngold: "YELLOW",
-        christmas: "CHRISTMAS"
+        christmas: "CHRISTMAS",
+        halloween: "HALLOWEEN"
       };
-      ui.themeSelect.innerHTML = available
+      const optionsHTML = available
         .map(id => `<option value="${id}">${themeNames[id] || id.toUpperCase()}</option>`)
         .join("");
       const current = document.documentElement.dataset.theme || safeStorageGet(LS.theme) || "green";
-      ui.themeSelect.value = current;
+
+      // Populate both theme selectors
+      if (ui.themeSelect) {
+        ui.themeSelect.innerHTML = optionsHTML;
+        ui.themeSelect.value = current;
+      }
+      if (ui.startThemeSelect) {
+        ui.startThemeSelect.innerHTML = optionsHTML;
+        ui.startThemeSelect.value = current;
+      }
     }
 
     function applyFontScale(scale, silent = false) {
@@ -5476,7 +5803,7 @@ button.btn-error {
       // Play severed sound effect
       playSfx(audio.severed);
 
-      randomizeTheme();
+      randomizeTheme(true, false);
       const g = activeGate();
       const stats = ensureGateStats(g);
       const shiftMs = Date.now() - runtime.shiftStart;
@@ -5610,9 +5937,10 @@ button.btn-error {
       // Update start screen state
       updateStartNameLabel();
       updateDataResetButtonVisibility();
+      updateShiftTimeButtonVisibility();
 
       // Randomize theme
-      randomizeTheme();
+      randomizeTheme(true, false);
 
       // Reset to start screen
       didBoot = false;
@@ -5863,6 +6191,10 @@ button.btn-error {
       // Check if operator has entered debt
       const wageCredits = availableWageCredits(g);
       if (wageCredits <= 0) return "OPERATOR ENTERED DEBT";
+
+      // Check for dock traffic congestion (more than 3 ships waiting to dock)
+      const waitingToDockCount = (g.inbound || []).filter(s => s.state === "WAITING TO DOCK").length;
+      if (waitingToDockCount > 3) return "DOCK TRAFFIC CONGESTION";
 
       if (g.relayFailureSince && (Date.now() - g.relayFailureSince) >= RELAY_SEVER_GRACE_MS) {
         const healthState = computeRelayHealthState(g);
@@ -6152,10 +6484,21 @@ button.btn-error {
       const fOffline = facility.filter(f => f.status === "OFFLINE").length;
       const fDegraded = facility.filter(f => f.status === "DEGRADED").length;
       ui.facilityMeta.textContent = `${facility.length} SYSTEMS / ${fDegraded} DEG / ${fOffline} OFF`;
+
+      // Count ships waiting to dock for CONGESTED status
+      const waitingToDockCount = (g.inbound || []).filter(s => s.state === "WAITING TO DOCK").length;
+
       ui.facilityList.innerHTML = facility.map(f => {
-        const pf = pillForState(FACILITY_STATES, f.status);
+        // Override status for DOCK facility when exactly 3 ships are waiting
+        let displayStatus = f.status;
+        if (f.id === "DOCK" && waitingToDockCount === 3 && f.status === "ONLINE") {
+          displayStatus = "CONGESTED";
+        }
+
+        const pf = pillForState(FACILITY_STATES, displayStatus);
         const isDegraded = f.status === "DEGRADED";
         const isOffline = f.status === "OFFLINE";
+        const isCongested = displayStatus === "CONGESTED";
         const hasRepair = hasActiveRepair(g, f.id);
         const hasWO = hasActiveWorkOrder(g, f.id);
         const cooldownRemaining = Math.max(0, REPAIR_COOLDOWN_MS - (now - (f.lastRepairAttemptAt || 0)));
@@ -6166,10 +6509,10 @@ button.btn-error {
         const showCooldown = isDegraded && onCooldown;
 
         return `
-          <div class="status-row">
+          <div class="status-row${isCongested ? " congested-pulse" : ""}">
             <div class="status-name">${escapeText(f.name)}</div>
             <div class="status-right">
-              <span class="pill ${pf.cls}">${escapeText(f.status)}</span>
+              <span class="pill ${pf.cls}">${escapeText(displayStatus)}</span>
               ${needsRepair ? `<button class="btn-mini attn" data-action="repair" data-system="${escapeText(f.id)}">REPAIR</button>` : ""}
               ${needsWO ? `<button class="btn-mini hold" data-action="workorder" data-system="${escapeText(f.id)}">WO</button>` : ""}
               ${showCooldown ? `<span class="status-meta">${Math.ceil(cooldownRemaining / 1000)}s</span>` : ""}
@@ -7054,13 +7397,13 @@ button.btn-error {
           s.wasCleared = true;
           consoleLine(`CLEARED: ${id} (TRANSPONDER OVERRIDE)`, "warn");
           if (g.id === runtime.activeGateId) eventLine(`CLEARANCE OVERRIDE: ${id} (TRANSPONDER)`, "warn");
-          if (["DOCK","DECON","REFUEL","CREW TRANSFER"].includes(s.request)) bumpConcourse(g, 2 + Math.random() * 4);
+          if (["DOCK","DECON","REFUEL","CREW TRANSFER"].includes(s.request)) bumpConcourse(g, 4 + Math.random() * 8);
         } else {
           s.state = "CLEARED";
           s.reason = null;
           s.wasCleared = true;
           consoleLine(`CLEARED: ${id} (${shipDisplayRequest(s)})`, "good");
-          if (["DOCK","DECON","REFUEL","CREW TRANSFER"].includes(s.request)) bumpConcourse(g, 2 + Math.random() * 4);
+          if (["DOCK","DECON","REFUEL","CREW TRANSFER"].includes(s.request)) bumpConcourse(g, 6 + Math.random() * 10);
         }
 
         // Check if OUTGOING ship with hazards was incorrectly approved
@@ -7327,6 +7670,7 @@ button.btn-error {
       const templates = [
         ["dim", "REPORT: AUX POWER FLUCTUATION"],
         ["dim", "REPORT: CONCOURSE QUIET"],
+        ["dim", "SYSCHECK RESULTS: TERMINAL OPERATING NORMALLY"],
         ["warn", "NOTICE: HANDSHAKE LATENCY"],
       ];
 
@@ -7346,8 +7690,9 @@ button.btn-error {
 
       const slots = g.dockSlots || [];
       const allSlotsFilled = slots.length > 0 && slots.every(slot => slot.state !== "EMPTY");
-      const waitingToDock = g.inbound.some(s => s.state === "WAITING TO DOCK");
-      if (allSlotsFilled && waitingToDock) {
+      const waitingToDockCount = (g.inbound || []).filter(s => s.state === "WAITING TO DOCK").length;
+      // Only show congestion notice when exactly 3 ships are waiting (CONGESTED state)
+      if (allSlotsFilled && waitingToDockCount === 3) {
         templates.push(["warn", "NOTICE: DOCK SLOT CONGESTION"]);
       }
 
@@ -9245,7 +9590,7 @@ function cmdPingRelay(id) {
       consoleLine("  SFX ON|OFF|TOGGLE", "dim");
       consoleLine("  MUSIC ON|OFF|TOGGLE", "dim");
       consoleLine("  VFX REG|LOW|TOGGLE", "dim");
-      consoleLine("  THEME GREEN|RED|BLUE|PURPLE|AMBER|CYAN|ORANGE|BLACK|LIGHTBLUE|LIGHTRED|LIGHTGREEN|PAPER", "dim");
+      consoleLine("  THEME GREEN|RED|BLUE|PURPLE|AMBER|CYAN|ORANGE|PINK|YELLOW|BLACK|LIGHTBLUE|LIGHTRED|LIGHTGREEN|PAPER", "dim");
       consoleLine("  CODE - USE WITH ACCESS CODE", "dim");
       consoleLine("  ZOOM UP | ZOOM DOWN | ZOOM RESET | ZOOM <50-200>%", "dim");
       consoleLine("  CLEAR (console)", "dim");
@@ -9628,6 +9973,16 @@ function cmdPingRelay(id) {
         }
 
         const codeMap = {
+          "THEJOLLYEND": {
+            type: "theme",
+            value: "christmas",
+            name: "CHRISTMAS"
+          },
+          "SPOOKYSCARY": {
+            type: "theme",
+            value: "halloween",
+            name: "HALLOWEEN"
+          }
         };
 
         const unlock = codeMap[code];
@@ -9638,6 +9993,35 @@ function cmdPingRelay(id) {
         }
 
         if (unlock.type === "theme") {
+          // Special handling for Christmas code on Dec 24-25
+          if (code === "THEJOLLYEND") {
+            const now = new Date();
+            const month = now.getMonth();
+            const day = now.getDate();
+
+            // If it's Dec 24 or 25, show special message instead
+            if (month === 11 && (day === 24 || day === 25)) {
+              consoleLine("MERRY CHRISTMAS FROM THE CORRIDOR NAVIGATIONAL AUTHORITY", "good");
+              playSfx("charged");
+              return;
+            }
+          }
+
+          // Special handling for Halloween code on Oct 31
+          if (code === "SPOOKYSCARY") {
+            const now = new Date();
+            const month = now.getMonth();
+            const day = now.getDate();
+
+            // If it's Oct 31, show special message instead
+            if (month === 9 && day === 31) {
+              consoleLine("BOO!", "good");
+              playSfx("charged");
+              return;
+            }
+          }
+
+          // Normal theme unlock logic
           const wasUnlocked = unlockTheme(unlock.value);
           if (wasUnlocked) {
             consoleLine(`THEME UNLOCKED: ${unlock.name}`, "good");
@@ -9904,6 +10288,14 @@ function cmdPingRelay(id) {
     }, true);
 
     ui.themeSelect.addEventListener("change", () => setTheme(ui.themeSelect.value));
+    if (ui.startThemeSelect) {
+      ui.startThemeSelect.addEventListener("change", () => {
+        // On start screen, only save to storage if there's saved data
+        // Otherwise, theme will be saved when game begins
+        const shouldSave = hasSavedData();
+        setTheme(ui.startThemeSelect.value, false, shouldSave);
+      });
+    }
     if (ui.btnShare) {
       ui.btnShare.addEventListener("click", async () => {
         try {
@@ -10172,7 +10564,7 @@ function cmdPingRelay(id) {
       if (vfxEnabled !== null) localStorage.setItem(LS.vfxEnabled, vfxEnabled);
 
       // Randomize theme
-      randomizeTheme();
+      randomizeTheme(true, false);
 
       // Clear URL hash to prevent reload from hash
       try {
@@ -10203,19 +10595,53 @@ function cmdPingRelay(id) {
     if (ui.btnShiftcompleteReset) ui.btnShiftcompleteReset.addEventListener("click", () => setResetConfirmOpen(true));
 
     loadTheme();
+		populateThemeDropdown();
     loadFontScale();
 
     let didBoot = false;
     let startInProgress = false;
     function beginSession() {
+      console.log("beginSession called!");
+      console.log("didBoot:", didBoot, "startInProgress:", startInProgress);
+
       if (didBoot || startInProgress) return;
+
+      console.log("hasSavedData():", hasSavedData());
+      console.log("hasShiftDurationSelected():", hasShiftDurationSelected());
+
+      // Check if shift duration is selected when there's no save data
+      if (!hasSavedData() && !hasShiftDurationSelected()) {
+        if (ui.startShiftError) {
+          ui.startShiftError.textContent = "PLEASE SELECT SHIFT DURATION";
+          ui.startShiftError.style.display = "block";
+          ui.startShiftError.style.visibility = "visible";
+          console.log("Error set:", ui.startShiftError.textContent);
+          console.log("Error element:", ui.startShiftError);
+          console.log("Error display:", window.getComputedStyle(ui.startShiftError).display);
+          console.log("Error visibility:", window.getComputedStyle(ui.startShiftError).visibility);
+        } else {
+          console.log("startShiftError element not found!");
+        }
+        playSfx("error");
+        return;
+      }
+
       startInProgress = true;
+
+      // Save the current theme to localStorage when the game begins
+      const currentTheme = document.documentElement.dataset.theme;
+      if (currentTheme) {
+        safeStorageSet(LS.theme, currentTheme);
+      }
+
       document.body.classList.add("start-loading");
       const loadingNameEl = document.getElementById("start-loading-name");
       if (loadingNameEl) {
         loadingNameEl.textContent = runtime.operatorCallsign || "USER";
       }
       ui.btnStart?.setAttribute("disabled", "true");
+      ui.btnShiftTime?.classList.remove("visible");
+      if (ui.startShiftError) ui.startShiftError.textContent = "";
       ui.startOverlay?.setAttribute("aria-hidden", "false");
       unlockAudio();
       requestStartupSound();
@@ -10231,7 +10657,10 @@ function cmdPingRelay(id) {
 
     if (ui.btnStart) {
       ui.btnStart.addEventListener("click", beginSession);
-      ui.btnStart.focus();
+      // Only focus START if it's enabled
+      if (!ui.btnStart.classList.contains("btn-disabled")) {
+        ui.btnStart.focus();
+      }
     }
 
     if (ui.btnStartResume && ui.startResumeInput) {
@@ -10255,6 +10684,58 @@ function cmdPingRelay(id) {
 
     // Initialize data reset button visibility
     updateDataResetButtonVisibility();
+
+    // Initialize shift time button visibility
+    updateShiftTimeButtonVisibility();
+
+    // Shift time modal event listeners
+    if (ui.btnShiftTime) {
+      ui.btnShiftTime.addEventListener("click", () => {
+        playSfx("click");
+        openShiftTimeModal();
+      });
+    }
+
+    if (ui.btnShiftTimeConfirm) {
+      ui.btnShiftTimeConfirm.addEventListener("click", confirmShiftTimeSelection);
+    }
+
+    if (ui.btnShiftTimeCancel) {
+      ui.btnShiftTimeCancel.addEventListener("click", () => {
+        playSfx("click");
+        closeShiftTimeModal();
+      });
+    }
+
+    // Shift time preset button handlers
+    document.querySelectorAll(".shift-time-preset-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        playSfx("click");
+        // Clear other selections
+        document.querySelectorAll(".shift-time-preset-btn").forEach(b => b.classList.remove("selected"));
+        // Clear custom input
+        if (ui.shiftTimeCustomHours) ui.shiftTimeCustomHours.value = "";
+        if (ui.shiftTimeCustomMinutes) ui.shiftTimeCustomMinutes.value = "";
+        if (ui.shiftTimeError) ui.shiftTimeError.textContent = "";
+        // Mark this button as selected
+        btn.classList.add("selected");
+      });
+    });
+
+    // Custom input handlers
+    if (ui.shiftTimeCustomHours || ui.shiftTimeCustomMinutes) {
+      const handleCustomInput = () => {
+        // Clear preset selection when custom input is used
+        document.querySelectorAll(".shift-time-preset-btn").forEach(b => b.classList.remove("selected"));
+        if (ui.shiftTimeError) ui.shiftTimeError.textContent = "";
+      };
+      if (ui.shiftTimeCustomHours) {
+        ui.shiftTimeCustomHours.addEventListener("input", handleCustomInput);
+      }
+      if (ui.shiftTimeCustomMinutes) {
+        ui.shiftTimeCustomMinutes.addEventListener("input", handleCustomInput);
+      }
+    }
 
     function setHelpOpen(open) {
       if (!ui.helpPanel) return;
@@ -10331,6 +10812,112 @@ function cmdPingRelay(id) {
       } else {
         ui.btnDataReset?.focus();
       }
+    }
+
+    // ---------------------------
+    // Shift Time Selection
+    // ---------------------------
+    function hasShiftDurationSelected() {
+      const stored = localStorage.getItem(LS.shiftDurationMs);
+      return stored !== null && stored !== "";
+    }
+
+    function updateShiftTimeButtonVisibility() {
+      if (!ui.btnShiftTime) return;
+      const savedData = hasSavedData();
+
+      if (savedData) {
+        ui.btnShiftTime.classList.remove("visible");
+        // Enable START button if there's saved data
+        if (ui.btnStart) ui.btnStart.classList.remove("btn-disabled");
+      } else {
+        ui.btnShiftTime.classList.add("visible");
+        // Disable START button if no shift duration selected
+        if (ui.btnStart) {
+          if (hasShiftDurationSelected()) {
+            ui.btnStart.classList.remove("btn-disabled");
+          } else {
+            ui.btnStart.classList.add("btn-disabled");
+          }
+        }
+      }
+    }
+
+    function openShiftTimeModal() {
+      document.body.classList.add("shift-time-modal-open");
+      if (ui.shiftTimeModalOverlay) {
+        ui.shiftTimeModalOverlay.setAttribute("aria-hidden", "false");
+      }
+      // Clear previous selection
+      const presetButtons = document.querySelectorAll(".shift-time-preset-btn");
+      presetButtons.forEach(btn => btn.classList.remove("selected"));
+      if (ui.shiftTimeCustomHours) ui.shiftTimeCustomHours.value = "";
+      if (ui.shiftTimeCustomMinutes) ui.shiftTimeCustomMinutes.value = "";
+      if (ui.shiftTimeError) ui.shiftTimeError.textContent = "";
+      if (ui.startShiftError) ui.startShiftError.textContent = "";
+    }
+
+    function closeShiftTimeModal() {
+      document.body.classList.remove("shift-time-modal-open");
+      if (ui.shiftTimeModalOverlay) {
+        ui.shiftTimeModalOverlay.setAttribute("aria-hidden", "true");
+      }
+    }
+
+    function saveShiftDuration(durationMs) {
+      localStorage.setItem(LS.shiftDurationMs, String(durationMs));
+    }
+
+    function loadShiftDuration() {
+      const stored = localStorage.getItem(LS.shiftDurationMs);
+      if (stored) {
+        const parsed = parseInt(stored, 10);
+        if (!isNaN(parsed) && parsed > 0) {
+          return parsed;
+        }
+      }
+      return 28_800_000; // Default 8 hours
+    }
+
+    function confirmShiftTimeSelection() {
+      let selectedDurationMs = null;
+
+      // Check if a preset is selected
+      const selectedPreset = document.querySelector(".shift-time-preset-btn.selected");
+      if (selectedPreset) {
+        const minutes = parseInt(selectedPreset.getAttribute("data-minutes"));
+        selectedDurationMs = minutes * 60 * 1000;
+      } else {
+        // Check custom input
+        const hours = parseInt(ui.shiftTimeCustomHours?.value || "0", 24);
+        const minutes = parseInt(ui.shiftTimeCustomMinutes?.value || "0", 10);
+        const totalMinutes = hours * 60 + minutes;
+
+        if (totalMinutes < 10) {
+          if (ui.shiftTimeError) {
+            ui.shiftTimeError.textContent = "Minimum shift duration is 10 minutes";
+          }
+          playSfx("error");
+          return;
+        }
+
+        selectedDurationMs = totalMinutes * 60 * 1000;
+      }
+
+      if (selectedDurationMs === null) {
+        if (ui.shiftTimeError) {
+          ui.shiftTimeError.textContent = "Please select or enter a shift duration";
+        }
+        playSfx("error");
+        return;
+      }
+
+      saveShiftDuration(selectedDurationMs);
+      // Enable the START button now that shift duration is selected
+      if (ui.btnStart) ui.btnStart.classList.remove("btn-disabled");
+      if (ui.startShiftError) ui.startShiftError.textContent = "";
+      closeShiftTimeModal();
+      playSfx("click");
     }
 
     // ---------------------------
@@ -10539,6 +11126,7 @@ function cmdPingRelay(id) {
         // Clear other saved data (but keep audio and VFX preferences)
         localStorage.removeItem(LS.shiftMs);
         localStorage.removeItem(LS.shiftCompleteShown);
+        localStorage.removeItem(LS.shiftDurationMs);
         localStorage.removeItem(LS.gateList);
         localStorage.removeItem(LS.gateCurrent);
         localStorage.removeItem(LS.collapsedPanels);
@@ -10547,10 +11135,11 @@ function cmdPingRelay(id) {
         localStorage.removeItem(LS.theme);
 
         // Randomize theme
-        randomizeTheme();
+        randomizeTheme(true, false);
 
         // Update button visibility
         updateDataResetButtonVisibility();
+        updateShiftTimeButtonVisibility();
       } catch (e) {
         console.error("Failed to clear saved data:", e);
       }
@@ -10778,15 +11367,17 @@ function cmdPingRelay(id) {
       runtime.tickTimer = setInterval(tickAllGates, 1000);
       runtime.uiTimer = setInterval(() => {
         const shiftMs = Date.now() - runtime.shiftStart;
-        const EIGHT_HOURS_MS = 28_800_000;
+        const shiftDurationMs = loadShiftDuration();
 
-        // Check for 8-hour shift completion
-        if (!runtime.shiftCompleteShown && !runtime.severed && shiftMs >= EIGHT_HOURS_MS) {
+        // Check for shift completion
+        if (!runtime.shiftCompleteShown && !runtime.severed && shiftMs >= shiftDurationMs) {
           triggerShiftComplete();
         }
 
         if (runtime.severed) return;
-        ui.shiftTime.textContent = formatHMS(shiftMs);
+        // Update display to show current / total format with percentage
+        const percentage = Math.min(100, Math.floor((shiftMs / shiftDurationMs) * 100));
+        ui.shiftTime.textContent = `${formatHMS(shiftMs)} // ${formatHMS(shiftDurationMs)} // ${percentage}%`;
         const g = activeGate();
         const stats = ensureGateStats(g);
         if (ui.shiftWage) {
