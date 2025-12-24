@@ -1376,6 +1376,21 @@ button.btn-error {
       50% { background-color: rgba(225, 100, 100, 0.15); }
     }
 
+    /* Critical exposure pulse animation for docked slots */
+    .status-row.exposure-critical {
+      animation: exposureCriticalPulse 1s ease-in-out infinite;
+    }
+    @keyframes exposureCriticalPulse {
+      0%, 100% {
+        background-color: rgba(225, 100, 100, 0.12);
+        box-shadow: 0 0 8px rgba(225, 100, 100, 0.3);
+      }
+      50% {
+        background-color: rgba(225, 100, 100, 0.22);
+        box-shadow: 0 0 16px rgba(225, 100, 100, 0.5);
+      }
+    }
+
     /* Deadline countdown styling */
     .status-meta {
       font-size: 0.7rem;
@@ -1995,6 +2010,10 @@ button.btn-error {
     }
 
     body.vfx-low .relay-ping {
+      animation: none !important;
+    }
+
+    body.vfx-low .exposure-critical {
       animation: none !important;
     }
 
@@ -4236,7 +4255,8 @@ button.btn-error {
       musicEnabled: loadStoredBool(LS.musicEnabled, true),
       unlocked: false,
       pendingStartup: false,
-      ackAlarmOn: false
+      ackAlarmOn: false,
+      klaxonOn: false
     };
 
     const vfxState = {
@@ -4263,6 +4283,7 @@ button.btn-error {
         scan: makeLoopAudio("/gatecontrol/scan.ogg", 1),
       processing: makeLoopAudio("/gatecontrol/processing.ogg", 0.65),
       ackalarm: makeLoopAudio("/gatecontrol/ackalarm.ogg", 0.65),
+      klaxon: makeLoopAudio("/gatecontrol/klaxon.ogg", 0.7),
       music: makeLoopAudio("/gatecontrol/bgaudio.ogg", 0.32)
     };
 		
@@ -4350,10 +4371,40 @@ button.btn-error {
       }
     }
 
+    function setKlaxon(active) {
+      audioState.klaxonOn = active;
+      if (!audioState.sfxEnabled || !audioState.unlocked) {
+        audio.klaxon.pause();
+        audio.klaxon.currentTime = 0;
+        return;
+      }
+      if (active) {
+        const promise = audio.klaxon.play();
+        if (promise?.catch) promise.catch(() => {});
+      } else {
+        audio.klaxon.pause();
+        audio.klaxon.currentTime = 0;
+      }
+    }
+
     function updateAckAlarm() {
       const g = activeGate();
       const hasAck = (g.relays || []).some(r => r.awaitingAck && !r.offline);
       setAckAlarm(hasAck);
+    }
+
+    function updateKlaxon() {
+      const g = activeGate();
+      const now = Date.now();
+      // Check if any docked ship has critical exposure (<=20s)
+      const hasCriticalExposure = (g.dockSlots || []).some(slot => {
+        if (!slot.shipId) return false;
+        const ship = findShipById(g, slot.shipId);
+        if (!ship || ship.state !== "WAITING DECON" || !ship.exposureDeadline) return false;
+        const left = Math.max(0, Math.ceil((ship.exposureDeadline - now) / 1000));
+        return left <= 20 && left > 0;
+      });
+      setKlaxon(hasCriticalExposure);
     }
 
     function setSfxEnabled(enabled) {
@@ -4361,9 +4412,11 @@ button.btn-error {
       storeBool(LS.sfxEnabled, audioState.sfxEnabled);
       if (!audioState.sfxEnabled) {
         setAckAlarm(false);
+        setKlaxon(false);
         stopMaintenanceSfx();
       } else {
         updateAckAlarm();
+        updateKlaxon();
       }
       updateAudioButtons();
       updateProcessingSound();
@@ -4828,6 +4881,8 @@ button.btn-error {
       audio.reset.currentTime = 0;
       audio.scan.pause();
       audio.scan.currentTime = 0;
+      audio.klaxon.pause();
+      audio.klaxon.currentTime = 0;
 
       // Play severed sound effect
       playSfx(audio.severed);
@@ -5625,20 +5680,22 @@ button.btn-error {
 
         // NEW: Calculate exposure countdown
         let exposureHtml = "";
+        let exposureCritical = false;
         if (ship && ship.state === "WAITING DECON" && ship.exposureDeadline) {
            const left = Math.max(0, Math.ceil((ship.exposureDeadline - Date.now()) / 1000));
            exposureHtml = ` <span style="color: var(--alert); font-weight: bold;">EXPOSURE ${formatMMSS(left)}</span>`;
+           exposureCritical = left <= 20;
         }
 
         // Add meta info to the display string (without exposure - that's added separately)
         const dockMeta = `${shipName} / ${dockState}${deconTime ? ` / T-${deconTime}` : ""}`;
-        
+
         const canDecon = ship && ship.state === "WAITING DECON" && getFacility(g, "DECON")?.status === "ONLINE" && !shipHasEffect(ship, "VACUUM BLOOM");
         const isDetailOpen = !!ship && runtime.inlineDetailId === ship.id;
-        
+
         // Return statement with exposure countdown styled in critical color
         return `
-          <div class="status-row">
+          <div class="status-row${exposureCritical ? " exposure-critical" : ""}">
             <div class="status-name">${escapeText(slot.id)} <span class="status-meta">${escapeText(dockMeta)}</span>${exposureHtml}</div>
             <div class="status-right">
               ${ship ? `<button class="btn-mini ${isDetailOpen ? "detail-open" : ""}" data-action="detail" data-id="${escapeText(ship.id)}">DTL</button>` : ""}
@@ -6197,7 +6254,10 @@ button.btn-error {
       slot.state = "DECON";
       slot.phaseEndsAt = s.deconEndsAt;
       consoleLine(`DECON STARTED: ${s.id} (${formatMMSS(duration)})`, "dim");
-      if (g.id === runtime.activeGateId) eventLine(`DECON START: ${s.id}`, "dim");
+      if (g.id === runtime.activeGateId) {
+        eventLine(`DECON START: ${s.id}`, "dim");
+        updateKlaxon();
+      }
       bumpStat(g, "deconStarts");
       return true;
     }
@@ -7437,6 +7497,7 @@ function tickGate(g) {
       resolveTraffic(g);
       checkUrgentDeadlineAudio(g);
       tickDockSlots(g);
+      if (g.id === runtime.activeGateId) updateKlaxon();
       driftSystems(g);
       driftFacility(g);
       tickWorkOrders(g);
