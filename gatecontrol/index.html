@@ -878,7 +878,8 @@
       display: grid;
       gap: 8px;
       justify-items: end;
-      min-width: min(520px, 100%);
+      min-width: 0;
+      flex: 1 1 auto;
       position: relative;
     }
 
@@ -1881,7 +1882,7 @@ button.btn-error {
 
     @media (max-width: 920px) {
       .brand { min-width: 100%; }
-      .header-right { min-width: 100%; justify-items: start; }
+      .header-right { flex: 1 1 100%; justify-items: start; }
       .controls { justify-content: flex-start; }
       .stats { text-align: left; }
       .stat-row { justify-content: flex-start; }
@@ -6545,6 +6546,9 @@ button.btn-error {
         }
       });
 
+      // Update grid layout based on collapsed state
+      updateInterfaceGridLayout();
+
       // Sub-sections
       const subSections = [
         { id: 'traffic-inbound', selector: '#traffic .queue-section:nth-child(1)' },
@@ -6597,6 +6601,67 @@ button.btn-error {
       } catch (e) {
         console.warn("Failed to load collapsed panels:", e);
       }
+    }
+
+    function updateInterfaceGridLayout() {
+      const interfaceEl = document.querySelector('.interface');
+      if (!interfaceEl) return;
+
+      // Get collapsed state for each main panel
+      const trafficCollapsed = runtime.collapsedPanels['traffic'] || false;
+      const systemsCollapsed = runtime.collapsedPanels['systems'] || false;
+      const terminalCollapsed = runtime.collapsedPanels['terminal'] || false;
+
+      // Check viewport width for responsive behavior
+      const width = window.innerWidth;
+
+      if (width <= 680) {
+        // Tiny mobile - reset to CSS defaults
+        interfaceEl.style.gridTemplateColumns = '';
+        interfaceEl.style.gridTemplateRows = '';
+        return;
+      }
+
+      if (width <= 780) {
+        // Mobile layout - single column, adjust rows
+        applyMobileLayout(trafficCollapsed, systemsCollapsed, terminalCollapsed, interfaceEl);
+      } else {
+        // Desktop layout - two columns
+        applyDesktopLayout(trafficCollapsed, systemsCollapsed, terminalCollapsed, interfaceEl);
+      }
+    }
+
+    function applyDesktopLayout(trafficCollapsed, systemsCollapsed, terminalCollapsed, interfaceEl) {
+      let columns, rows;
+
+      // Determine column sizing based on top panels
+      if (trafficCollapsed && systemsCollapsed) {
+        columns = 'auto auto'; // Both collapsed - minimal width
+      } else if (trafficCollapsed) {
+        columns = 'auto 1fr'; // Traffic collapsed, Systems takes full width
+      } else if (systemsCollapsed) {
+        columns = '1fr auto'; // Systems collapsed, Traffic takes full width
+      } else {
+        columns = '1.25fr 1fr'; // Both expanded - original ratio
+      }
+
+      // Determine row sizing based on terminal
+      rows = terminalCollapsed
+        ? 'minmax(0, 1fr) auto'
+        : 'minmax(0, 1fr) var(--terminal-h)';
+
+      interfaceEl.style.gridTemplateColumns = columns;
+      interfaceEl.style.gridTemplateRows = rows;
+    }
+
+    function applyMobileLayout(trafficCollapsed, systemsCollapsed, terminalCollapsed, interfaceEl) {
+      // Single column - only rows change
+      const trafficRow = trafficCollapsed ? 'auto' : 'minmax(0, 1fr)';
+      const systemsRow = systemsCollapsed ? 'auto' : 'minmax(0, 1fr)';
+      const terminalRow = terminalCollapsed ? 'auto' : 'var(--terminal-h)';
+
+      interfaceEl.style.gridTemplateColumns = '1fr';
+      interfaceEl.style.gridTemplateRows = `${trafficRow} ${systemsRow} ${terminalRow}`;
     }
 
     // ---------------------------
@@ -8993,6 +9058,12 @@ function cmdPingRelay(id) {
           if (!isNaN(percent)) {
             return cmdFontSet(percent);
           }
+        } else if (arg) {
+          // Try parsing as plain number (% symbol is optional)
+          const percent = parseInt(arg, 10);
+          if (!isNaN(percent)) {
+            return cmdFontSet(percent);
+          }
         }
         consoleLine("USAGE: ZOOM UP | ZOOM DOWN | ZOOM RESET | ZOOM <50-200>%", "warn");
         return;
@@ -9672,6 +9743,18 @@ function cmdPingRelay(id) {
         togglePanel(panelId);
       }
     });
+
+    // Resize handler to update layout on viewport changes
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        if (runtime.collapsedPanels) {
+          updateInterfaceGridLayout();
+        }
+      }, 150);
+    });
+
     if (ui.resetOverlay) {
       ui.resetOverlay.addEventListener("click", (e) => {
         if (e.target === ui.resetOverlay) setResetConfirmOpen(false);
