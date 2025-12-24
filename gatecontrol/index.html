@@ -3040,8 +3040,8 @@ button.btn-error {
     // ---------------------------
     // State Model (lonelier / slower)
     // ---------------------------
-    const TYPES_IN = ["CARGO", "CIVILIAN", "MAINT", "ESCORT", "MED", "UNKNOWN"];
-    const TYPES_OUT = ["CARGO", "CIVILIAN", "ESCORT", "MAINT", "MAINT", "MED"];
+    const TYPES_IN = ["CARGO", "CIVILIAN", "MAINT", "ESCORT", "MED", "UNKNOWN", "INFESTED", "PIRATE", "RAIDER", "IRRADIATED"];
+    const TYPES_OUT = ["CARGO", "CIVILIAN", "ESCORT", "MAINT", "MAINT", "MED", "INFESTED", "PIRATE", "RAIDER", "IRRADIATED"];
 
     const REQUESTS_IN = ["DOCK", "DECON", "REFUEL", "MED", "CARGO OFFLOAD", "CUSTOMS"];
     const REQUESTS_OUT = ["DEPART", "TOW", "REFUEL", "CREW TRANSFER", "CARGO LOAD"];
@@ -3205,17 +3205,49 @@ button.btn-error {
         type = "UNKNOWN";
         transponder = "UNKNOWN";
       }
-      const infoMasked = !obscured && rng() < 0.075;
+
       const req = dir === "IN" ? pick(rng, REQUESTS_IN) : pick(rng, REQUESTS_OUT);
 
       const state = "PENDING";
 
+      // Generate effects first
       const effects = [];
-      if (rng() < 0.08) effects.push({ name: "CORRIDOR RADIATION", hidden: rng() < 0.5, revealed: false });
+      // CORRIDOR RADIATION only applies to OUTGOING ships
+      if (dir === "OUT" && rng() < 0.08) effects.push({ name: "CORRIDOR RADIATION", hidden: rng() < 0.5, revealed: false });
       if (rng() < 0.06) effects.push({ name: "VACUUM BLOOM", hidden: rng() < 0.6, revealed: false });
       if (rng() < 0.025) effects.push({ name: rng() < 0.5 ? "RAIDER" : "PIRATE", hidden: rng() < 0.65, revealed: false });
       const hiddenThreat = obscured && rng() < 0.35;
       if (hiddenThreat) effects.push({ name: rng() < 0.5 ? "RAIDER" : "PIRATE", hidden: true, revealed: false });
+
+      // Determine if ship should be marked as UNKNOWN based on hazards
+      let infoMasked = false;
+      let isHazardous = false;
+
+      // Check for hazardous effects and set type accordingly
+      if (effects.some(e => e.name === "VACUUM BLOOM")) {
+        type = "INFESTED";
+        infoMasked = true;
+        isHazardous = true;
+      } else if (effects.some(e => e.name === "RAIDER")) {
+        type = "RAIDER";
+        infoMasked = true;
+        isHazardous = true;
+      } else if (effects.some(e => e.name === "PIRATE")) {
+        type = "PIRATE";
+        infoMasked = true;
+        isHazardous = true;
+      } else if (effects.some(e => e.name === "CORRIDOR RADIATION") && dir === "OUT") {
+        // Only mark OUTGOING ships with CORRIDOR RADIATION as UNKNOWN
+        // INCOMING ships with CORRIDOR RADIATION can dock safely after DECON
+        type = "IRRADIATED";
+        infoMasked = true;
+        isHazardous = true;
+      }
+
+      // For non-hazardous ships, keep existing random UNKNOWN spawning
+      if (!isHazardous && !obscured) {
+        infoMasked = rng() < 0.075;
+      }
 
       return {
         id: makeShipId(rng),
@@ -7814,7 +7846,11 @@ function tickGate(g) {
 
         setTimeout(() => {
           // scan can reveal issues AND occasionally triggers a soft fault
-          const flagged = [...g.inbound, ...g.outbound].filter(s => s.transponder !== "VALID");
+          // Only scan active ships (exclude completed/denied/departed/arrived states)
+          const activeShips = [...g.inbound, ...g.outbound].filter(s =>
+            s.state !== "ARRIVED" && s.state !== "DENIED" && s.state !== "DEPARTED" && s.state !== "COMPLETE"
+          );
+          const flagged = activeShips.filter(s => s.transponder !== "VALID");
           if (!flagged.length) {
             consoleLine("SCAN: NO ANOMALIES (LOW CONF)", "good");
           } else {
@@ -7823,7 +7859,7 @@ function tickGate(g) {
           }
 
           const effectHits = [];
-          for (const s of [...g.inbound, ...g.outbound]) {
+          for (const s of activeShips) {
             for (const ef of s.effects || []) {
               if (!ef.hidden || ef.revealed) continue;
               if (Math.random() < 0.55) {
@@ -9310,6 +9346,9 @@ function cmdPingRelay(id) {
 
       // Clear all localStorage
       localStorage.clear();
+		runtime.lastSevered = null;
+		runtime.operatorCallsign = "";
+		runtime.skipHashLoad = true;
 			runtime.severed = false;
 			runtime.shiftStart = Date.now();
 			runtime.resumeShiftMs = 0;
@@ -9322,6 +9361,12 @@ function cmdPingRelay(id) {
 
       // Randomize theme
       randomizeTheme();
+
+      // Clear URL hash to prevent reload from hash
+      try {
+        const cleared = safeReplaceState(location.pathname + location.search);
+        if (!cleared) location.hash = "";
+      } catch (_) {}
 
       // Reset to start screen
       didBoot = false;
