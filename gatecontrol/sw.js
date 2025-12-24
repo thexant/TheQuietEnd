@@ -1,4 +1,4 @@
-const CACHE_VERSION = "gatecontrol-v1.2";
+const CACHE_VERSION = "gatecontrol-v2.2";
 const PRECACHE_URLS = [
   "./",
   "./index.html",

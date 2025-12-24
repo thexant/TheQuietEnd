@@ -49,7 +49,7 @@
       --radius: 3px;
       --font-title: "B612 Mono", "Courier New", monospace;
       --font-body: "Share Tech Mono", "Courier New", monospace;
-
+			--accent: var(--signal);
       --interface-gap: clamp(8px, 2vmin, 14px);
       --frame-pad: clamp(10px, 2.6vmin, 18px);
       --terminal-h: clamp(220px, 30vh, 360px);
@@ -319,6 +319,25 @@
 			--shadowText2: rgba(212, 175, 55, 0.10);
 
 			--stat: #ffb84d;
+		}
+
+		:root[data-theme="christmas"] {
+			--deep: #0a1a0a;
+			--bg-hi: #1a0f0f;
+
+			--ink: #c9ffc9;
+			--muted: #a3c9a3;
+			--signal: #ff4444;
+			--good: #44ff44;
+
+			--line: rgba(255, 68, 68, 0.25);
+			--grid: rgba(68, 255, 68, 0.08);
+			--glow: rgba(255, 68, 68, 0.35);
+
+			--shadowText: rgba(255, 68, 68, 0.18);
+			--shadowText2: rgba(68, 255, 68, 0.12);
+
+			--stat: #ffb3b3;
 		}
 
 		/* Light-theme surface fixes (because many backgrounds are hard-coded dark rgba) */
@@ -809,6 +828,111 @@
       letter-spacing: 0.12em;
     }
 
+    /* Break Modal */
+    #break-modal-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at center, rgba(10, 6, 8, 0.92) 0%, rgba(0,0,0,0.98) 70%);
+      z-index: 210;
+    }
+    body.break-modal-open #break-modal-overlay { display: flex; }
+
+    .break-modal-card {
+      max-width: 600px;
+    }
+    .break-modal-body p {
+      margin: 0 0 12px 0;
+    }
+    .break-duration-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 16px 0;
+    }
+    .break-duration-btn {
+      min-width: 90px;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      background: rgba(var(--signal-rgb, 100, 180, 255), 0.15);
+      border: 1px solid rgba(var(--signal-rgb, 100, 180, 255), 0.3);
+      color: var(--signal);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .break-duration-btn:hover {
+      background: rgba(var(--signal-rgb, 100, 180, 255), 0.25);
+      border-color: var(--signal);
+    }
+    .break-duration-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.3);
+    }
+    .break-cost {
+      font-size: 0.7rem;
+      opacity: 0.7;
+    }
+    .break-error {
+      color: #ff4444;
+      font-size: 0.85rem;
+      text-align: center;
+      margin-top: 12px;
+      padding: 8px;
+      background: rgba(255, 68, 68, 0.1);
+      border: 1px solid rgba(255, 68, 68, 0.3);
+      border-radius: 4px;
+    }
+
+    /* Break Screen */
+    #break-screen-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, var(--bg-hi) 0%, var(--deep) 100%);
+      color: var(--ink);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      z-index: 220;
+      font-family: var(--font-title);
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      padding: 24px;
+    }
+    body.on-break #break-screen-overlay { display: flex; }
+
+    .break-screen-card {
+      display: grid;
+      gap: 24px;
+      align-items: center;
+    }
+    .break-screen-title {
+      font-size: clamp(2rem, 8vw, 4rem);
+      letter-spacing: 0.3em;
+      color: var(--signal);
+      text-shadow: 0 0 20px var(--glow);
+    }
+    .break-screen-timer {
+      font-size: clamp(3rem, 12vw, 6rem);
+      letter-spacing: 0.1em;
+      color: var(--signal);
+      text-shadow: 0 0 30px var(--glow);
+      font-family: var(--font-mono);
+    }
+    .break-screen-sub {
+      font-size: 0.9rem;
+      color: var(--muted);
+      letter-spacing: 0.24em;
+    }
+
     /* Container - full screen */
     #game-container {
       position: relative;
@@ -1016,6 +1140,8 @@
       background: var(--line);
       outline: none;
       border-radius: 2px;
+      position: relative;
+      z-index: 0;
     }
     .volume-slider::-webkit-slider-thumb {
       -webkit-appearance: none;
@@ -1047,6 +1173,45 @@
       opacity: 0.5;
       pointer-events: none;
       z-index: 1;
+    }
+    .volume-current-marker {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 3px;
+      height: 20px;
+      background: linear-gradient(to bottom, var(--accent) 0%, var(--accent) 100%);
+      pointer-events: none;
+      z-index: 10;
+      transition: left 0.15s ease;
+      box-shadow: 0 0 12px var(--accent), 0 0 4px var(--accent), inset 0 0 2px rgba(255,255,255,0.8);
+      border-radius: 2px;
+    }
+    .volume-current-marker::before {
+      content: '';
+      position: absolute;
+      top: -3px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-top: 5px solid var(--accent);
+      filter: drop-shadow(0 0 4px var(--accent));
+    }
+    .volume-current-marker::after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 4px solid transparent;
+      border-right: 4px solid transparent;
+      border-bottom: 5px solid var(--accent);
+      filter: drop-shadow(0 0 4px var(--accent));
     }
     .volume-value {
       font-family: var(--font-mono);
@@ -1117,6 +1282,23 @@
     button { cursor: pointer; transition: all 0.12s; }
     button:hover { background: rgba(255,255,255,0.05); box-shadow: 0 0 14px var(--glow); }
     button:active { background: var(--signal); color: #000; box-shadow: 0 0 18px var(--signal); }
+
+    /* Keyboard navigation selection highlight */
+    .kb-selected {
+      outline: 2px solid var(--signal) !important;
+      box-shadow: 0 0 20px var(--glow) !important;
+      position: relative;
+      z-index: 100;
+    }
+    button.kb-selected,
+    select.kb-selected,
+    input.kb-selected {
+      background: rgba(255,255,255,0.08) !important;
+    }
+    .panel-header.kb-selected,
+    .subsection-header.kb-selected {
+      background: rgba(255,255,255,0.05);
+    }
     button.btn-busy {
       cursor: wait;
       color: var(--stat);
@@ -2256,6 +2438,38 @@ button.btn-error {
     </div>
   </div>
 
+  <div id="break-modal-overlay" aria-hidden="true">
+    <div class="confirm-card break-modal-card" role="dialog" aria-modal="true" aria-labelledby="break-modal-title">
+      <div id="break-modal-title" class="confirm-title">OPERATOR BREAK REQUEST</div>
+      <div class="confirm-body break-modal-body">
+        <p>WARNING: Break time is DEDUCTED from your wage at <strong>50 CR/MIN</strong>.</p>
+        <p>During break, all gate operations are SUSPENDED. Relays remain silent. Ship timers freeze. Your shift clock pauses.</p>
+        <p>Select break duration (minutes):</p>
+        <div class="break-duration-buttons">
+          <button class="break-duration-btn" data-minutes="1">1 MIN<br><span class="break-cost">-50 CR</span></button>
+          <button class="break-duration-btn" data-minutes="2">2 MIN<br><span class="break-cost">-100 CR</span></button>
+          <button class="break-duration-btn" data-minutes="3">3 MIN<br><span class="break-cost">-150 CR</span></button>
+          <button class="break-duration-btn" data-minutes="5">5 MIN<br><span class="break-cost">-250 CR</span></button>
+          <button class="break-duration-btn" data-minutes="10">10 MIN<br><span class="break-cost">-500 CR</span></button>
+        </div>
+        <div id="break-insufficient-funds" class="break-error" style="display: none;">
+          INSUFFICIENT FUNDS. Current wage: <span id="break-current-wage">0</span> CR
+        </div>
+      </div>
+      <div class="confirm-actions">
+        <button id="btn-break-cancel">CANCEL</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="break-screen-overlay" aria-hidden="true">
+    <div class="break-screen-card">
+      <div class="break-screen-title">BREAK</div>
+      <div class="break-screen-timer" id="break-timer-display">00:00</div>
+      <div class="break-screen-sub">Gate operations suspended</div>
+    </div>
+  </div>
+
   <div id="game-container">
     <header>
       <div class="brand">
@@ -2282,6 +2496,7 @@ button.btn-error {
           <button id="btn-share" aria-label="Share this session">SHARE</button>
           <button id="btn-resume" aria-label="Load from an exported save">LOAD FILE</button>
           <button id="btn-export" aria-label="Export this session">EXPORT</button>
+          <button id="btn-break" aria-label="Take a paid break">BREAK - 50CR/MIN</button>
           <button id="btn-options" aria-expanded="false" aria-controls="options-panel">OPTIONS</button>
           <button id="btn-help" aria-expanded="false" aria-controls="help-panel">HELP</button>
           <button id="btn-hard-reset" class="btn-danger" aria-label="Reset gate simulation">RESET</button>
@@ -2448,7 +2663,7 @@ button.btn-error {
                 <span class="subsection-chevron">▼</span>
                 <span>Resources</span>
               </div>
-              <div id="resource-meta" class="queue-meta">2 TRACKS</div>
+              <div id="resource-meta" class="queue-meta">SYSTEM LEVELS</div>
             </div>
             <div class="subsection-content">
             <div id="resource-list" class="resource-list"></div>
@@ -2477,7 +2692,7 @@ button.btn-error {
                 <span class="subsection-chevron">▼</span>
                 <span>Repeater Relays</span>
               </div>
-              <div class="queue-meta">LOCAL</div>
+              <div class="queue-meta">LOCAL RELAY NETWORK</div>
             </div>
             <div class="subsection-content">
             <div id="relay-list" class="status-list"></div>
@@ -2490,7 +2705,7 @@ button.btn-error {
                 <span class="subsection-chevron">▼</span>
                 <span>Maintenance</span>
               </div>
-              <div class="queue-meta">LOCAL AUTH</div>
+              <div class="queue-meta">AUTHORIZED COMMANDS</div>
             </div>
             <div class="subsection-content">
             <div class="sys-actions">
@@ -2540,7 +2755,7 @@ button.btn-error {
     </div>
 
     <footer>
-      <div>LOCAL SCOPE // NO NAVIGATIONAL GUARANTEE // DATA AGE: <span id="data-age">00:00</span></div>
+      <div>CORRIDOR NAVIGATIONAL AUTHORITY // GATE ACCESS TERMINAL // TERMINAL STATUS: <span id="data-age">CONNECTED</span></div>
       <div class="footer-right">
         <span class="hint">ENTER: RUN</span>
         <span class="hint">↑: HISTORY</span>
@@ -2901,6 +3116,7 @@ button.btn-error {
               <div class="volume-slider-container">
                 <input type="range" id="sfx-volume-slider" class="volume-slider" min="0" max="100" value="80" aria-label="SFX volume">
                 <div class="volume-default-marker" style="left: 80%;" title="Default (80%)"></div>
+                <div id="sfx-volume-current-marker" class="volume-current-marker" style="left: 80%;"></div>
               </div>
               <span id="sfx-volume-value" class="volume-value">80%</span>
               <button id="btn-sfx-volume-reset" class="btn-volume-reset" aria-label="Reset SFX volume to default">RESET</button>
@@ -2918,6 +3134,7 @@ button.btn-error {
               <div class="volume-slider-container">
                 <input type="range" id="music-volume-slider" class="volume-slider" min="0" max="100" value="80" aria-label="Music volume">
                 <div class="volume-default-marker" style="left: 80%;" title="Default (80%)"></div>
+                <div id="music-volume-current-marker" class="volume-current-marker" style="left: 80%;"></div>
               </div>
               <span id="music-volume-value" class="volume-value">80%</span>
               <button id="btn-music-volume-reset" class="btn-volume-reset" aria-label="Reset music volume to default">RESET</button>
@@ -3216,8 +3433,8 @@ button.btn-error {
     // ---------------------------
     // State Model (lonelier / slower)
     // ---------------------------
-    const TYPES_IN = ["CARGO", "CIVILIAN", "MAINT", "ESCORT", "MED", "UNKNOWN", "INFESTED", "PIRATE", "RAIDER", "IRRADIATED"];
-    const TYPES_OUT = ["CARGO", "CIVILIAN", "ESCORT", "MAINT", "MAINT", "MED", "INFESTED", "PIRATE", "RAIDER", "IRRADIATED"];
+    const TYPES_IN = ["CARGO", "CIVILIAN", "MAINT", "ESCORT", "MED"];
+    const TYPES_OUT = ["CARGO", "CIVILIAN", "ESCORT", "MAINT", "MAINT", "MED"];
 
     const REQUESTS_IN = ["DOCK", "DECON", "REFUEL", "MED", "CARGO OFFLOAD", "CUSTOMS"];
     const REQUESTS_OUT = ["DEPART", "TOW", "REFUEL", "CREW TRANSFER", "CARGO LOAD"];
@@ -3281,10 +3498,10 @@ button.btn-error {
 
     // Sparse rates (per second tick)
     const RATES = {
-      maxIn: 5,
-      maxOut: 5,
-      spawnInChance: 0.0055,   // ~1 every 2.7 min
-      spawnOutChance: 0.0048,  // ~1 every 3.3 min
+      maxIn: 6,
+      maxOut: 6,
+      spawnInChance: 0.0050,   // ~1 every 2.7 min
+      spawnOutChance: 0.0045,  // ~1 every 3.3 min
       reportChance: 0.018,    // sparse ambient chatter
       flavorChance: 0.0025,   // rare ambient flavor text
       driftChance: 0.015,     // alignment drift
@@ -4111,15 +4328,24 @@ button.btn-error {
       btnSfx: document.getElementById("btn-sfx"),
       sfxVolumeSlider: document.getElementById("sfx-volume-slider"),
       sfxVolumeValue: document.getElementById("sfx-volume-value"),
+      sfxVolumeCurrentMarker: document.getElementById("sfx-volume-current-marker"),
       btnSfxVolumeReset: document.getElementById("btn-sfx-volume-reset"),
       btnMusic: document.getElementById("btn-music"),
       musicVolumeSlider: document.getElementById("music-volume-slider"),
       musicVolumeValue: document.getElementById("music-volume-value"),
+      musicVolumeCurrentMarker: document.getElementById("music-volume-current-marker"),
       btnMusicVolumeReset: document.getElementById("btn-music-volume-reset"),
       btnVfx: document.getElementById("btn-vfx"),
       btnHelp: document.getElementById("btn-help"),
       btnOptions: document.getElementById("btn-options"),
       btnHardReset: document.getElementById("btn-hard-reset"),
+      btnBreak: document.getElementById("btn-break"),
+      breakModalOverlay: document.getElementById("break-modal-overlay"),
+      breakScreenOverlay: document.getElementById("break-screen-overlay"),
+      breakTimerDisplay: document.getElementById("break-timer-display"),
+      breakCurrentWage: document.getElementById("break-current-wage"),
+      breakInsufficientFunds: document.getElementById("break-insufficient-funds"),
+      btnBreakCancel: document.getElementById("btn-break-cancel"),
       helpPanel: document.getElementById("help-panel"),
       helpDismiss: document.getElementById("btn-help-dismiss"),
       optionsPanel: document.getElementById("options-panel"),
@@ -4259,6 +4485,14 @@ button.btn-error {
         // TERMINAL sub-sections
         'terminal-console': false,
         'terminal-events': false
+      },
+      breakState: {
+        active: false,
+        endTime: null,
+        timer: null,
+        pausedShiftTime: 0,
+        pausedTickTimer: null,
+        pausedUiTimer: null
       }
     };
 
@@ -4514,8 +4748,11 @@ button.btn-error {
 
       if (ui.sfxVolumeSlider) ui.sfxVolumeSlider.value = sfxPercent;
       if (ui.sfxVolumeValue) ui.sfxVolumeValue.textContent = `${sfxPercent}%`;
+      if (ui.sfxVolumeCurrentMarker) ui.sfxVolumeCurrentMarker.style.left = `${sfxPercent}%`;
+
       if (ui.musicVolumeSlider) ui.musicVolumeSlider.value = musicPercent;
       if (ui.musicVolumeValue) ui.musicVolumeValue.textContent = `${musicPercent}%`;
+      if (ui.musicVolumeCurrentMarker) ui.musicVolumeCurrentMarker.style.left = `${musicPercent}%`;
     }
 
     function applySfxVolume() {
@@ -4935,8 +5172,8 @@ button.btn-error {
       setTimeout(() => btn.classList.remove("btn-error"), 500);
     }
 
-    const THEME_OPTIONS = ["green", "red", "blue", "purple", "amber", "cyan", "orange", "black", "lightblue", "lightred", "lightgreen", "paper"];
-    const UNLOCKABLE_THEMES = ["pinkblack", "browngold"];
+    const THEME_OPTIONS = ["green", "red", "blue", "purple", "amber", "cyan", "orange", "black", "lightblue", "lightred", "lightgreen", "paper", "pinkblack", "browngold"];
+    const UNLOCKABLE_THEMES = [];
 
     function pickRandomTheme(exclude) {
       const lightThemes = ["lightblue", "lightred", "lightgreen", "paper"];
@@ -4991,11 +5228,32 @@ button.btn-error {
 
     function isThemeUnlocked(themeId) {
       if (THEME_OPTIONS.includes(themeId)) return true;
+
+      // Check if Christmas theme is available
+      if (themeId === "christmas") {
+        const now = new Date();
+        const month = now.getMonth();
+        const day = now.getDate();
+        if (month === 11 && (day === 24 || day === 25)) {
+          return true;
+        }
+      }
+
       return getUnlockedThemes().includes(themeId);
     }
 
     function getAllAvailableThemes() {
-      return [...THEME_OPTIONS, ...getUnlockedThemes()];
+      const themes = [...THEME_OPTIONS, ...getUnlockedThemes()];
+
+      // Add Christmas theme only on Dec 24-25
+      const now = new Date();
+      const month = now.getMonth(); // 0-indexed, so December is 11
+      const day = now.getDate();
+      if (month === 11 && (day === 24 || day === 25)) {
+        themes.push("christmas");
+      }
+
+      return themes;
     }
 
     function populateThemeDropdown() {
@@ -5013,8 +5271,9 @@ button.btn-error {
         lightred: "LIGHT - RED",
         lightgreen: "LIGHT - GREEN",
         paper: "PAPER",
-        pinkblack: "PINK & BLACK",
-        browngold: "BROWN & GOLD"
+        pinkblack: "PINK",
+        browngold: "YELLOW",
+        christmas: "CHRISTMAS"
       };
       ui.themeSelect.innerHTML = available
         .map(id => `<option value="${id}">${themeNames[id] || id.toUpperCase()}</option>`)
@@ -5390,8 +5649,9 @@ button.btn-error {
         if (text) issues.push(text);
       };
 
-      if (g.health.includes("MAINTENANCE")) mark(2, "GATE MAINTENANCE");
-      else if (g.health.includes("DEGRADED")) mark(1, "GATE DEGRADED");
+      // NODE status is a reflection of other issues, so don't count it separately
+      // if (g.health.includes("MAINTENANCE")) mark(2, "GATE MAINTENANCE");
+      // else if (g.health.includes("DEGRADED")) mark(1, "GATE DEGRADED");
 
       if (g.beacon === "OFFLINE") mark(2, "BEACON OFFLINE");
       else if (g.beacon === "FAULT") mark(1, "BEACON FAULT");
@@ -5629,7 +5889,7 @@ button.btn-error {
       const visibleEffects = (s.effects || []).filter(e => !e.hidden || e.revealed).map(e => e.name);
       const effectLine = visibleEffects.length ? visibleEffects.join(" / ") : "NONE";
 
-      const rows = s.obscured ? [
+      const rows = (s.obscured && s.infoMasked) ? [
         ["DIR", s.dir],
         ["STATE", s.state],
         ...(deconTime ? [["DECON REMAIN", deconTime]] : []),
@@ -5665,7 +5925,7 @@ button.btn-error {
     }
 
     function shipInlineDetailPanel(s, opts = {}) {
-      const note = s.obscured ? `<div class="inline-detail-sub">SIGNAL MASKED / IDENTITY UNVERIFIED</div>` : "";
+      const note = (s.obscured && s.infoMasked) ? `<div class="inline-detail-sub">SIGNAL MASKED / IDENTITY UNVERIFIED</div>` : "";
       return `
         <div class="inline-detail ${opts.compact ? "inline-detail-compact" : ""}">
           <div class="inline-detail-head">
@@ -6458,7 +6718,7 @@ button.btn-error {
       if (shipHasEffect(s, "VACUUM BLOOM")) return "QUARANTINE REQUIRED";
       if (shipIsRaider(s) || s.hiddenThreat) return "AUTHORITIES NOTIFIED";
       if (s.dir === "OUT" && shipHasEffect(s, "CORRIDOR RADIATION")) return "RADIATION HAZARD";
-      if (s.obscured) return "SIGNAL MASKED";
+      if (s.obscured && s.infoMasked) return "SIGNAL MASKED";
       if (s.infoMasked) return "UNVERIFIED REGISTRY";
       if (s.transponder !== "VALID") return "TRANSPONDER ANOMALY";
       if (s.type === "UNKNOWN") return "UNVERIFIED REGISTRY";
@@ -9278,8 +9538,6 @@ function cmdPingRelay(id) {
         }
 
         const codeMap = {
-          "1024": { type: "theme", value: "pinkblack", name: "PINK & BLACK" },
-          "14UC": { type: "theme", value: "browngold", name: "BROWN & GOLD" }
         };
 
         const unlock = codeMap[code];
@@ -9776,8 +10034,8 @@ function cmdPingRelay(id) {
     }
 
     function severedRestart() {
-      // Notify multiplayer that this operator is going offline
-      sendGameStateChange(false);
+      // Close multiplayer connection cleanly so it can reconnect when START is pressed
+      cleanupMultiplayer("reset");
 
       // Preserve audio and VFX preferences
       const sfxEnabled = localStorage.getItem(LS.sfxEnabled);
@@ -9965,6 +10223,191 @@ function cmdPingRelay(id) {
       }
     }
 
+    // ---------------------------
+    // Break System
+    // ---------------------------
+    const BREAK_COST_PER_MIN = 50;
+
+    function openBreakModal() {
+      if (runtime.severed || runtime.shiftCompleteShown) return;
+      if (runtime.breakState.active) return;
+
+      const g = activeGate();
+      const stats = ensureGateStats(g);
+      const shiftMs = Date.now() - runtime.shiftStart;
+      const currentWage = computeWage(stats, shiftMs);
+
+      // Update current wage display
+      if (ui.breakCurrentWage) {
+        ui.breakCurrentWage.textContent = currentWage;
+      }
+
+      // Update button states based on available funds
+      const breakButtons = document.querySelectorAll('.break-duration-btn');
+      breakButtons.forEach(btn => {
+        const minutes = parseInt(btn.getAttribute('data-minutes'));
+        const cost = minutes * BREAK_COST_PER_MIN;
+        btn.disabled = cost > currentWage;
+      });
+
+      document.body.classList.add('break-modal-open');
+      if (ui.breakModalOverlay) {
+        ui.breakModalOverlay.setAttribute('aria-hidden', 'false');
+      }
+      if (ui.breakInsufficientFunds) {
+        ui.breakInsufficientFunds.style.display = 'none';
+      }
+    }
+
+    function closeBreakModal() {
+      document.body.classList.remove('break-modal-open');
+      if (ui.breakModalOverlay) {
+        ui.breakModalOverlay.setAttribute('aria-hidden', 'true');
+      }
+    }
+
+    function startBreak(minutes) {
+      const g = activeGate();
+      const stats = ensureGateStats(g);
+      const shiftMs = Date.now() - runtime.shiftStart;
+      const currentWage = computeWage(stats, shiftMs);
+      const cost = minutes * BREAK_COST_PER_MIN;
+
+      // Check if user has enough funds
+      if (cost > currentWage) {
+        if (ui.breakInsufficientFunds) {
+          ui.breakInsufficientFunds.style.display = 'block';
+        }
+        return;
+      }
+
+      // Deduct cost from wage by adjusting stats
+      spendWage(g, cost);
+
+      // Close modal
+      closeBreakModal();
+
+      // Pause the game
+      pauseGame();
+
+      // Set break state
+      runtime.breakState.active = true;
+      runtime.breakState.endTime = Date.now() + (minutes * 60 * 1000);
+
+      // Show break screen
+      document.body.classList.add('on-break');
+      if (ui.breakScreenOverlay) {
+        ui.breakScreenOverlay.setAttribute('aria-hidden', 'false');
+      }
+
+      // Start countdown timer
+      updateBreakTimer();
+      runtime.breakState.timer = setInterval(updateBreakTimer, 1000);
+
+      playSfx("confirm");
+    }
+
+    function pauseGame() {
+      // Store current shift time
+      runtime.breakState.pausedShiftTime = Date.now() - runtime.shiftStart;
+
+      // Pause game timers
+      if (runtime.tickTimer) {
+        runtime.breakState.pausedTickTimer = runtime.tickTimer;
+        clearInterval(runtime.tickTimer);
+        runtime.tickTimer = null;
+      }
+      if (runtime.uiTimer) {
+        runtime.breakState.pausedUiTimer = runtime.uiTimer;
+        clearInterval(runtime.uiTimer);
+        runtime.uiTimer = null;
+      }
+    }
+
+    function resumeGame() {
+      // Adjust shift start time to account for break duration
+      const breakDuration = Date.now() - (runtime.shiftStart + runtime.breakState.pausedShiftTime);
+      runtime.shiftStart += breakDuration;
+
+      // Resume game timers
+      if (!runtime.tickTimer) {
+        runtime.tickTimer = setInterval(tickAllGates, 1000);
+      }
+      if (!runtime.uiTimer) {
+        runtime.uiTimer = setInterval(() => {
+          const shiftMs = Date.now() - runtime.shiftStart;
+          const EIGHT_HOURS_MS = 28_800_000;
+
+          // Check for 8-hour shift completion
+          if (!runtime.shiftCompleteShown && !runtime.severed && shiftMs >= EIGHT_HOURS_MS) {
+            triggerShiftComplete();
+          }
+
+          if (runtime.severed) return;
+          ui.shiftTime.textContent = formatHMS(shiftMs);
+          const g = activeGate();
+          const stats = ensureGateStats(g);
+          if (ui.shiftWage) {
+            ui.shiftWage.textContent = `${computeWage(stats, shiftMs)} CR`;
+          }
+          ui.dataAge.textContent = formatMMSS((Date.now() - g.lastRefresh) / 1000);
+          updateMaintenanceCooldownUI();
+        }, 250);
+      }
+
+      // Clear break state
+      runtime.breakState.pausedShiftTime = 0;
+      runtime.breakState.pausedTickTimer = null;
+      runtime.breakState.pausedUiTimer = null;
+    }
+
+    function updateBreakTimer() {
+      const remaining = runtime.breakState.endTime - Date.now();
+
+      if (remaining <= 0) {
+        endBreak();
+        return;
+      }
+
+      // Update timer display
+      const totalSeconds = Math.ceil(remaining / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      const timeStr = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+      if (ui.breakTimerDisplay) {
+        ui.breakTimerDisplay.textContent = timeStr;
+      }
+
+      // Play click sound for last 10 seconds
+      if (totalSeconds <= 10 && totalSeconds > 0) {
+        playSfx("click");
+      }
+    }
+
+    function endBreak() {
+      // Clear timer
+      if (runtime.breakState.timer) {
+        clearInterval(runtime.breakState.timer);
+        runtime.breakState.timer = null;
+      }
+
+      // Hide break screen
+      document.body.classList.remove('on-break');
+      if (ui.breakScreenOverlay) {
+        ui.breakScreenOverlay.setAttribute('aria-hidden', 'true');
+      }
+
+      // Resume game
+      resumeGame();
+
+      // Clear break state
+      runtime.breakState.active = false;
+      runtime.breakState.endTime = null;
+
+      playSfx("confirm");
+    }
+
     function clearAllSavedData() {
       try {
         // Clean up multiplayer connection if active (prevents auto-reconnect and marks player offline)
@@ -10024,6 +10467,28 @@ function cmdPingRelay(id) {
     if (ui.optionsDismiss) {
       ui.optionsDismiss.addEventListener("click", () => setOptionsOpen(false));
     }
+
+    // Break system event handlers
+    if (ui.btnBreak) {
+      ui.btnBreak.addEventListener("click", () => {
+        openBreakModal();
+      });
+    }
+    if (ui.btnBreakCancel) {
+      ui.btnBreakCancel.addEventListener("click", () => {
+        closeBreakModal();
+      });
+    }
+    // Break duration buttons
+    document.addEventListener("click", (e) => {
+      const btn = e.target.closest('.break-duration-btn');
+      if (!btn || btn.disabled) return;
+      const minutes = parseInt(btn.getAttribute('data-minutes'));
+      if (minutes) {
+        startBreak(minutes);
+      }
+    });
+
     document.addEventListener("click", (e) => {
       if (!ui.helpPanel || !ui.btnHelp) return;
       if (!ui.helpPanel.classList.contains("open")) return;
@@ -10042,6 +10507,7 @@ function cmdPingRelay(id) {
       setOptionsOpen(false);
       setResetConfirmOpen(false);
       setDataResetConfirmOpen(false);
+      closeBreakModal();
     });
 
     // Panel collapse event delegation
@@ -10344,7 +10810,7 @@ function cmdPingRelay(id) {
 
       runtime.multiplayer.ws.send(JSON.stringify(msg));
     }
-
+		
     function sendGameStateChange(gameActive, reason = null) {
       if (!runtime.multiplayer.ws || runtime.multiplayer.ws.readyState !== WebSocket.OPEN) return;
 
