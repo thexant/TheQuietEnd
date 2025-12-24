@@ -1972,6 +1972,18 @@ button.btn-error {
         box-shadow: 0 0 16px rgba(225, 100, 100, 0.6);
       }
     }
+    tr.ship-flagged-pulse {
+      animation: shipFlaggedPulse 0.8s ease-out;
+    }
+    @keyframes shipFlaggedPulse {
+      0%, 100% {
+        background: transparent;
+      }
+      50% {
+        background: rgba(210, 169, 90, 0.2);
+        box-shadow: 0 0 8px rgba(210, 169, 90, 0.4);
+      }
+    }
     .status-right {
       display: inline-flex;
       gap: 6px;
@@ -3125,6 +3137,24 @@ button.btn-error {
         </div>
         <div class="help-row">
           <div class="help-key">
+            <button id="btn-keyboard" aria-label="Toggle keyboard sounds" aria-pressed="true" style="width: 100%; min-width: 100px;">KEYBOARD: ON</button>
+          </div>
+          <div>
+            <div>Toggle keyboard typing sounds. Mechanical keyboard clack sounds when typing.</div>
+            <div class="volume-control">
+              <label for="keyboard-volume-slider" class="volume-label">Volume</label>
+              <div class="volume-slider-container">
+                <input type="range" id="keyboard-volume-slider" class="volume-slider" min="0" max="100" value="80" aria-label="Keyboard volume">
+                <div class="volume-default-marker" style="left: 80%;" title="Default (80%)"></div>
+                <div id="keyboard-volume-current-marker" class="volume-current-marker" style="left: 80%;"></div>
+              </div>
+              <span id="keyboard-volume-value" class="volume-value">80%</span>
+              <button id="btn-keyboard-volume-reset" class="btn-volume-reset" aria-label="Reset keyboard volume to default">RESET</button>
+            </div>
+          </div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">
             <button id="btn-music" aria-label="Toggle background music" aria-pressed="true" style="width: 100%; min-width: 100px;">MUSIC: ON</button>
           </div>
           <div>
@@ -3158,9 +3188,8 @@ button.btn-error {
     // ---------------------------
     // Version & Cache Busting
     // ---------------------------
-    const APP_VERSION = "v2.0-relay-degradation-2023-12-23";
+    const APP_VERSION = "v2.5-2025-24-12";
     console.log(`%c🛰️ GATE CONTROL TERMINAL ${APP_VERSION}`, "color: #00ff00; font-weight: bold; font-size: 14px;");
-    console.log("%cIf messages aren't degrading with bad relays, hard refresh: Ctrl+Shift+R (or Cmd+Shift+R)", "color: #ffaa00;");
 
     // ---------------------------
     // Utilities
@@ -3379,6 +3408,8 @@ button.btn-error {
       gateStatePrefix: "tqe_gate_terminal_gate_state::",
       sfxEnabled: "tqe_gate_terminal_sfx_enabled",
       sfxVolume: "tqe_gate_terminal_sfx_volume",
+      keyboardEnabled: "tqe_gate_terminal_keyboard_enabled",
+      keyboardVolume: "tqe_gate_terminal_keyboard_volume",
       musicEnabled: "tqe_gate_terminal_music_enabled",
       musicVolume: "tqe_gate_terminal_music_volume",
       vfxEnabled: "tqe_gate_terminal_vfx_enabled",
@@ -4330,6 +4361,11 @@ button.btn-error {
       sfxVolumeValue: document.getElementById("sfx-volume-value"),
       sfxVolumeCurrentMarker: document.getElementById("sfx-volume-current-marker"),
       btnSfxVolumeReset: document.getElementById("btn-sfx-volume-reset"),
+      btnKeyboard: document.getElementById("btn-keyboard"),
+      keyboardVolumeSlider: document.getElementById("keyboard-volume-slider"),
+      keyboardVolumeValue: document.getElementById("keyboard-volume-value"),
+      keyboardVolumeCurrentMarker: document.getElementById("keyboard-volume-current-marker"),
+      btnKeyboardVolumeReset: document.getElementById("btn-keyboard-volume-reset"),
       btnMusic: document.getElementById("btn-music"),
       musicVolumeSlider: document.getElementById("music-volume-slider"),
       musicVolumeValue: document.getElementById("music-volume-value"),
@@ -4695,6 +4731,8 @@ button.btn-error {
     const audioState = {
       sfxEnabled: loadStoredBool(LS.sfxEnabled, true),
       sfxVolume: loadStoredNumber(LS.sfxVolume, 0.8),
+      keyboardEnabled: loadStoredBool(LS.keyboardEnabled, true),
+      keyboardVolume: loadStoredNumber(LS.keyboardVolume, 0.8),
       musicEnabled: loadStoredBool(LS.musicEnabled, true),
       musicVolume: loadStoredNumber(LS.musicVolume, 0.8),
       unlocked: false,
@@ -4738,6 +4776,10 @@ button.btn-error {
         ui.btnSfx.textContent = `SFX: ${audioState.sfxEnabled ? "ON" : "OFF"}`;
         ui.btnSfx.setAttribute("aria-pressed", audioState.sfxEnabled ? "true" : "false");
       }
+      if (ui.btnKeyboard) {
+        ui.btnKeyboard.textContent = `KEYBOARD: ${audioState.keyboardEnabled ? "ON" : "OFF"}`;
+        ui.btnKeyboard.setAttribute("aria-pressed", audioState.keyboardEnabled ? "true" : "false");
+      }
       if (ui.btnMusic) {
         ui.btnMusic.textContent = `MUSIC: ${audioState.musicEnabled ? "ON" : "OFF"}`;
         ui.btnMusic.setAttribute("aria-pressed", audioState.musicEnabled ? "true" : "false");
@@ -4750,11 +4792,16 @@ button.btn-error {
 
     function updateVolumeControls() {
       const sfxPercent = Math.round(audioState.sfxVolume * 100);
+      const keyboardPercent = Math.round(audioState.keyboardVolume * 100);
       const musicPercent = Math.round(audioState.musicVolume * 100);
 
       if (ui.sfxVolumeSlider) ui.sfxVolumeSlider.value = sfxPercent;
       if (ui.sfxVolumeValue) ui.sfxVolumeValue.textContent = `${sfxPercent}%`;
       if (ui.sfxVolumeCurrentMarker) ui.sfxVolumeCurrentMarker.style.left = `${sfxPercent}%`;
+
+      if (ui.keyboardVolumeSlider) ui.keyboardVolumeSlider.value = keyboardPercent;
+      if (ui.keyboardVolumeValue) ui.keyboardVolumeValue.textContent = `${keyboardPercent}%`;
+      if (ui.keyboardVolumeCurrentMarker) ui.keyboardVolumeCurrentMarker.style.left = `${keyboardPercent}%`;
 
       if (ui.musicVolumeSlider) ui.musicVolumeSlider.value = musicPercent;
       if (ui.musicVolumeValue) ui.musicVolumeValue.textContent = `${musicPercent}%`;
@@ -4763,9 +4810,8 @@ button.btn-error {
 
     function applySfxVolume() {
       const vol = audioState.sfxVolume;
-      // Update all SFX audio pools
+      // Update all SFX audio pools (excluding clack, which is controlled by keyboard volume)
       if (audio.click?.pool) audio.click.pool.forEach(a => a.volume = 0.35 * vol);
-      if (audio.clack?.pool) audio.clack.pool.forEach(a => a.volume = 0.28 * vol);
       if (audio.beep?.pool) audio.beep.pool.forEach(a => a.volume = 0.55 * vol);
       if (audio.blip?.pool) audio.blip.pool.forEach(a => a.volume = 0.4 * vol);
       if (audio.msg?.pool) audio.msg.pool.forEach(a => a.volume = 0.6 * vol);
@@ -4791,6 +4837,11 @@ button.btn-error {
       if (audio.music) audio.music.volume = 0.32 * audioState.musicVolume;
     }
 
+    function applyKeyboardVolume() {
+      const vol = audioState.keyboardVolume;
+      if (audio.clack?.pool) audio.clack.pool.forEach(a => a.volume = 0.28 * vol);
+    }
+
     function setSfxVolume(volume) {
       audioState.sfxVolume = Math.max(0, Math.min(1, volume));
       storeNumber(LS.sfxVolume, audioState.sfxVolume);
@@ -4805,8 +4856,23 @@ button.btn-error {
       updateVolumeControls();
     }
 
+    function setKeyboardVolume(volume) {
+      audioState.keyboardVolume = Math.max(0, Math.min(1, volume));
+      storeNumber(LS.keyboardVolume, audioState.keyboardVolume);
+      applyKeyboardVolume();
+      updateVolumeControls();
+    }
+
+    function setKeyboardEnabled(enabled) {
+      audioState.keyboardEnabled = !!enabled;
+      storeBool(LS.keyboardEnabled, audioState.keyboardEnabled);
+      updateAudioButtons();
+    }
+
     function playSfx(name) {
-      if (!audioState.sfxEnabled || !audioState.unlocked) return;
+      // Check keyboard settings for clack sound, sfx settings for other sounds
+      const isEnabled = (name === "clack") ? audioState.keyboardEnabled : audioState.sfxEnabled;
+      if (!isEnabled || !audioState.unlocked) return;
       const group = audio[name];
       if (!group) return;
       if (group.pool) {
@@ -4987,11 +5053,11 @@ button.btn-error {
       if (combinedScore <= 1) {
         corruptionRate = 0;
       } else if (combinedScore <= 4) {
-        corruptionRate = 0.10;
+        corruptionRate = 0.20;
       } else if (combinedScore <= 8) {
-        corruptionRate = 0.30;
+        corruptionRate = 0.50;
       } else {
-        corruptionRate = 0.60;
+        corruptionRate = 0.80;
       }
 
       if (corruptionRate === 0) return text;
@@ -6006,9 +6072,10 @@ button.btn-error {
         const isFinalized = isShipFinalized(s);
         const disabledClass = isFinalized ? "disabled" : "";
         const st = String(s.state || "").toUpperCase();
-				const canDecide = !(st.includes("DEPART") || st.includes("ARRIV") || st.includes("COMPLETE"));
+				const canDecide = !(st.includes("DEPART") || st.includes("ARRIV") || st.includes("COMPLETE") || st.includes("WAITING TO DOCK"));
+        const pulseClass = s.justFlagged ? " ship-flagged-pulse" : "";
         return `
-          <tr class="${urgency}">
+          <tr class="${urgency}${pulseClass}">
             <td class="code" data-label="Id" title="${escapeText(shipDisplayRequest(s))} / ${escapeText(shipDisplayTransponder(s))}">${escapeText(s.id)}${prio}${tr}${mask}${getDeadlineSymbol(s)}</td>
             <td data-label="Eta">${escapeText(eta)}</td>
             <td data-label="Type" title="${escapeText(shipDisplayRequest(s))}">${escapeText(shipDisplayType(s))}</td>
@@ -8522,9 +8589,16 @@ function tickGate(g) {
           const flagged = activeShips.filter(s => s.transponder !== "VALID");
           if (!flagged.length) {
             consoleLine("SCAN: NO ANOMALIES (LOW CONF)", "good");
+            if (g.id === runtime.activeGateId) eventLine("SCAN: NO ANOMALIES", "good");
           } else {
             const sample = flagged.slice(0, 3).map(s => s.id).join(" / ");
             consoleLine(`SCAN: FLAGGED ${flagged.length} CONTACTS (${sample}${flagged.length > 3 ? " / ..." : ""})`, "warn");
+            if (g.id === runtime.activeGateId) eventLine(`SCAN: FLAGGED ${flagged.length} CONTACTS (${sample}${flagged.length > 3 ? " / ..." : ""})`, "warn");
+
+            // Mark flagged ships for pulse animation
+            for (const ship of flagged) {
+              ship.justFlagged = true;
+            }
           }
 
 					const effectHits = [];
@@ -8555,6 +8629,16 @@ function tickGate(g) {
           g.lastRefresh = Date.now();
           if (shouldAward) bumpStat(g, "maintenanceOps");
           renderAll();
+
+          // Clear flagged ship pulse after animation completes
+          if (flagged.length) {
+            setTimeout(() => {
+              for (const ship of flagged) {
+                ship.justFlagged = false;
+              }
+              renderAll();
+            }, 800);
+          }
         }, 700);
       }
     }
@@ -9656,13 +9740,17 @@ function cmdPingRelay(id) {
         const g = activeGate();
         const senderHealthState = computeRelayHealthState(g);
         const senderScore = senderHealthState.score;
+
+        // Corrupt outgoing text based on sender's relay health
+        const corruptedText = corruptMessageText(text, senderScore);
+
         const msg = {
           type: "message",
           timestamp: Date.now(),
           data: {
             gateId: g.id,
             operatorCallsign: runtime.operatorCallsign || "OPERATOR",
-            text: text,
+            text: corruptedText,
             recipients: "all",
             senderRelayScore: senderScore
           }
@@ -9749,6 +9837,7 @@ function cmdPingRelay(id) {
     // ---------------------------
     updateAudioButtons();
     applySfxVolume();
+    applyKeyboardVolume();
     applyMusicVolume();
     updateVolumeControls();
     applyVfxMode();
@@ -9771,6 +9860,21 @@ function cmdPingRelay(id) {
     if (ui.btnSfxVolumeReset) {
       ui.btnSfxVolumeReset.addEventListener("click", () => {
         setSfxVolume(0.8);
+        playSfx("beep");
+      });
+    }
+
+    if (ui.btnKeyboard) {
+      ui.btnKeyboard.addEventListener("click", () => setKeyboardEnabled(!audioState.keyboardEnabled));
+    }
+    if (ui.keyboardVolumeSlider) {
+      ui.keyboardVolumeSlider.addEventListener("input", (e) => {
+        setKeyboardVolume(parseInt(e.target.value, 10) / 100);
+      });
+    }
+    if (ui.btnKeyboardVolumeReset) {
+      ui.btnKeyboardVolumeReset.addEventListener("click", () => {
+        setKeyboardVolume(0.8);
         playSfx("beep");
       });
     }

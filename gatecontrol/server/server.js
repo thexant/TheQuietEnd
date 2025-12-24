@@ -311,10 +311,17 @@ function handleGameStateChange(data) {
   }
 }
 
-function handleHeartbeat(gateId) {
-  const player = players.get(gateId);
+function handleHeartbeat(data) {
+  const player = players.get(data.gateId);
   if (player) {
     player.lastHeartbeat = Date.now();
+
+    // Update operator callsign if it has changed
+    if (data.operatorCallsign && data.operatorCallsign !== player.operatorCallsign) {
+      player.operatorCallsign = data.operatorCallsign;
+      // Broadcast updated player list so all clients see the new name
+      broadcastPlayerList("update", "name_change", data.gateId);
+    }
   }
 }
 
@@ -388,7 +395,7 @@ wss.on("connection", (ws) => {
           handleGameStateChange(msg.data);
           break;
         case "heartbeat":
-          handleHeartbeat(msg.data.gateId);
+          handleHeartbeat(msg.data);
           break;
         default:
           console.warn("Unknown message type:", msg.type);
