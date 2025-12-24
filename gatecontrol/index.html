@@ -8,11 +8,11 @@
   <meta property="og:title" content="Gate Control Terminal // The Quiet End" />
   <meta
     property="og:description"
-    content="Simulated gate control terminal for reviewing traffic, managing systems, and logging events."
+    content="A Gate Control Terminal simulation game set in the setting of The Quiet End. Monitor traffic, maintain gate systems, and survive a full shift. Now supports ambient multiplayer."
   />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://thequietend.com/gatecontrol/" />
-  <meta property="og:image" content="https://thequietend.com/gatecontrol/embed.png" />
+  <meta property="og:image" content="http://thequietend.com/gatecontrol/embed.png" />
   <meta property="og:image:alt" content="Gate Control Terminal" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Gate Control Terminal // The Quiet End" />
@@ -2629,7 +2629,7 @@ button.btn-error {
         </div>
         <div class="help-row">
           <div class="help-key">Concourse</div>
-          <div>Shows current ship population at your gate (6-26+). Increases when you approve ships, decreases over time. High concourse levels (overcrowding) can cause issues. <strong>Fix:</strong> Type PURGE command or click PURGE button to clear low-priority traffic (15-second cooldown).</div>
+          <div>Shows current ship population at your gate (6-26+). Increases when you approve ships, decreases over time. High concourse levels (overcrowding) can cause issues. <strong>Fix:</strong> Type PURGE command or click PURGE button to clear low-priority traffic (costs 10 FUEL, 15-second cooldown).</div>
         </div>
       </div>
       <div class="help-section">
@@ -2644,7 +2644,7 @@ button.btn-error {
             SCAN — Detect hidden hazards on ships (15s cooldown, use every 60-90s)<br>
             REALIGN — Fix gate alignment (15s cooldown)<br>
             RESET — Fix sync issues (15s cooldown)<br>
-            PURGE — Clear concourse congestion (15s cooldown)<br>
+            PURGE — Clear concourse congestion (costs 10 FUEL, 15s cooldown)<br>
             ACK [relay-id] — Acknowledge relay ping (e.g., ACK R-7701) CRITICAL<br>
             REPAIR [system] — Quick repair facility (e.g., REPAIR DECON BAY)<br>
             ORDER FUEL [amount] — Buy fuel (e.g., ORDER FUEL 50)<br>
@@ -2750,7 +2750,7 @@ button.btn-error {
               <li>Watch outbound ship deadlines. CRITICAL priority ships can SEVER your gate if missed.</li>
               <li>When in doubt, use HOLD to pause a ship, then SCAN and DETAIL to investigate.</li>
               <li>Incorrect DENYs cost credits but won't end your game. Incorrect APPROVEs will.</li>
-              <li>Use REALIGN, RESET, PURGE preventively (they have 15s cooldowns).</li>
+              <li>Use REALIGN and RESET preventively (15s cooldowns). PURGE costs 10 FUEL.</li>
               <li>You earn 0.25 credits per minute + credits per action. </li>
             </ul>
           </div>
@@ -3090,8 +3090,8 @@ button.btn-error {
     ];
 
     const RESOURCE_TYPES = [
-      { id: "FUEL", name: "FUEL", startMin: 75, startMax: 95, restockMin: 35, restockMax: 55, request: "REFUEL", pricePerUnit: 1 },
-      { id: "SUPPLY", name: "SUPPLY", startMin: 75, startMax: 95, restockMin: 30, restockMax: 50, request: "RESUPPLY", pricePerUnit: 1 }
+      { id: "FUEL", name: "FUEL", startMin: 90, startMax: 100, restockMin: 35, restockMax: 55, request: "REFUEL", pricePerUnit: 1 },
+      { id: "SUPPLY", name: "SUPPLY", startMin: 90, startMax: 100, restockMin: 30, restockMax: 50, request: "RESUPPLY", pricePerUnit: 1 }
     ];
     const RESOURCE_ORDER_THRESHOLD = 25;
     const RESOURCE_CRITICAL_THRESHOLD = 25;
@@ -3105,15 +3105,15 @@ button.btn-error {
 
     // Sparse rates (per second tick)
     const RATES = {
-      maxIn: 6,
-      maxOut: 6,
-      spawnInChance: 0.0054,   // ~1 every 2.7 min
-      spawnOutChance: 0.0052,  // ~1 every 3.3 min
+      maxIn: 5,
+      maxOut: 5,
+      spawnInChance: 0.0055,   // ~1 every 2.7 min
+      spawnOutChance: 0.0048,  // ~1 every 3.3 min
       reportChance: 0.018,    // sparse ambient chatter
       flavorChance: 0.0025,   // rare ambient flavor text
       driftChance: 0.015,     // alignment drift
       syncDriftChance: 0.006, // sync slips to ASYNC/FAULT
-      syncRecoverChance: 0.02, // sync recovers to SYNC (with healthy relays)
+      syncRecoverChance: 0.05, // sync recovers to SYNC (with healthy relays)
       wobbleChance: 0.010,    // corridor wobble
       facilityFaultChance: 0.00085, // rare subsystem faults
       facilityWorsenChance: 0.00015,
@@ -3122,9 +3122,9 @@ button.btn-error {
       relayPingChance: 0.0018,
       relayDropChance: 0.00025,
       concourseFade: 0.08,
-      fuelDrain: 0.015,
+      fuelDrain: 0.010,
       supplyDrainWorkOrder: 0.045,
-      supplyDrainDecon: 0.025
+      supplyDrainDecon: 0.015
     };
 
     // Repair system configuration
@@ -3132,13 +3132,13 @@ button.btn-error {
     const REPAIR_DELAY_MAX = 30; // seconds
     const REPAIR_FAILURE_CHANCE = 0.30; // 30%
     const REPAIR_COOLDOWN_MS = 5000; // 5 seconds
-    const DEGRADED_TIMEOUT_MIN_MS = 2 * 60 * 1000; // 2 min
-    const DEGRADED_TIMEOUT_MAX_MS = 5 * 60 * 1000; // 5 min
+    const DEGRADED_TIMEOUT_MIN_MS = 1 * 60 * 1000; // 2 min
+    const DEGRADED_TIMEOUT_MAX_MS = 3 * 60 * 1000; // 5 min
 
     const CORRIDOR_TRAFFIC_WEIGHTS = {
       STABLE: 1,
       DEGRADED: 0.75,
-      INTERMITTENT: 0.45,
+      INTERMITTENT: 0.35,
       OFFLINE: 0.05
     };
 
@@ -3980,6 +3980,7 @@ button.btn-error {
       resumeShiftMs: null,
       skipHashLoad: false,
       operatorCallsign: "",
+      pendingConfirmation: null,
       multiplayer: {
         enabled: false,
         ws: null,
@@ -5373,7 +5374,12 @@ button.btn-error {
       const [pText, pCls] = shipStatusPill(s);
       const deconTime = deconCountdown(s);
       const deadlineTime = departureDeadlineCountdown(s);
-      const eta = (["DENIED","ARRIVED","DEPARTED","WAITING TO DOCK","WAITING DECON","DECON","SERVICING","CLEARING","COMPLETE"].includes(s.state)) ? "—" : formatMMSS(s.eta);
+      const stEta = String(s.state || "").toUpperCase();
+			const etaFrozen =
+				["DENIED","ARRIVED","DEPARTED","WAITING TO DOCK","WAITING DECON","DECON","SERVICING","CLEARING","COMPLETE"].includes(s.state) ||
+				stEta.includes("DEPART") || stEta.includes("ARRIV") || stEta.includes("COMPLETE");
+
+			const eta = etaFrozen ? "—" : formatMMSS(s.eta);
       const prio = shipDisplayPriority(s) ? " ★" : "";
         const tr = (shipDisplayTransponder(s) !== "VALID") ? " !" : "";
         const mask = s.obscured ? " X" : "";
@@ -5384,6 +5390,8 @@ button.btn-error {
         const isDetailOpen = runtime.inlineDetailId === s.id;
         const isFinalized = isShipFinalized(s);
         const disabledClass = isFinalized ? "disabled" : "";
+        const st = String(s.state || "").toUpperCase();
+				const canDecide = !(st.includes("DEPART") || st.includes("ARRIV") || st.includes("COMPLETE"));
         return `
           <tr class="${urgency}">
             <td class="code" data-label="Id" title="${escapeText(shipDisplayRequest(s))} / ${escapeText(shipDisplayTransponder(s))}">${escapeText(s.id)}${prio}${tr}${mask}${getDeadlineSymbol(s)}</td>
@@ -5399,9 +5407,9 @@ button.btn-error {
                 <button class="btn-mini ${isDetailOpen ? "detail-open" : ""}" data-action="detail" data-id="${escapeText(s.id)}">DTL</button>
                 ${canQuery ? `<button class="btn-mini hold" data-action="query" data-id="${escapeText(s.id)}">QRY</button>` : ""}
                 ${canDecon ? `<button class="btn-mini approve" data-action="decon" data-id="${escapeText(s.id)}">DECON</button>` : ""}
-                ${s.state !== "DEPARTED" ? `<button class="btn-mini approve ${disabledClass}" data-action="approve" data-id="${escapeText(s.id)}">APP</button>` : ""}
-                ${s.state !== "DEPARTED" ? renderHoldButton(s, isFinalized) : ""}
-                ${s.state !== "DEPARTED" ? `<button class="btn-mini deny ${disabledClass}" data-action="deny" data-id="${escapeText(s.id)}">DENY</button>` : ""}
+                ${canDecide ? `<button class="btn-mini approve ${disabledClass}" data-action="approve" data-id="${escapeText(s.id)}">APP</button>` : ""}
+                ${canDecide ? renderHoldButton(s, isFinalized) : ""}
+                ${canDecide ? `<button class="btn-mini deny ${disabledClass}" data-action="deny" data-id="${escapeText(s.id)}">DENY</button>` : ""}
               </div>
             </td>
           </tr>
@@ -6145,7 +6153,11 @@ button.btn-error {
         playSfx("error");
         return false;
       }
-      const duration = randRange(3 * 60, 6 * 60);
+      let duration = randRange(3 * 60, 6 * 60);
+      // Ships with transponder mismatches take 50% longer to process
+      if (s.transponder !== "VALID") {
+        duration *= 1.5;
+      }
       s.deconEndsAt = Date.now() + duration * 1000;
       s.state = "DECON";
       s.dockState = "DECON";
@@ -6296,7 +6308,18 @@ button.btn-error {
         return;
       }
 
-      if (["WAITING TO DOCK","WAITING DECON","DECON","SERVICING","CLEARING","COMPLETE"].includes(s.state)) {
+      // Decisions no longer apply once the contact is departing / completed
+			const st = String(s.state || "").toUpperCase();
+			const decisionClosed = st.includes("DEPART") || st.includes("ARRIV") || st.includes("COMPLETE");
+
+			if (["approve", "deny", "hold"].includes(action) && decisionClosed) {
+				const stateLabel = st.includes("COMPLETE") ? "DEPARTING GATE" : s.state;
+				consoleLine(`ACTION REFUSED: ${s.id} ${stateLabel}`, "warn");
+				playSfx("error");
+				return;
+			}
+
+      if (["WAITING TO DOCK","WAITING DECON","DECON","SERVICING","CLEARING"].includes(s.state)) {
         consoleLine(`ACTION REFUSED: ${s.id} DOCKED`, "warn");
         playSfx("error");
         return;
@@ -6872,7 +6895,7 @@ button.btn-error {
             ship.state = "WAITING DECON";
             ship.dockState = "WAITING DECON";
             if (shipHasDangerEffect(ship)) {
-              ship.hazardDeadline = Date.now() + randRange(30, 2 * 60) * 1000;
+              ship.hazardDeadline = Date.now() + randRange(60, 2 * 60) * 1000;
             }
             if (g.id === runtime.activeGateId) eventLine(`DECON FAIL: ${ship.id} (RETRY REQUIRED)`, "warn");
             continue;
@@ -6880,7 +6903,12 @@ button.btn-error {
           slot.state = "SERVICING";
           ship.state = "SERVICING";
           ship.dockState = "SERVICING";
-          slot.phaseEndsAt = now + randRange(3 * 60, 8 * 60) * 1000;
+          let serviceDuration = randRange(3 * 60, 8 * 60);
+          // Ships with transponder mismatches take 50% longer to service
+          if (ship.transponder !== "VALID") {
+            serviceDuration *= 1.5;
+          }
+          slot.phaseEndsAt = now + serviceDuration * 1000;
           if (g.id === runtime.activeGateId) eventLine(`DECON COMPLETE: ${ship.id} (SERVICING)`, "dim");
         } else if (slot.state === "SERVICING" && now >= slot.phaseEndsAt) {
           // Check if FUEL MANIFOLD is online before allowing servicing to complete
@@ -6904,7 +6932,12 @@ button.btn-error {
           slot.state = "CLEARING";
           ship.state = "CLEARING";
           ship.dockState = "CLEARING";
-          slot.phaseEndsAt = now + randRange(1 * 60, 2 * 60) * 1000;
+          let clearDuration = randRange(1 * 60, 2 * 60);
+          // Ships with transponder mismatches take 50% longer to clear
+          if (ship.transponder !== "VALID") {
+            clearDuration *= 1.5;
+          }
+          slot.phaseEndsAt = now + clearDuration * 1000;
           if (g.id === runtime.activeGateId) eventLine(`SERVICING COMPLETE: ${ship.id} (CLEARING)`, "dim");
         } else if (slot.state === "CLEARING" && now >= slot.phaseEndsAt) {
           slot.state = "EMPTY";
@@ -7686,7 +7719,7 @@ function tickGate(g) {
           setTimeout(() => {
             const prevSync = g.sync;
             // fix sync most of the time
-            if (relaysFunctional(g) && Math.random() < 0.45) {
+            if (relaysFunctional(g) && Math.random() < 0.35) {
               g.sync = "SYNC";
             } else {
               g.sync = (Math.random() < 0.92) ? "ASYNC" : "FAULT";
@@ -7718,7 +7751,14 @@ function tickGate(g) {
       if (kind === "purge") {
         const shouldAward = hasPurgeNeed(g);
         g.lastPurgeAt = Date.now();
+
+        // Deduct 10 fuel for PURGE operation
+        ensureResources(g);
+        const resources = g.resources;
+        resources.FUEL.level = Math.max(0, resources.FUEL.level - 10);
+
         consoleLine("MAINT: PURGE QUEUE (LOCAL)", "warn");
+        consoleLine("FUEL: -10", "warn");
         let removed = 0;
         let released = 0;
         let authReset = 0;
@@ -8402,7 +8442,7 @@ function cmdPingRelay(id) {
       consoleLine("  APPROVE <ID> | HOLD <ID> | DENY <ID>", "dim");
       consoleLine("  QUERY <ID>", "dim");
       consoleLine("  DECON START <ID>", "dim");
-      consoleLine("  REALIGN | RESET | PURGE | SCAN", "dim");
+      consoleLine("  REALIGN | RESET | PURGE (costs 10 FUEL) | SCAN", "dim");
       consoleLine("  REPAIR <SYSTEM>           - Quick repair DEGRADED system (30% fail chance)", "dim");
       consoleLine("  WORKORDER <SYSTEM>", "dim");
       consoleLine("  RELAYS | PING <RELAY-ID> | PING GATE <GATE-ID> | ACK <RELAY-ID> | RESTORE <RELAY-ID>", "dim");
@@ -8514,6 +8554,26 @@ function cmdPingRelay(id) {
       const parts = line.split(/\s+/);
       const cmd = parts[0].toUpperCase();
 
+      // Handle pending confirmation (for PURGE command)
+      if (runtime.pendingConfirmation) {
+        const answer = cmd;
+        const pending = runtime.pendingConfirmation;
+        runtime.pendingConfirmation = null;
+
+        if (answer === "Y" || answer === "YES") {
+          if (pending.type === "purge") {
+            queueMaintenance("purge", ui.btnPurge, { showConsole: true, skipFuelCheck: true });
+          }
+          return;
+        } else if (answer === "N" || answer === "NO") {
+          consoleLine("PURGE CANCELLED", "dim");
+          return;
+        } else {
+          consoleLine("INVALID RESPONSE. PURGE CANCELLED", "warn");
+          return;
+        }
+      }
+
       if (cmd === "HELP" || cmd === "?") return cmdHelp();
       if (cmd === "STATUS") return cmdStatus();
       if (cmd === "LINKS") return cmdLinks();
@@ -8587,7 +8647,19 @@ function cmdPingRelay(id) {
 
       if (cmd === "REALIGN") return queueMaintenance("realign", ui.btnRealign, { showConsole: true });
       if (cmd === "RESET") return queueMaintenance("reset", ui.btnReset, { showConsole: true });
-      if (cmd === "PURGE") return queueMaintenance("purge", ui.btnPurge, { showConsole: true });
+      if (cmd === "PURGE") {
+        const g = activeGate();
+        ensureResources(g);
+        const fuel = g.resources.FUEL;
+        if (fuel.level < 10) {
+          consoleLine("PURGE REFUSED: INSUFFICIENT FUEL (10 REQUIRED)", "warn");
+          playSfx("error");
+          return;
+        }
+        runtime.pendingConfirmation = { type: "purge" };
+        consoleLine("PURGE COSTS 10 FUEL. CONTINUE (Y,N):", "warn");
+        return;
+      }
       if (cmd === "SCAN") return queueMaintenance("scan", ui.btnScan, { showConsole: true });
 
       if (cmd === "REPAIR") return initiateRepair(parts.slice(1).join(" "));
@@ -9098,6 +9170,18 @@ function cmdPingRelay(id) {
         return;
       }
 
+      // Check fuel cost for PURGE (unless skipFuelCheck is set from confirmation)
+      if (kind === "purge" && !options.skipFuelCheck) {
+        ensureResources(g);
+        const fuel = g.resources.FUEL;
+        if (fuel.level < 10) {
+          consoleLine("PURGE REFUSED: INSUFFICIENT FUEL (10 REQUIRED)", "warn");
+          playSfx("error");
+          flashErrorButton(btn);
+          return;
+        }
+      }
+
       const label = btn?.dataset.label || btn?.textContent.trim() || kind.toUpperCase();
       if (btn) {
         btn.dataset.label = label;
@@ -9198,10 +9282,19 @@ function cmdPingRelay(id) {
           delete btn.dataset.cooldown;
           delete btn.dataset.cooldownGate;
           btn.classList.remove("btn-cooldown");
-          btn.textContent = btn.dataset.baseLabel;
+          // Show fuel cost for PURGE when available
+          if (kind === "purge") {
+            btn.textContent = "PURGE (-10 FUEL)";
+          } else {
+            btn.textContent = btn.dataset.baseLabel;
+          }
           if (sameGate) announceMaintenanceReady(kind, g);
         } else {
           btn.classList.remove("btn-cooldown");
+          // Show fuel cost for PURGE when available
+          if (kind === "purge") {
+            btn.textContent = "PURGE (-10 FUEL)";
+          }
         }
       }
     }
@@ -9217,7 +9310,11 @@ function cmdPingRelay(id) {
 
       // Clear all localStorage
       localStorage.clear();
-
+			runtime.severed = false;
+			runtime.shiftStart = Date.now();
+			runtime.resumeShiftMs = 0;
+			runtime.gates.clear();
+			runtime.activeGateId = null;
       // Restore audio and VFX preferences
       if (sfxEnabled !== null) localStorage.setItem(LS.sfxEnabled, sfxEnabled);
       if (musicEnabled !== null) localStorage.setItem(LS.musicEnabled, musicEnabled);
