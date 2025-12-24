@@ -4,6 +4,10 @@
   <meta charset="UTF-8" />
   <base href="/gatecontrol/">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <!-- Cache-busting headers to ensure users get latest updates -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
   <title>Gate Control Terminal // The Quiet End</title>
   <meta property="og:title" content="Gate Control Terminal // The Quiet End" />
   <meta
@@ -2790,6 +2794,13 @@ button.btn-error {
   </div>
 
   <script>
+    // ---------------------------
+    // Version & Cache Busting
+    // ---------------------------
+    const APP_VERSION = "v2.0-relay-degradation-2023-12-23";
+    console.log(`%c🛰️ GATE CONTROL TERMINAL ${APP_VERSION}`, "color: #00ff00; font-weight: bold; font-size: 14px;");
+    console.log("%cIf messages aren't degrading with bad relays, hard refresh: Ctrl+Shift+R (or Cmd+Shift+R)", "color: #ffaa00;");
+
     // ---------------------------
     // Utilities
     // ---------------------------
@@ -9806,6 +9817,13 @@ function cmdPingRelay(id) {
     // ---------------------------
 
     function initMultiplayer() {
+      // Skip if already connected or connecting
+      if (runtime.multiplayer.ws &&
+          (runtime.multiplayer.ws.readyState === WebSocket.OPEN ||
+           runtime.multiplayer.ws.readyState === WebSocket.CONNECTING)) {
+        return;
+      }
+
       const serverUrl = safeStorageGet(LS.multiplayerServer) || "wss://thequietend.com/ws";
       runtime.multiplayer.serverUrl = serverUrl;
 
@@ -9901,7 +9919,10 @@ function cmdPingRelay(id) {
       const msg = {
         type: "heartbeat",
         timestamp: Date.now(),
-        data: { gateId: g.id }
+        data: {
+          gateId: g.id,
+          operatorCallsign: runtime.operatorCallsign || "OPERATOR"
+        }
       };
 
       runtime.multiplayer.ws.send(JSON.stringify(msg));
@@ -9971,22 +9992,32 @@ function cmdPingRelay(id) {
 
       updateConnectionIndicator(data.changeType);
 
+      // Skip logging events about ourselves (we already log these locally)
+      const g = activeGate();
+      const isOwnEvent = data.gateId === g.id;
+
       if (data.changeType === "join") {
-        eventLine(`OPERATOR CONNECTED (${data.playerCount} NODES)`, "dim");
-      } else if (data.changeType === "leave") {
-        // Display different messages based on disconnect reason
-        let message;
-        if (data.reason === "shift_complete") {
-          message = `OPERATOR SHIFT COMPLETE: ${data.gateId}`;
-        } else if (data.reason === "severed") {
-          message = `OPERATOR CONNECTION LOST: ${data.gateId} SEVERED`;
-        } else if (data.reason === "reset") {
-          message = `OPERATOR DISCONNECTED: CONNECTION RESET`;
-        } else {
-          // Default message for normal disconnects (page close, refresh, timeout, etc.)
-          message = `OPERATOR DISCONNECTED (${data.playerCount} NODES)`;
+        // Only log other players connecting
+        if (!isOwnEvent) {
+          eventLine(`OPERATOR CONNECTED (${data.playerCount} NODES)`, "dim");
         }
-        eventLine(message, "dim");
+      } else if (data.changeType === "leave") {
+        // Only log other players disconnecting
+        if (!isOwnEvent) {
+          // Display different messages based on disconnect reason
+          let message;
+          if (data.reason === "shift_complete") {
+            message = `OPERATOR SHIFT COMPLETE: ${data.gateId}`;
+          } else if (data.reason === "severed") {
+            message = `OPERATOR CONNECTION LOST: ${data.gateId} SEVERED`;
+          } else if (data.reason === "reset") {
+            message = `OPERATOR DISCONNECTED: CONNECTION RESET`;
+          } else {
+            // Default message for normal disconnects (page close, refresh, timeout, etc.)
+            message = `OPERATOR DISCONNECTED (${data.playerCount} NODES)`;
+          }
+          eventLine(message, "dim");
+        }
       }
     }
 
