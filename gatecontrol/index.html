@@ -988,6 +988,97 @@
       display: flex;
       justify-content: flex-end;
     }
+    .volume-control {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed var(--line);
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      gap: 8px;
+      align-items: center;
+    }
+    .volume-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+    }
+    .volume-slider-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .volume-slider {
+      width: 100%;
+      height: 4px;
+      -webkit-appearance: none;
+      appearance: none;
+      background: var(--line);
+      outline: none;
+      border-radius: 2px;
+    }
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      background: var(--accent);
+      cursor: pointer;
+      border-radius: 50%;
+      border: 2px solid var(--bg);
+      box-shadow: 0 0 4px rgba(0,0,0,0.3);
+    }
+    .volume-slider::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      background: var(--accent);
+      cursor: pointer;
+      border-radius: 50%;
+      border: 2px solid var(--bg);
+      box-shadow: 0 0 4px rgba(0,0,0,0.3);
+    }
+    .volume-default-marker {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 2px;
+      height: 12px;
+      background: var(--muted);
+      opacity: 0.5;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .volume-value {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--ink);
+      min-width: 36px;
+      text-align: right;
+    }
+    .btn-volume-reset {
+      font-family: var(--font-title);
+      font-size: 0.62rem;
+      padding: 4px 8px;
+      letter-spacing: 0.08em;
+      background: transparent;
+      border: 1px solid var(--line);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+    .btn-volume-reset:hover {
+      background: var(--line);
+      color: var(--ink);
+    }
+    @media (max-width: 720px) {
+      .volume-control {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+      .volume-label {
+        display: none;
+      }
+    }
 
     .ctl { display: grid; gap: 4px; text-align: right; }
     .ctl label {
@@ -2189,11 +2280,9 @@ button.btn-error {
             </select>
           </div>
           <button id="btn-share" aria-label="Share this session">SHARE</button>
-          <button id="btn-export" aria-label="Export this session">EXPORT</button>
           <button id="btn-resume" aria-label="Load from an exported save">LOAD FILE</button>
-          <button id="btn-sfx" aria-label="Toggle sound effects" aria-pressed="true">SFX: ON</button>
-          <button id="btn-music" aria-label="Toggle background music" aria-pressed="true">MUSIC: ON</button>
-          <button id="btn-vfx" aria-label="Toggle visual effects" aria-pressed="true">VFX: REG</button>
+          <button id="btn-export" aria-label="Export this session">EXPORT</button>
+          <button id="btn-options" aria-expanded="false" aria-controls="options-panel">OPTIONS</button>
           <button id="btn-help" aria-expanded="false" aria-controls="help-panel">HELP</button>
           <button id="btn-hard-reset" class="btn-danger" aria-label="Reset gate simulation">RESET</button>
         </div>
@@ -2794,6 +2883,60 @@ button.btn-error {
     </div>
   </div>
 
+  <div id="options-panel" class="help-panel" aria-hidden="true">
+    <div class="help-head">
+      <div class="help-title">Options</div>
+      <div class="help-sub">Interface settings</div>
+    </div>
+    <div class="help-body">
+      <div class="help-section">
+        <div class="help-row">
+          <div class="help-key">
+            <button id="btn-sfx" aria-label="Toggle sound effects" aria-pressed="true" style="width: 100%; min-width: 100px;">SFX: ON</button>
+          </div>
+          <div>
+            <div>Toggle sound effects. Sound effects include button clicks, alerts, and relay pings. Recommended to keep ON for critical relay ping alerts.</div>
+            <div class="volume-control">
+              <label for="sfx-volume-slider" class="volume-label">Volume</label>
+              <div class="volume-slider-container">
+                <input type="range" id="sfx-volume-slider" class="volume-slider" min="0" max="100" value="80" aria-label="SFX volume">
+                <div class="volume-default-marker" style="left: 80%;" title="Default (80%)"></div>
+              </div>
+              <span id="sfx-volume-value" class="volume-value">80%</span>
+              <button id="btn-sfx-volume-reset" class="btn-volume-reset" aria-label="Reset SFX volume to default">RESET</button>
+            </div>
+          </div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">
+            <button id="btn-music" aria-label="Toggle background music" aria-pressed="true" style="width: 100%; min-width: 100px;">MUSIC: ON</button>
+          </div>
+          <div>
+            <div>Toggle background music. Atmospheric audio that plays during your shift.</div>
+            <div class="volume-control">
+              <label for="music-volume-slider" class="volume-label">Volume</label>
+              <div class="volume-slider-container">
+                <input type="range" id="music-volume-slider" class="volume-slider" min="0" max="100" value="80" aria-label="Music volume">
+                <div class="volume-default-marker" style="left: 80%;" title="Default (80%)"></div>
+              </div>
+              <span id="music-volume-value" class="volume-value">80%</span>
+              <button id="btn-music-volume-reset" class="btn-volume-reset" aria-label="Reset music volume to default">RESET</button>
+            </div>
+          </div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">
+            <button id="btn-vfx" aria-label="Toggle visual effects" aria-pressed="true" style="width: 100%; min-width: 120px;">VFX: REG</button>
+          </div>
+          <div>Toggle visual effects intensity. REG (regular) shows full visual effects. LOW reduces effects for better performance on low-end devices.</div>
+        </div>
+      </div>
+    </div>
+    <div class="help-actions">
+      <button id="btn-options-dismiss">Dismiss</button>
+    </div>
+  </div>
+
   <script>
     // ---------------------------
     // Version & Cache Busting
@@ -3018,7 +3161,9 @@ button.btn-error {
       gateCurrent: "tqe_gate_terminal_gate_current",
       gateStatePrefix: "tqe_gate_terminal_gate_state::",
       sfxEnabled: "tqe_gate_terminal_sfx_enabled",
+      sfxVolume: "tqe_gate_terminal_sfx_volume",
       musicEnabled: "tqe_gate_terminal_music_enabled",
+      musicVolume: "tqe_gate_terminal_music_volume",
       vfxEnabled: "tqe_gate_terminal_vfx_enabled",
       operatorCallsign: "tqe_gate_terminal_operator_callsign",
 			shiftMs: "tqe_gate_terminal_shift_ms",
@@ -3964,12 +4109,21 @@ button.btn-error {
       btnResume: document.getElementById("btn-resume"),
       resumeInput: document.getElementById("resume-file"),
       btnSfx: document.getElementById("btn-sfx"),
+      sfxVolumeSlider: document.getElementById("sfx-volume-slider"),
+      sfxVolumeValue: document.getElementById("sfx-volume-value"),
+      btnSfxVolumeReset: document.getElementById("btn-sfx-volume-reset"),
       btnMusic: document.getElementById("btn-music"),
+      musicVolumeSlider: document.getElementById("music-volume-slider"),
+      musicVolumeValue: document.getElementById("music-volume-value"),
+      btnMusicVolumeReset: document.getElementById("btn-music-volume-reset"),
       btnVfx: document.getElementById("btn-vfx"),
       btnHelp: document.getElementById("btn-help"),
+      btnOptions: document.getElementById("btn-options"),
       btnHardReset: document.getElementById("btn-hard-reset"),
       helpPanel: document.getElementById("help-panel"),
       helpDismiss: document.getElementById("btn-help-dismiss"),
+      optionsPanel: document.getElementById("options-panel"),
+      optionsDismiss: document.getElementById("btn-options-dismiss"),
       resetOverlay: document.getElementById("confirm-reset-overlay"),
       btnResetCancel: document.getElementById("btn-reset-cancel"),
       btnResetConfirm: document.getElementById("btn-reset-confirm"),
@@ -4234,8 +4388,23 @@ button.btn-error {
       return fallback;
     }
 
+    function loadStoredNumber(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (raw !== null) {
+          const num = parseFloat(raw);
+          if (!isNaN(num)) return num;
+        }
+      } catch (_) {}
+      return fallback;
+    }
+
     function storeBool(key, value) {
       try { localStorage.setItem(key, value ? "true" : "false"); } catch (_) {}
+    }
+
+    function storeNumber(key, value) {
+      try { localStorage.setItem(key, String(value)); } catch (_) {}
     }
 
     function makeAudioPool(src, count, volume = 0.8) {
@@ -4285,7 +4454,9 @@ button.btn-error {
 
     const audioState = {
       sfxEnabled: loadStoredBool(LS.sfxEnabled, true),
+      sfxVolume: loadStoredNumber(LS.sfxVolume, 0.8),
       musicEnabled: loadStoredBool(LS.musicEnabled, true),
+      musicVolume: loadStoredNumber(LS.musicVolume, 0.8),
       unlocked: false,
       pendingStartup: false,
       ackAlarmOn: false,
@@ -4335,6 +4506,60 @@ button.btn-error {
         ui.btnVfx.textContent = `VFX: ${vfxState.enabled ? "REG" : "LOW"}`;
         ui.btnVfx.setAttribute("aria-pressed", vfxState.enabled ? "true" : "false");
       }
+    }
+
+    function updateVolumeControls() {
+      const sfxPercent = Math.round(audioState.sfxVolume * 100);
+      const musicPercent = Math.round(audioState.musicVolume * 100);
+
+      if (ui.sfxVolumeSlider) ui.sfxVolumeSlider.value = sfxPercent;
+      if (ui.sfxVolumeValue) ui.sfxVolumeValue.textContent = `${sfxPercent}%`;
+      if (ui.musicVolumeSlider) ui.musicVolumeSlider.value = musicPercent;
+      if (ui.musicVolumeValue) ui.musicVolumeValue.textContent = `${musicPercent}%`;
+    }
+
+    function applySfxVolume() {
+      const vol = audioState.sfxVolume;
+      // Update all SFX audio pools
+      if (audio.click?.pool) audio.click.pool.forEach(a => a.volume = 0.35 * vol);
+      if (audio.clack?.pool) audio.clack.pool.forEach(a => a.volume = 0.28 * vol);
+      if (audio.beep?.pool) audio.beep.pool.forEach(a => a.volume = 0.55 * vol);
+      if (audio.blip?.pool) audio.blip.pool.forEach(a => a.volume = 0.4 * vol);
+      if (audio.msg?.pool) audio.msg.pool.forEach(a => a.volume = 0.6 * vol);
+      if (audio.ping?.pool) audio.ping.pool.forEach(a => a.volume = 0.6 * vol);
+      if (audio.restore?.pool) audio.restore.pool.forEach(a => a.volume = 0.5 * vol);
+      if (audio.startup?.pool) audio.startup.pool.forEach(a => a.volume = 0.65 * vol);
+      if (audio.offline?.pool) audio.offline.pool.forEach(a => a.volume = 0.65 * vol);
+      if (audio.error?.pool) audio.error.pool.forEach(a => a.volume = 0.6 * vol);
+      if (audio.charged?.pool) audio.charged.pool.forEach(a => a.volume = 0.55 * vol);
+      if (audio.severed?.pool) audio.severed.pool.forEach(a => a.volume = 0.7 * vol);
+      if (audio.shiftcomplete?.pool) audio.shiftcomplete.pool.forEach(a => a.volume = 0.7 * vol);
+      if (audio.showhide?.pool) audio.showhide.pool.forEach(a => a.volume = 0.45 * vol);
+      // Update loop SFX
+      if (audio.purge) audio.purge.volume = 0.75 * vol;
+      if (audio.reset) audio.reset.volume = 0.65 * vol;
+      if (audio.scan) audio.scan.volume = 1 * vol;
+      if (audio.processing) audio.processing.volume = 0.65 * vol;
+      if (audio.ackalarm) audio.ackalarm.volume = 0.65 * vol;
+      if (audio.klaxon) audio.klaxon.volume = 0.7 * vol;
+    }
+
+    function applyMusicVolume() {
+      if (audio.music) audio.music.volume = 0.32 * audioState.musicVolume;
+    }
+
+    function setSfxVolume(volume) {
+      audioState.sfxVolume = Math.max(0, Math.min(1, volume));
+      storeNumber(LS.sfxVolume, audioState.sfxVolume);
+      applySfxVolume();
+      updateVolumeControls();
+    }
+
+    function setMusicVolume(volume) {
+      audioState.musicVolume = Math.max(0, Math.min(1, volume));
+      storeNumber(LS.musicVolume, audioState.musicVolume);
+      applyMusicVolume();
+      updateVolumeControls();
     }
 
     function playSfx(name) {
@@ -5029,7 +5254,9 @@ button.btn-error {
 
       // Preserve audio and VFX preferences
       const sfxEnabled = localStorage.getItem(LS.sfxEnabled);
+      const sfxVolume = localStorage.getItem(LS.sfxVolume);
       const musicEnabled = localStorage.getItem(LS.musicEnabled);
+      const musicVolume = localStorage.getItem(LS.musicVolume);
       const vfxEnabled = localStorage.getItem(LS.vfxEnabled);
 
       // Clear all localStorage
@@ -5037,7 +5264,9 @@ button.btn-error {
 
       // Restore audio and VFX preferences
       if (sfxEnabled !== null) localStorage.setItem(LS.sfxEnabled, sfxEnabled);
+      if (sfxVolume !== null) localStorage.setItem(LS.sfxVolume, sfxVolume);
       if (musicEnabled !== null) localStorage.setItem(LS.musicEnabled, musicEnabled);
+      if (musicVolume !== null) localStorage.setItem(LS.musicVolume, musicVolume);
       if (vfxEnabled !== null) localStorage.setItem(LS.vfxEnabled, vfxEnabled);
 
       // Reset runtime state
@@ -9255,6 +9484,9 @@ function cmdPingRelay(id) {
     // Wire up UI
     // ---------------------------
     updateAudioButtons();
+    applySfxVolume();
+    applyMusicVolume();
+    updateVolumeControls();
     applyVfxMode();
 
     if (ui.btnSfx) {
@@ -9265,6 +9497,30 @@ function cmdPingRelay(id) {
     }
     if (ui.btnVfx) {
       ui.btnVfx.addEventListener("click", () => setVfxEnabled(!vfxState.enabled));
+    }
+
+    if (ui.sfxVolumeSlider) {
+      ui.sfxVolumeSlider.addEventListener("input", (e) => {
+        setSfxVolume(parseInt(e.target.value, 10) / 100);
+      });
+    }
+    if (ui.btnSfxVolumeReset) {
+      ui.btnSfxVolumeReset.addEventListener("click", () => {
+        setSfxVolume(0.8);
+        playSfx("beep");
+      });
+    }
+
+    if (ui.musicVolumeSlider) {
+      ui.musicVolumeSlider.addEventListener("input", (e) => {
+        setMusicVolume(parseInt(e.target.value, 10) / 100);
+      });
+    }
+    if (ui.btnMusicVolumeReset) {
+      ui.btnMusicVolumeReset.addEventListener("click", () => {
+        setMusicVolume(0.8);
+        playSfx("beep");
+      });
     }
 
     document.addEventListener("click", (e) => {
@@ -9525,7 +9781,9 @@ function cmdPingRelay(id) {
 
       // Preserve audio and VFX preferences
       const sfxEnabled = localStorage.getItem(LS.sfxEnabled);
+      const sfxVolume = localStorage.getItem(LS.sfxVolume);
       const musicEnabled = localStorage.getItem(LS.musicEnabled);
+      const musicVolume = localStorage.getItem(LS.musicVolume);
       const vfxEnabled = localStorage.getItem(LS.vfxEnabled);
 
       // Clear all localStorage
@@ -9540,7 +9798,9 @@ function cmdPingRelay(id) {
 			runtime.activeGateId = null;
       // Restore audio and VFX preferences
       if (sfxEnabled !== null) localStorage.setItem(LS.sfxEnabled, sfxEnabled);
+      if (sfxVolume !== null) localStorage.setItem(LS.sfxVolume, sfxVolume);
       if (musicEnabled !== null) localStorage.setItem(LS.musicEnabled, musicEnabled);
+      if (musicVolume !== null) localStorage.setItem(LS.musicVolume, musicVolume);
       if (vfxEnabled !== null) localStorage.setItem(LS.vfxEnabled, vfxEnabled);
 
       // Randomize theme
@@ -9637,6 +9897,15 @@ function cmdPingRelay(id) {
       }
       if (ui.btnStartHelp) {
         ui.btnStartHelp.setAttribute("aria-expanded", open ? "true" : "false");
+      }
+    }
+
+    function setOptionsOpen(open) {
+      if (!ui.optionsPanel) return;
+      ui.optionsPanel.classList.toggle("open", open);
+      ui.optionsPanel.setAttribute("aria-hidden", open ? "false" : "true");
+      if (ui.btnOptions) {
+        ui.btnOptions.setAttribute("aria-expanded", open ? "true" : "false");
       }
     }
 
@@ -9747,15 +10016,30 @@ function cmdPingRelay(id) {
     if (ui.helpDismiss) {
       ui.helpDismiss.addEventListener("click", () => setHelpOpen(false));
     }
+    if (ui.btnOptions && ui.optionsPanel) {
+      ui.btnOptions.addEventListener("click", () => {
+        setOptionsOpen(!ui.optionsPanel.classList.contains("open"));
+      });
+    }
+    if (ui.optionsDismiss) {
+      ui.optionsDismiss.addEventListener("click", () => setOptionsOpen(false));
+    }
     document.addEventListener("click", (e) => {
       if (!ui.helpPanel || !ui.btnHelp) return;
       if (!ui.helpPanel.classList.contains("open")) return;
       if (ui.helpPanel.contains(e.target) || ui.btnHelp.contains(e.target) || (ui.btnStartHelp && ui.btnStartHelp.contains(e.target))) return;
       setHelpOpen(false);
     });
+    document.addEventListener("click", (e) => {
+      if (!ui.optionsPanel || !ui.btnOptions) return;
+      if (!ui.optionsPanel.classList.contains("open")) return;
+      if (ui.optionsPanel.contains(e.target) || ui.btnOptions.contains(e.target)) return;
+      setOptionsOpen(false);
+    });
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
       setHelpOpen(false);
+      setOptionsOpen(false);
       setResetConfirmOpen(false);
       setDataResetConfirmOpen(false);
     });
@@ -10027,6 +10311,9 @@ function cmdPingRelay(id) {
     }
 
     function attemptReconnect() {
+      // Don't reconnect if multiplayer was intentionally disabled (e.g., from reset/disconnect)
+      if (!runtime.multiplayer.enabled) return;
+
       if (runtime.multiplayer.reconnectAttempts >= 3) {
         eventLine("GATE NETWORK: RECONNECT FAILED", "bad");
         return;
