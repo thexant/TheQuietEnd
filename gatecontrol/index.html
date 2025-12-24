@@ -3274,7 +3274,28 @@ button.btn-error {
         infoMasked = true;
         isHazardous = true;
       }
+      
+			// FORCE: pirate/raider/infested/irradiated ships spawn as UNKNOWN and only become identifiable via SCAN
+      const SCAN_ONLY_TYPES = ["PIRATE", "RAIDER", "INFESTED", "IRRADIATED"];
+      if (SCAN_ONLY_TYPES.includes(type)) {
+        infoMasked = true;
+        isHazardous = true;
 
+        // Ensure the gameplay effect exists for the chosen type
+        const ensureEffect = (name) => {
+          if (!effects.some(e => e.name === name)) effects.push({ name, hidden: true, revealed: false });
+        };
+        if (type === "INFESTED") ensureEffect("VACUUM BLOOM");
+        if (type === "IRRADIATED") ensureEffect("CORRIDOR RADIATION");
+        if (type === "PIRATE") ensureEffect("PIRATE");
+        if (type === "RAIDER") ensureEffect("RAIDER");
+
+        // Hide ALL effects until SCAN reveals them (100%)
+        for (const ef of effects) {
+          ef.hidden = true;
+          ef.revealed = false;
+        }
+      }
       // For non-hazardous ships, keep existing random UNKNOWN spawning
       if (!isHazardous && !obscured) {
         infoMasked = rng() < 0.075;
@@ -6189,6 +6210,13 @@ button.btn-error {
       return shipInfoMasked(s) ? false : s.priority;
     }
 
+    function shipIsHazardous(s) {
+      return shipHasEffect(s, "VACUUM BLOOM") ||
+             shipHasEffect(s, "RAIDER") ||
+             shipHasEffect(s, "PIRATE") ||
+             (s.dir === "OUT" && shipHasEffect(s, "CORRIDOR RADIATION"));
+    }
+
     function shipHasDangerEffect(s) {
       return shipHasEffect(s, "CORRIDOR RADIATION") || shipHasEffect(s, "VACUUM BLOOM");
     }
@@ -6287,6 +6315,15 @@ button.btn-error {
           const target = findShipById(g, s.id);
           if (!target) return;
           target.queryPending = false;
+
+          // Scan-only identities: QUERY cannot unmask PIRATE/RAIDER/INFESTED/IRRADIATED ships (SCAN required)
+          if (["PIRATE", "RAIDER", "INFESTED", "IRRADIATED"].includes(target.type)) {
+            if (g.id === runtime.activeGateId) eventLine(`QUERY FAILED: ${target.id} SCAN REQUIRED`, "warn");
+            g.lastRefresh = Date.now();
+            renderAll();
+            return;
+          }
+
           target.infoMasked = false;
           const revealed = [];
           for (const ef of target.effects || []) {
@@ -7995,14 +8032,18 @@ function tickGate(g) {
             consoleLine(`SCAN: FLAGGED ${flagged.length} CONTACTS (${sample}${flagged.length > 3 ? " / ..." : ""})`, "warn");
           }
 
-          const effectHits = [];
+					const effectHits = [];
           for (const s of activeShips) {
+            // CHANGE: 100% reveal of hazardous identities
+            if (s.infoMasked && ["PIRATE", "RAIDER", "INFESTED", "IRRADIATED"].includes(s.type)) {
+              s.infoMasked = false;
+            }
+
             for (const ef of s.effects || []) {
               if (!ef.hidden || ef.revealed) continue;
-              if (Math.random() < 0.55) {
-                ef.revealed = true;
-                effectHits.push(`${s.id} ${ef.name}`);
-              }
+              // CHANGE: 100% reveal of effects (removed RNG check)
+              ef.revealed = true;
+              effectHits.push(`${s.id} ${ef.name}`);
             }
           }
           if (effectHits.length) {
@@ -9657,6 +9698,12 @@ function cmdPingRelay(id) {
 
     function clearAllSavedData() {
       try {
+        // Clean up multiplayer connection if active (prevents auto-reconnect and marks player offline)
+        if (runtime.multiplayer.ws) {
+          sendGameStateChange(false, "reset");
+          cleanupMultiplayer("reset");
+        }
+
         // Clear all gate states
         const keysToRemove = [];
         for (let i = 0; i < localStorage.length; i++) {
