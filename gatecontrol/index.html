@@ -4447,6 +4447,7 @@ button.btn-error {
       pendingConfirmation: null,
       multiplayer: {
         enabled: false,
+        shouldReconnect: true,
         ws: null,
         playerId: null,
         players: [],
@@ -4549,6 +4550,11 @@ button.btn-error {
       runtime.operatorCallsign = String(value || "").trim().slice(0, 24);
       safeStorageSet(LS.operatorCallsign, runtime.operatorCallsign);
       updateOperatorLabel();
+
+      // Push updated callsign to the multiplayer server immediately (used for ACTIVE/PING/MSG display)
+      if (runtime.multiplayer.ws && runtime.multiplayer.ws.readyState === WebSocket.OPEN && runtime.activeGateId) {
+        sendHeartbeat();
+      }
     }
 
     function startOperatorEdit() {
@@ -10697,6 +10703,8 @@ function cmdPingRelay(id) {
     // ---------------------------
 
     function initMultiplayer() {
+      // Allow auto-reconnect for normal disconnects
+      runtime.multiplayer.shouldReconnect = true;
       // Skip if already connected or connecting
       if (runtime.multiplayer.ws &&
           (runtime.multiplayer.ws.readyState === WebSocket.OPEN ||
@@ -10778,8 +10786,7 @@ function cmdPingRelay(id) {
 
     function attemptReconnect() {
       // Don't reconnect if multiplayer was intentionally disabled (e.g., from reset/disconnect)
-      if (!runtime.multiplayer.enabled) return;
-
+      if (runtime.multiplayer.shouldReconnect === false) return;
       if (runtime.multiplayer.reconnectAttempts >= 3) {
         eventLine("GATE NETWORK: RECONNECT FAILED", "bad");
         return;
@@ -10810,7 +10817,7 @@ function cmdPingRelay(id) {
 
       runtime.multiplayer.ws.send(JSON.stringify(msg));
     }
-		
+
     function sendGameStateChange(gameActive, reason = null) {
       if (!runtime.multiplayer.ws || runtime.multiplayer.ws.readyState !== WebSocket.OPEN) return;
 
@@ -11027,6 +11034,8 @@ function cmdPingRelay(id) {
     }
 
     function cleanupMultiplayer(reason = "disconnect") {
+      // Prevent auto-reconnect for intentional disconnects
+      runtime.multiplayer.shouldReconnect = false;
       if (runtime.multiplayer.ws && runtime.multiplayer.ws.readyState === WebSocket.OPEN) {
         const g = activeGate();
         const msg = {
