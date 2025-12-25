@@ -12,7 +12,7 @@
   <meta property="og:title" content="Gate Control Terminal // The Quiet End" />
   <meta
     property="og:description"
-    content="A Gate Control Terminal simulation game set in the setting of The Quiet End. Monitor traffic, maintain gate systems, and survive a full shift. Now supports ambient multiplayer."
+    content="A Web-Browser based Gate Control Terminal simulation game set in the setting of The Quiet End. Monitor traffic, maintain gate systems, and survive a full shift. Now supports ambient multiplayer."
   />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://thequietend.com/gatecontrol/" />
@@ -359,11 +359,68 @@
 			--stat: #ffaa44;
 		}
 
+	:root[data-theme="soviet"] {
+			--deep: #1a0a0a;
+			--bg-hi: #2a1010;
+
+			--ink: #ffdd33;
+			--muted: #ccaa44;
+			--signal: #dd2222;
+			--good: #ffee55;
+
+			--line: rgba(221, 34, 34, 0.25);
+			--grid: rgba(255, 221, 51, 0.08);
+			--glow: rgba(221, 34, 34, 0.35);
+
+			--shadowText: rgba(221, 34, 34, 0.18);
+			--shadowText2: rgba(255, 221, 51, 0.12);
+
+			--stat: #ffaa33;
+		}
+
+		:root[data-theme="synthwave"] {
+			--deep: #0a0514;
+			--bg-hi: #1a0a28;
+
+			--ink: #ff00ff;
+			--muted: #cc66cc;
+			--signal: #00ffff;
+			--good: #ff00ff;
+
+			--line: rgba(0, 255, 255, 0.25);
+			--grid: rgba(255, 0, 255, 0.08);
+			--glow: rgba(0, 255, 255, 0.35);
+
+			--shadowText: rgba(255, 0, 255, 0.18);
+			--shadowText2: rgba(0, 255, 255, 0.12);
+
+			--stat: #ff66ff;
+		}
+
+		:root[data-theme="superearth"] {
+			--deep: #4db8e8;
+			--bg-hi: #6ec9f0;
+
+			--ink: #ffffff;
+			--muted: #ffffcc;
+			--signal: #ffd700;
+			--good: #ffd700;
+
+			--line: rgba(255, 215, 0, 0.25);
+			--grid: rgba(255, 255, 255, 0.08);
+			--glow: rgba(255, 215, 0, 0.35);
+
+			--shadowText: rgba(255, 215, 0, 0.18);
+			--shadowText2: rgba(255, 255, 255, 0.12);
+
+			--stat: #ffffff;
+		}
 		/* Light-theme surface fixes (because many backgrounds are hard-coded dark rgba) */
 		:root[data-theme="lightblue"] #game-container,
 		:root[data-theme="lightred"] #game-container,
 		:root[data-theme="lightgreen"] #game-container,
-		:root[data-theme="paper"] #game-container {
+		:root[data-theme="paper"] #game-container,
+		:root[data-theme="superearth"] #game-container {
 			background: rgba(255,255,255,0.86);
 			box-shadow: 0 0 24px rgba(0,0,0,0.18), inset 0 0 0 1px rgba(0,0,0,0.06);
 		}
@@ -371,7 +428,8 @@
 		:root[data-theme="lightblue"] .panel,
 		:root[data-theme="lightred"] .panel,
 		:root[data-theme="lightgreen"] .panel,
-		:root[data-theme="paper"] .panel {
+		:root[data-theme="paper"] .panel,
+		:root[data-theme="superearth"] .panel {
 			background: rgba(255,255,255,0.72);
 			box-shadow: inset 0 0 12px rgba(0,0,0,0.08);
 		}
@@ -379,7 +437,8 @@
 		:root[data-theme="lightblue"] .panel::before,
 		:root[data-theme="lightred"] .panel::before,
 		:root[data-theme="lightgreen"] .panel::before,
-		:root[data-theme="paper"] .panel::before {
+		:root[data-theme="paper"] .panel::before,
+		:root[data-theme="superearth"] .panel::before {
 			background:
 				linear-gradient(transparent 70%, rgba(0,0,0,0.03) 70%),
 				radial-gradient(circle at 20% 0%, var(--grid) 0%, transparent 55%);
@@ -392,7 +451,9 @@
 		:root[data-theme="lightgreen"] .queue-section,
 		:root[data-theme="lightgreen"] .sys-block,
 		:root[data-theme="paper"] .queue-section,
-		:root[data-theme="paper"] .sys-block {
+		:root[data-theme="paper"] .sys-block,
+		:root[data-theme="superearth"] .queue-section,
+		:root[data-theme="superearth"] .sys-block {
 			background: rgba(255,255,255,0.58);
 		}
 
@@ -419,7 +480,13 @@
 		:root[data-theme="paper"] input,
 		:root[data-theme="paper"] .gate-display,
 		:root[data-theme="paper"] .breadcrumbs,
-		:root[data-theme="paper"] .operator-callsign {
+		:root[data-theme="paper"] .operator-callsign,
+		:root[data-theme="superearth"] select,
+		:root[data-theme="superearth"] button,
+		:root[data-theme="superearth"] input,
+		:root[data-theme="superearth"] .gate-display,
+		:root[data-theme="superearth"] .breadcrumbs,
+		:root[data-theme="superearth"] .operator-callsign {
 			background: rgba(255,255,255,0.78);
 			box-shadow: inset 0 0 12px rgba(0,0,0,0.06);
 		}
@@ -427,11 +494,32 @@
 		:root[data-theme="lightblue"] button:hover,
 		:root[data-theme="lightred"] button:hover,
 		:root[data-theme="lightgreen"] button:hover,
-		:root[data-theme="paper"] button:hover { background: rgba(0,0,0,0.04); }
+		:root[data-theme="paper"] button:hover,
+		:root[data-theme="superearth"] button:hover { background: rgba(0,0,0,0.04); }
 		:root[data-theme="lightblue"] button:active,
 		:root[data-theme="lightred"] button:active,
 		:root[data-theme="lightgreen"] button:active,
-		:root[data-theme="paper"] button:active { color: #fff; }
+		:root[data-theme="paper"] button:active,
+		:root[data-theme="superearth"] button:active { color: #fff; }
+
+		/* Light theme dropdown option styling for readability */
+		:root[data-theme="lightblue"] select option,
+		:root[data-theme="lightred"] select option,
+		:root[data-theme="lightgreen"] select option,
+		:root[data-theme="paper"] select option,
+		:root[data-theme="superearth"] select option {
+			background: #ffffff;
+			color: #1a1a1a;
+		}
+		:root[data-theme="lightblue"] select option:checked,
+		:root[data-theme="lightred"] select option:checked,
+		:root[data-theme="lightgreen"] select option:checked,
+		:root[data-theme="paper"] select option:checked,
+		:root[data-theme="superearth"] select option:checked {
+			background: var(--signal);
+			color: #ffffff;
+			font-weight: bold;
+		}
 
 		:root[data-theme="lightblue"] th,
 		:root[data-theme="lightblue"] td,
@@ -440,14 +528,17 @@
 		:root[data-theme="lightgreen"] th,
 		:root[data-theme="lightgreen"] td,
 		:root[data-theme="paper"] th,
-		:root[data-theme="paper"] td {
+		:root[data-theme="paper"] td,
+		:root[data-theme="superearth"] th,
+		:root[data-theme="superearth"] td {
 			border-bottom: 1px solid rgba(0,0,0,0.06);
 		}
 
 		:root[data-theme="lightblue"] .help-panel,
 		:root[data-theme="lightred"] .help-panel,
 		:root[data-theme="lightgreen"] .help-panel,
-		:root[data-theme="paper"] .help-panel {
+		:root[data-theme="paper"] .help-panel,
+		:root[data-theme="superearth"] .help-panel {
 			background: rgba(255,255,255,0.95);
 			box-shadow: 0 0 32px rgba(0,0,0,0.18), inset 0 0 0 1px rgba(0,0,0,0.05);
 		}
@@ -455,8 +546,214 @@
 		:root[data-theme="lightblue"] .help-section,
 		:root[data-theme="lightred"] .help-section,
 		:root[data-theme="lightgreen"] .help-section,
-		:root[data-theme="paper"] .help-section {
+		:root[data-theme="paper"] .help-section,
+		:root[data-theme="superearth"] .help-section {
 			background: rgba(0,0,0,0.03);
+		}
+
+		/* Light-theme modal overlay fixes */
+		:root[data-theme="lightblue"] #break-modal-overlay,
+		:root[data-theme="lightblue"] #shift-time-modal-overlay,
+		:root[data-theme="lightblue"] #confirm-reset-overlay,
+		:root[data-theme="lightblue"] #confirm-data-reset-overlay,
+		:root[data-theme="lightred"] #break-modal-overlay,
+		:root[data-theme="lightred"] #shift-time-modal-overlay,
+		:root[data-theme="lightred"] #confirm-reset-overlay,
+		:root[data-theme="lightred"] #confirm-data-reset-overlay,
+		:root[data-theme="lightgreen"] #break-modal-overlay,
+		:root[data-theme="lightgreen"] #shift-time-modal-overlay,
+		:root[data-theme="lightgreen"] #confirm-reset-overlay,
+		:root[data-theme="lightgreen"] #confirm-data-reset-overlay,
+		:root[data-theme="paper"] #break-modal-overlay,
+		:root[data-theme="paper"] #shift-time-modal-overlay,
+		:root[data-theme="paper"] #confirm-reset-overlay,
+		:root[data-theme="paper"] #confirm-data-reset-overlay,
+		:root[data-theme="superearth"] #break-modal-overlay,
+		:root[data-theme="superearth"] #shift-time-modal-overlay,
+		:root[data-theme="superearth"] #confirm-reset-overlay,
+		:root[data-theme="superearth"] #confirm-data-reset-overlay {
+			background: radial-gradient(circle at center, rgba(245, 246, 248, 0.94) 0%, rgba(230,232,235,0.98) 70%);
+		}
+
+		/* Light-theme modal card fixes */
+		:root[data-theme="lightblue"] .confirm-card,
+		:root[data-theme="lightred"] .confirm-card,
+		:root[data-theme="lightgreen"] .confirm-card,
+		:root[data-theme="paper"] .confirm-card,
+		:root[data-theme="superearth"] .confirm-card {
+			background: rgba(255, 255, 255, 0.96);
+			border: 1px solid rgba(0,0,0,0.12);
+			box-shadow: 0 0 30px rgba(0,0,0,0.15), inset 0 0 0 1px rgba(0,0,0,0.05);
+		}
+
+		/* Light-theme shift time custom section */
+		:root[data-theme="lightblue"] .shift-time-custom,
+		:root[data-theme="lightred"] .shift-time-custom,
+		:root[data-theme="lightgreen"] .shift-time-custom,
+		:root[data-theme="paper"] .shift-time-custom,
+		:root[data-theme="superearth"] .shift-time-custom {
+			background: rgba(0, 0, 0, 0.04);
+			border: 1px solid rgba(0, 0, 0, 0.1);
+		}
+
+		/* Light-theme shift time custom inputs */
+		:root[data-theme="lightblue"] .shift-time-custom-input,
+		:root[data-theme="lightred"] .shift-time-custom-input,
+		:root[data-theme="lightgreen"] .shift-time-custom-input,
+		:root[data-theme="paper"] .shift-time-custom-input,
+		:root[data-theme="superearth"] .shift-time-custom-input {
+			background: rgba(255, 255, 255, 0.85);
+			border: 1px solid rgba(var(--signal-rgb, 100, 180, 255), 0.3);
+			color: var(--signal);
+		}
+
+		:root[data-theme="lightblue"] .shift-time-custom-input:focus,
+		:root[data-theme="lightred"] .shift-time-custom-input:focus,
+		:root[data-theme="lightgreen"] .shift-time-custom-input:focus,
+		:root[data-theme="paper"] .shift-time-custom-input:focus,
+		:root[data-theme="superearth"] .shift-time-custom-input:focus {
+			background: rgba(255, 255, 255, 0.95);
+			border-color: var(--signal);
+		}
+
+		/* Light-theme preset and break duration buttons */
+		:root[data-theme="lightblue"] .shift-time-preset-btn,
+		:root[data-theme="lightblue"] .break-duration-btn,
+		:root[data-theme="lightred"] .shift-time-preset-btn,
+		:root[data-theme="lightred"] .break-duration-btn,
+		:root[data-theme="lightgreen"] .shift-time-preset-btn,
+		:root[data-theme="lightgreen"] .break-duration-btn,
+		:root[data-theme="paper"] .shift-time-preset-btn,
+		:root[data-theme="paper"] .break-duration-btn,
+		:root[data-theme="superearth"] .shift-time-preset-btn,
+		:root[data-theme="superearth"] .break-duration-btn {
+			background: rgba(var(--signal-rgb, 100, 180, 255), 0.08);
+			border: 1px solid rgba(var(--signal-rgb, 100, 180, 255), 0.25);
+		}
+
+		:root[data-theme="lightblue"] .shift-time-preset-btn:hover,
+		:root[data-theme="lightblue"] .break-duration-btn:hover,
+		:root[data-theme="lightred"] .shift-time-preset-btn:hover,
+		:root[data-theme="lightred"] .break-duration-btn:hover,
+		:root[data-theme="lightgreen"] .shift-time-preset-btn:hover,
+		:root[data-theme="lightgreen"] .break-duration-btn:hover,
+		:root[data-theme="paper"] .shift-time-preset-btn:hover,
+		:root[data-theme="paper"] .break-duration-btn:hover,
+		:root[data-theme="superearth"] .shift-time-preset-btn:hover,
+		:root[data-theme="superearth"] .break-duration-btn:hover {
+			background: rgba(var(--signal-rgb, 100, 180, 255), 0.15);
+			border-color: var(--signal);
+		}
+
+		:root[data-theme="lightblue"] .shift-time-preset-btn.selected,
+		:root[data-theme="lightred"] .shift-time-preset-btn.selected,
+		:root[data-theme="lightgreen"] .shift-time-preset-btn.selected,
+		:root[data-theme="paper"] .shift-time-preset-btn.selected,
+		:root[data-theme="superearth"] .shift-time-preset-btn.selected {
+			background: rgba(var(--signal-rgb, 100, 180, 255), 0.25);
+			border-color: var(--signal);
+		}
+
+		/* Light-theme disabled break buttons */
+		:root[data-theme="lightblue"] .break-duration-btn:disabled,
+		:root[data-theme="lightred"] .break-duration-btn:disabled,
+		:root[data-theme="lightgreen"] .break-duration-btn:disabled,
+		:root[data-theme="paper"] .break-duration-btn:disabled,
+		:root[data-theme="superearth"] .break-duration-btn:disabled {
+			opacity: 0.4;
+			background: rgba(0, 0, 0, 0.03);
+			border-color: rgba(0, 0, 0, 0.12);
+			color: rgba(0, 0, 0, 0.35);
+		}
+
+		/* Light-theme break error styling */
+		:root[data-theme="lightblue"] .break-error,
+		:root[data-theme="lightred"] .break-error,
+		:root[data-theme="lightgreen"] .break-error,
+		:root[data-theme="paper"] .break-error,
+		:root[data-theme="superearth"] .break-error {
+			background: rgba(255, 68, 68, 0.08);
+			border: 1px solid rgba(255, 68, 68, 0.25);
+		}
+
+		/* Light-theme start screen card */
+		:root[data-theme="lightblue"] .start-card,
+		:root[data-theme="lightred"] .start-card,
+		:root[data-theme="lightgreen"] .start-card,
+		:root[data-theme="paper"] .start-card,
+		:root[data-theme="superearth"] .start-card {
+			background: rgba(255, 255, 255, 0.92);
+			border: 1px solid rgba(0,0,0,0.12);
+			box-shadow: 0 0 30px rgba(0,0,0,0.15), inset 0 0 0 1px rgba(0,0,0,0.04);
+		}
+
+		/* Light-theme severed overlay and card */
+		:root[data-theme="lightblue"] #severed-overlay,
+		:root[data-theme="lightred"] #severed-overlay,
+		:root[data-theme="lightgreen"] #severed-overlay,
+		:root[data-theme="paper"] #severed-overlay,
+		:root[data-theme="superearth"] #severed-overlay {
+			background: radial-gradient(circle at top, rgba(240,235,232,0.98) 0%, rgba(220,220,220,1) 70%);
+		}
+
+		:root[data-theme="lightblue"] .severed-card,
+		:root[data-theme="lightred"] .severed-card,
+		:root[data-theme="lightgreen"] .severed-card,
+		:root[data-theme="paper"] .severed-card,
+		:root[data-theme="superearth"] .severed-card {
+			background: rgba(255, 255, 255, 0.94);
+			border: 1px solid rgba(0,0,0,0.12);
+			box-shadow: 0 0 30px rgba(0,0,0,0.15), inset 0 0 0 1px rgba(0,0,0,0.05);
+		}
+
+		/* Light-theme shift complete card */
+		:root[data-theme="lightblue"] .shiftcomplete-card,
+		:root[data-theme="lightred"] .shiftcomplete-card,
+		:root[data-theme="lightgreen"] .shiftcomplete-card,
+		:root[data-theme="paper"] .shiftcomplete-card,
+		:root[data-theme="superearth"] .shiftcomplete-card {
+			background: rgba(255, 255, 255, 0.90);
+			border: 1px solid rgba(0,0,0,0.12);
+			box-shadow: 0 0 40px rgba(0,0,0,0.12), inset 0 0 0 1px rgba(0,0,0,0.05);
+		}
+
+		/* Light-theme console and events log */
+		:root[data-theme="lightblue"] .logbox,
+		:root[data-theme="lightred"] .logbox,
+		:root[data-theme="lightgreen"] .logbox,
+		:root[data-theme="paper"] .logbox,
+		:root[data-theme="superearth"] .logbox {
+			background: rgba(255, 255, 255, 0.65);
+			box-shadow: inset 0 0 18px rgba(0,0,0,0.08);
+		}
+
+		:root[data-theme="lightblue"] .loghead,
+		:root[data-theme="lightred"] .loghead,
+		:root[data-theme="lightgreen"] .loghead,
+		:root[data-theme="paper"] .loghead,
+		:root[data-theme="superearth"] .loghead {
+			background: rgba(255, 255, 255, 0.88);
+			border-bottom: 1px solid rgba(0,0,0,0.1);
+		}
+
+		/* Light-theme start shift error */
+		:root[data-theme="lightblue"] .start-shift-error,
+		:root[data-theme="lightred"] .start-shift-error,
+		:root[data-theme="lightgreen"] .start-shift-error,
+		:root[data-theme="paper"] .start-shift-error,
+		:root[data-theme="superearth"] .start-shift-error {
+			background: rgba(225, 100, 100, 0.08);
+			border: 1px solid rgba(225, 100, 100, 0.25);
+		}
+
+		/* Light-theme hint badges */
+		:root[data-theme="lightblue"] .hint,
+		:root[data-theme="lightred"] .hint,
+		:root[data-theme="lightgreen"] .hint,
+		:root[data-theme="paper"] .hint,
+		:root[data-theme="superearth"] .hint {
+			background: rgba(0, 0, 0, 0.06);
+			border: 1px solid rgba(0,0,0,0.12);
 		}
     * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
     html, body { height: 100%; }
@@ -517,6 +814,9 @@
       outline-offset: 2px;
     }
     #btn-start-help {
+      z-index: 221;
+    }
+    #btn-start-options {
       z-index: 221;
     }
     .start-card {
@@ -705,6 +1005,12 @@
       100% { width: 100%; }
     }
     body.started #start-overlay {
+      display: none;
+    }
+    body.started #start-theme-select {
+      display: none;
+    }
+    body:not(.started) #theme-select {
       display: none;
     }
 
@@ -998,6 +1304,23 @@
     .shift-time-preset-btn.selected {
       background: rgba(var(--signal-rgb, 100, 180, 255), 0.35);
       border-color: var(--signal);
+    }
+
+    .shift-time-preset-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .shift-time-preset-subtext {
+      font-size: 0.65rem;
+      opacity: 0.7;
+      text-transform: none;
+      letter-spacing: 0.05em;
+      text-align: center;
+      max-width: 200px;
+      line-height: 1.3;
     }
 
     .shift-time-custom {
@@ -1454,6 +1777,19 @@
     select:focus, input:focus {
       box-shadow: 0 0 0 2px rgba(255,255,255,0.06), 0 0 18px var(--glow);
     }
+
+    /* Ensure dropdown options are readable on all browsers and system themes */
+    select option {
+      background: #0a0a0c;
+      color: #ffffff;
+      padding: 8px 10px;
+      font-family: var(--font-title);
+    }
+    select option:checked {
+      background: var(--signal);
+      color: #000000;
+      font-weight: bold;
+    }
     button { cursor: pointer; transition: all 0.12s; }
     button:hover { background: rgba(255,255,255,0.05); box-shadow: 0 0 14px var(--glow); }
     button:active { background: var(--signal); color: #000; box-shadow: 0 0 18px var(--signal); }
@@ -1671,6 +2007,15 @@ button.btn-error {
       opacity: 0.9;
     }
 
+    /* Collapse grid structure when queue-section is collapsed */
+    .queue-section.collapsed {
+      grid-template-rows: auto 0;
+      gap: 0;
+      min-height: 0;
+      height: fit-content;
+      padding-bottom: 8px;
+    }
+
     /* Grid adjustments for collapsed panels */
     #traffic.collapsed,
     #systems.collapsed,
@@ -1717,7 +2062,7 @@ button.btn-error {
     #systems { grid-area: systems; display: grid; grid-template-rows: auto minmax(0,1fr); gap: 10px; }
     #terminal { grid-area: terminal; display: grid; grid-template-rows: auto minmax(0,1fr) auto; gap: 8px; }
 
-    .queue { display: grid; grid-template-columns: 1fr; gap: 10px; min-height: 0; }
+    .queue { display: grid; grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; min-height: 0; }
 
     .queue-section {
       border: 1px dashed var(--line);
@@ -1872,6 +2217,61 @@ button.btn-error {
         background-color: rgba(225, 100, 100, 0.22);
         box-shadow: 0 0 16px rgba(225, 100, 100, 0.5);
       }
+    }
+
+    /* Propagated alert pulses for collapsed panels/subsections */
+    .panel-header.alert-propagated-ack,
+    .subsection-header.alert-propagated-ack {
+      animation: headerAckPulse 0.9s ease-in-out infinite;
+    }
+    @keyframes headerAckPulse {
+      0%, 100% {
+        background-color: rgba(210, 169, 90, 0.12);
+        box-shadow: 0 0 8px rgba(210, 169, 90, 0.35);
+      }
+      50% {
+        background-color: rgba(210, 169, 90, 0.22);
+        box-shadow: 0 0 16px rgba(210, 169, 90, 0.6);
+      }
+    }
+
+    .panel-header.alert-propagated-exposure,
+    .subsection-header.alert-propagated-exposure {
+      animation: headerExposurePulse 1s ease-in-out infinite;
+    }
+    @keyframes headerExposurePulse {
+      0%, 100% {
+        background-color: rgba(225, 100, 100, 0.15);
+        box-shadow: 0 0 10px rgba(225, 100, 100, 0.4);
+      }
+      50% {
+        background-color: rgba(225, 100, 100, 0.28);
+        box-shadow: 0 0 18px rgba(225, 100, 100, 0.65);
+      }
+    }
+
+    .panel-header.alert-propagated-congested,
+    .subsection-header.alert-propagated-congested {
+      animation: headerCongestedPulse 1.8s ease-in-out infinite;
+    }
+    @keyframes headerCongestedPulse {
+      0%, 100% {
+        background-color: rgba(255, 184, 77, 0.12);
+        box-shadow: 0 0 8px rgba(255, 184, 77, 0.35);
+      }
+      50% {
+        background-color: rgba(255, 184, 77, 0.22);
+        box-shadow: 0 0 16px rgba(255, 184, 77, 0.55);
+      }
+    }
+
+    .panel-header.alert-propagated-relay-ping,
+    .subsection-header.alert-propagated-relay-ping {
+      animation: headerRelayPingPulse 0.9s ease-out 1;
+    }
+    @keyframes headerRelayPingPulse {
+      0% { background-color: rgba(77, 255, 154, 0.3); box-shadow: 0 0 16px rgba(77, 255, 154, 0.5); }
+      100% { background-color: rgba(77, 255, 154, 0.05); box-shadow: 0 0 4px rgba(77, 255, 154, 0.15); }
     }
 
     /* Deadline countdown styling */
@@ -2083,6 +2483,50 @@ button.btn-error {
       0% { opacity: 0.8; transform: scale(0.98); }
       100% { opacity: 0; transform: scale(1.03); }
     }
+    /* Gate Network ping animation */
+    .status-row.gate-ping {
+      position: relative;
+    }
+    .status-row.gate-ping::after {
+      content: "";
+      position: absolute;
+      inset: -4px -6px;
+      border-radius: 6px;
+      border: 1px solid var(--stat);
+      box-shadow: 0 0 14px var(--stat);
+      opacity: 0.8;
+      pointer-events: none;
+      transform-origin: center;
+      animation: gatePingPulse 2s ease-in-out infinite;
+    }
+    .status-row.gate-ping .status-name {
+      color: var(--stat);
+      text-shadow: 0 0 10px var(--stat);
+    }
+    @keyframes gatePingPulse {
+      0%, 100% {
+        opacity: 0.8;
+        transform: scale(1);
+        box-shadow: 0 0 14px var(--stat);
+      }
+      50% {
+        opacity: 0.4;
+        transform: scale(1.02);
+        box-shadow: 0 0 20px var(--stat);
+      }
+    }
+    /* Blinking indicator animation */
+    .hb-indicator.blink {
+      animation: indicatorBlink 1s ease-in-out infinite;
+    }
+    @keyframes indicatorBlink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    .hb-indicator.ok {
+      background: var(--signal);
+      box-shadow: 0 0 10px var(--glow);
+    }
     .status-name {
       font-family: var(--font-title);
       letter-spacing: 0.08em;
@@ -2280,10 +2724,10 @@ button.btn-error {
       pointer-events: none;
     }
 
-    /* Console + Event log split */
+    /* Console log */
     .logs {
       display: grid;
-      grid-template-columns: 1.35fr 0.65fr;
+      grid-template-columns: 1fr;
       gap: var(--interface-gap);
       min-height: 0;
       overflow: hidden;
@@ -2386,6 +2830,7 @@ button.btn-error {
         grid-template-areas: "traffic" "systems" "terminal";
       }
       .kv { grid-template-columns: 120px 1fr; }
+      .queue { grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); }
       .logs { grid-template-columns: 1fr; }
 
       /* Smaller chevrons on mobile */
@@ -2508,6 +2953,10 @@ button.btn-error {
       animation: none !important;
     }
 
+    body.vfx-low .gate-ping::after {
+      animation: none !important;
+    }
+
     body.vfx-low .exposure-critical {
       animation: none !important;
     }
@@ -2527,7 +2976,11 @@ button.btn-error {
     body.vfx-low @keyframes beaconPulse,
     body.vfx-low @keyframes pulse-urgent,
     body.vfx-low @keyframes ackPulse,
-    body.vfx-low @keyframes relayPingPulse {
+    body.vfx-low @keyframes relayPingPulse,
+    body.vfx-low @keyframes headerAckPulse,
+    body.vfx-low @keyframes headerExposurePulse,
+    body.vfx-low @keyframes headerCongestedPulse,
+    body.vfx-low @keyframes headerRelayPingPulse {
       from, to { opacity: 1; transform: none; }
     }
   </style>
@@ -2537,9 +2990,7 @@ button.btn-error {
   <div class="crt-overlay"></div>
   <div id="start-overlay" aria-hidden="false">
     <div class="start-controls">
-      <select id="start-theme-select" aria-label="Display theme">
-        <!-- Populated dynamically by populateThemeDropdown() -->
-      </select>
+      <button id="btn-start-options" aria-expanded="false" aria-controls="options-panel">OPTIONS</button>
       <button id="btn-start-help" aria-expanded="false" aria-controls="help-panel">HELP</button>
     </div>
     <div class="start-card">
@@ -2582,6 +3033,14 @@ button.btn-error {
         <button class="shift-time-preset-btn" data-minutes="120">2 HR</button>
         <button class="shift-time-preset-btn" data-minutes="240">4 HR</button>
         <button class="shift-time-preset-btn" data-minutes="480">8 HR</button>
+        <div class="shift-time-preset-wrapper">
+          <button class="shift-time-preset-btn" data-mode="unlimited">UNLIMITED</button>
+          <div class="shift-time-preset-subtext">Timer runs forever until SEVER or RESET</div>
+        </div>
+        <div class="shift-time-preset-wrapper">
+          <button class="shift-time-preset-btn" data-mode="endurance">ENDURANCE</button>
+          <div class="shift-time-preset-subtext">UNLIMITED mode with saves disabled</div>
+        </div>
       </div>
       <div class="shift-time-custom">
         <div class="shift-time-custom-label">CUSTOM DURATION</div>
@@ -2743,13 +3202,6 @@ button.btn-error {
             <label>Gate Node</label>
             <div id="gate-display" class="gate-display">GATE-00</div>
           </div>
-          <div class="ctl">
-            <label for="theme-select">Display</label>
-            <select id="theme-select">
-              <!-- Populated dynamically by populateThemeDropdown() -->
-            </select>
-          </div>
-          <button id="btn-share" aria-label="Share this session">SHARE</button>
           <button id="btn-resume" aria-label="Load from an exported save">LOAD FILE</button>
           <button id="btn-export" aria-label="Export this session">EXPORT</button>
           <button id="btn-break" aria-label="Take a paid break">BREAK - 50CR/MIN</button>
@@ -2955,6 +3407,19 @@ button.btn-error {
             </div>
           </div>
 
+          <div id="gate-network-panel" class="sys-block" style="display: none;">
+            <div class="queue-head subsection-header collapsed" data-panel="systems-gatenetwork">
+              <div class="queue-title">
+                <span class="subsection-chevron">▼</span>
+                <span>Gate Network</span>
+              </div>
+              <div class="queue-meta">CONNECTED OPERATORS</div>
+            </div>
+            <div class="subsection-content">
+            <div id="gate-network-list" class="status-list"></div>
+            </div>
+          </div>
+
           <div class="sys-block">
             <div class="queue-head subsection-header" data-panel="systems-maintenance">
               <div class="queue-title">
@@ -2992,14 +3457,6 @@ button.btn-error {
             </div>
             <div class="subsection-content"></div>
           </div>
-
-          <div id="events-log" class="logbox" aria-label="Events log">
-            <div class="loghead subsection-header" data-panel="terminal-events">
-              <span class="subsection-chevron">▼</span>
-              <span>Events</span>
-            </div>
-            <div class="subsection-content"></div>
-          </div>
         </div>
 
         <div class="prompt">
@@ -3011,7 +3468,7 @@ button.btn-error {
     </div>
 
     <footer>
-      <div>CORRIDOR NAVIGATIONAL AUTHORITY // GATE ACCESS TERMINAL // TERMINAL STATUS: <span id="data-age">CONNECTED</span></div>
+      <div>CORRIDOR NAVIGATIONAL AUTHORITY // GATE ACCESS TERMINAL // TERMINAL STATUS: CONNECTED<span id="data-age">00:00</span></div>
       <div class="footer-right">
         <span class="hint">ENTER: RUN</span>
         <span class="hint">↑: HISTORY</span>
@@ -3272,7 +3729,6 @@ button.btn-error {
             MUSIC or MUSIC ON|OFF|TOGGLE — Control background music<br>
             VFX or VFX REG|LOW|TOGGLE — Control visual effects<br>
             CLEAR — Clear console text<br>
-            CLEAR EVENTS — Clear event log<br>
             ZOOM [up/down/reset/N%] — Adjust text size
           </div>
         </div>
@@ -3350,8 +3806,8 @@ button.btn-error {
           </div>
         </div>
         <div class="help-row">
-          <div class="help-key">Save/Load/Share</div>
-          <div>SHARE copies a URL snapshot of your session. EXPORT downloads a .tqegate save file. LOAD FILE restores a saved session. Use these to preserve long successful shifts.</div>
+          <div class="help-key">Save/Load</div>
+          <div>EXPORT downloads a .tqegate save file. LOAD FILE restores a saved session. Use these to preserve long successful shifts.</div>
         </div>
         <div class="help-row">
           <div class="help-key">Interface Settings</div>
@@ -3430,6 +3886,20 @@ button.btn-error {
             <button id="btn-vfx" aria-label="Toggle visual effects" aria-pressed="true" style="width: 100%; min-width: 120px;">VFX: REG</button>
           </div>
           <div>Toggle visual effects intensity. REG (regular) shows full visual effects. LOW reduces effects for better performance on low-end devices.</div>
+        </div>
+        <div class="help-row">
+          <div class="help-key">
+            <label for="options-theme-select" style="width: 100%; min-width: 120px;">Display</label>
+          </div>
+          <div>
+            <select id="start-theme-select" aria-label="Display theme" style="width: 100%; max-width: 200px;">
+              <!-- Populated dynamically by populateThemeDropdown() -->
+            </select>
+            <select id="theme-select" aria-label="Display theme" style="width: 100%; max-width: 200px;">
+              <!-- Populated dynamically by populateThemeDropdown() -->
+            </select>
+            <div style="margin-top: 8px;">Select display theme. Different themes provide various color schemes and visual styles. Some themes can be unlocked during gameplay.</div>
+          </div>
         </div>
       </div>
     </div>
@@ -3671,6 +4141,7 @@ button.btn-error {
 			shiftMs: "tqe_gate_terminal_shift_ms",
 		shiftCompleteShown: "tqe_gate_terminal_shift_complete_shown",
       shiftDurationMs: "tqe_gate_terminal_shift_duration_ms",
+      shiftMode: "tqe_gate_terminal_shift_mode",
       collapsedPanels: "tqe_gate_terminal_collapsed_panels",
       multiplayerServer: "tqe_gate_terminal_multiplayer_server",
       multiplayerEnabled: "tqe_gate_terminal_multiplayer_enabled",
@@ -3766,6 +4237,7 @@ button.btn-error {
       { key: "ONLINE", cls: "ok" },
       { key: "WEAK", cls: "warn" },
       { key: "FAULT", cls: "bad" },
+      { key: "CRITICAL", cls: "bad" },
       { key: "OFFLINE", cls: "bad" }
     ];
 
@@ -3799,7 +4271,7 @@ button.btn-error {
       facilityWorsenChance: 0.00015,
       relayPacketChance: 0.0045,
       relayShiftChance: 0.0012,
-      relayPingChance: 0.0020,
+      relayPingChance: 0.0025,
       relayDropChance: 0.00025,
       concourseFade: 0.05,
       fuelDrain: 0.010,
@@ -3903,41 +4375,39 @@ button.btn-error {
       let infoMasked = false;
       let isHazardous = false;
 
-      // Check for hazardous effects and set type accordingly
+      // Check for hazardous effects and determine hazard type
+      // CRITICAL: Ships with hazards MUST spawn as UNKNOWN and only reveal after SCAN
+      let hazardType = null;
+
       if (effects.some(e => e.name === "VACUUM BLOOM")) {
-        type = "INFESTED";
-        infoMasked = true;
+        hazardType = "INFESTED";
         isHazardous = true;
       } else if (effects.some(e => e.name === "RAIDER")) {
-        type = "RAIDER";
-        infoMasked = true;
+        hazardType = "RAIDER";
         isHazardous = true;
       } else if (effects.some(e => e.name === "PIRATE")) {
-        type = "PIRATE";
-        infoMasked = true;
+        hazardType = "PIRATE";
         isHazardous = true;
       } else if (effects.some(e => e.name === "CORRIDOR RADIATION") && dir === "OUT") {
-        // Only mark OUTGOING ships with CORRIDOR RADIATION as UNKNOWN
+        // Only mark OUTGOING ships with CORRIDOR RADIATION as hazardous
         // INCOMING ships with CORRIDOR RADIATION can dock safely after DECON
-        type = "IRRADIATED";
-        infoMasked = true;
+        hazardType = "IRRADIATED";
         isHazardous = true;
       }
-      
-			// FORCE: pirate/raider/infested/irradiated ships spawn as UNKNOWN and only become identifiable via SCAN
-      const SCAN_ONLY_TYPES = ["PIRATE", "RAIDER", "INFESTED", "IRRADIATED"];
-      if (SCAN_ONLY_TYPES.includes(type)) {
-        infoMasked = true;
-        isHazardous = true;
 
-        // Ensure the gameplay effect exists for the chosen type
+      // If ship has a hazard, it MUST spawn as UNKNOWN (not the hazard type)
+      if (hazardType) {
+        type = "UNKNOWN";  // Force to UNKNOWN - will change to hazardType on SCAN
+        infoMasked = true;
+
+        // Ensure the gameplay effect exists for the chosen hazard type
         const ensureEffect = (name) => {
           if (!effects.some(e => e.name === name)) effects.push({ name, hidden: true, revealed: false });
         };
-        if (type === "INFESTED") ensureEffect("VACUUM BLOOM");
-        if (type === "IRRADIATED") ensureEffect("CORRIDOR RADIATION");
-        if (type === "PIRATE") ensureEffect("PIRATE");
-        if (type === "RAIDER") ensureEffect("RAIDER");
+        if (hazardType === "INFESTED") ensureEffect("VACUUM BLOOM");
+        if (hazardType === "IRRADIATED") ensureEffect("CORRIDOR RADIATION");
+        if (hazardType === "PIRATE") ensureEffect("PIRATE");
+        if (hazardType === "RAIDER") ensureEffect("RAIDER");
 
         // Hide ALL effects until SCAN reveals them (100%)
         for (const ef of effects) {
@@ -3974,6 +4444,7 @@ button.btn-error {
         hazardDeadline: 0,
         obscured,
         infoMasked,
+        hazardType,  // Stores actual hazard type (PIRATE/RAIDER/INFESTED/IRRADIATED) for UNKNOWN ships
         hiddenThreat,
         // Deadline properties for outgoing ships
         departureDeadline: 0,
@@ -4116,6 +4587,7 @@ button.btn-error {
 			const relays = Array.from({ length: relayCount }, (_, i) => ({
 				id: `RELAY-${i + 1}`,
         status: "ONLINE",
+        health: randRange(80, 100), // Start with good health
         lastChange: Date.now(),
         lastPacketAt: 0,
         lastRelayPingAt: 0,
@@ -4128,7 +4600,9 @@ button.btn-error {
         hiddenOffline: false,
         hiccupRecoverable: false,
         offlineReason: null,
-        offlineSince: 0
+        offlineSince: 0,
+        lastHealthPingAt: 0,
+        nextHealthPingCooldown: Date.now()
       }));
 
       const gate = {
@@ -4187,17 +4661,28 @@ button.btn-error {
       return gate;
     }
 
-    function reviveGateState(raw) {
+    function reviveGateState(raw, exportedAt) {
       const g = raw && typeof raw === "object" ? raw : null;
       if (!g || !g.id) return null;
 
-      g.createdAt ||= Date.now();
-      g.lastRefresh ||= Date.now();
-      g.lastScanAt ||= 0;
-      g.lastRealignAt ||= 0;
-      g.lastResetAt ||= 0;
-      g.lastPurgeAt ||= 0;
-      g.relayFailureSince = typeof g.relayFailureSince === "number" ? g.relayFailureSince : 0;
+      // Calculate time delta for timestamp adjustment
+      const timeDelta = (typeof exportedAt === "number" && exportedAt > 0)
+        ? Date.now() - exportedAt
+        : 0;
+
+      // Helper to adjust timestamps
+      const adjustTimestamp = (ts) => {
+        if (typeof ts !== "number" || ts <= 0) return ts;
+        return ts + timeDelta;
+      };
+
+      g.createdAt = adjustTimestamp(g.createdAt) || Date.now();
+      g.lastRefresh = adjustTimestamp(g.lastRefresh) || Date.now();
+      g.lastScanAt = adjustTimestamp(g.lastScanAt) || 0;
+      g.lastRealignAt = adjustTimestamp(g.lastRealignAt) || 0;
+      g.lastResetAt = adjustTimestamp(g.lastResetAt) || 0;
+      g.lastPurgeAt = adjustTimestamp(g.lastPurgeAt) || 0;
+      g.relayFailureSince = adjustTimestamp(typeof g.relayFailureSince === "number" ? g.relayFailureSince : 0);
       g.alerts ||= [];
       g.reports ||= [];
         g.stats ||= {
@@ -4242,11 +4727,13 @@ button.btn-error {
         w.systemName ||= (FACILITY_SYSTEMS.find(x => x.id === w.systemId)?.name || "UNKNOWN");
         w.state ||= "QUEUED";
         w.phaseIndex = typeof w.phaseIndex === "number" ? w.phaseIndex : 0;
-        if (typeof w.phaseEndsAt !== "number" || w.phaseEndsAt <= 0) {
+        if (typeof w.phaseEndsAt === "number" && w.phaseEndsAt > 0) {
+          w.phaseEndsAt = adjustTimestamp(w.phaseEndsAt);
+        } else {
           const phase = WORKORDER_PHASES[w.phaseIndex] || WORKORDER_PHASES[0];
           w.phaseEndsAt = Date.now() + randRange(phase.min, phase.max) * 1000;
         }
-        w.createdAt ||= Date.now();
+        w.createdAt = adjustTimestamp(w.createdAt) || Date.now();
       }
 
       g.resources ||= {};
@@ -4261,7 +4748,9 @@ button.btn-error {
           res.order.stage ||= RESOURCE_ORDER_PHASES[0].key;
           res.order.stageIndex = typeof res.order.stageIndex === "number" ? res.order.stageIndex : 0;
           res.order.amount = normalizeOrderAmount(res.order.amount ?? res.orderAmount);
-          if (!res.order.stageEndsAt || res.order.stageEndsAt <= 0) {
+          if (res.order.stageEndsAt && res.order.stageEndsAt > 0) {
+            res.order.stageEndsAt = adjustTimestamp(res.order.stageEndsAt);
+          } else {
             const phase = RESOURCE_ORDER_PHASES[res.order.stageIndex] || RESOURCE_ORDER_PHASES[0];
             res.order.stageEndsAt = Date.now() + randRange(phase.min, phase.max) * 1000;
           }
@@ -4271,7 +4760,7 @@ button.btn-error {
             res.order.stageEndsAt = Date.now() + randRange(60, 120) * 1000;
           }
           if (res.order.stage === "DELIVERED") {
-            res.order.completedAt ||= Date.now();
+            res.order.completedAt = adjustTimestamp(res.order.completedAt) || Date.now();
           }
         } else {
           res.order = null;
@@ -4280,7 +4769,7 @@ button.btn-error {
 
       g.corridors ||= [];
       for (const c of g.corridors) {
-        c.lastChange ||= Date.now();
+        c.lastChange = adjustTimestamp(c.lastChange) || Date.now();
         c.cls ||= (CORRIDOR_STATES.find(x => x.key === c.status)?.cls || "warn");
       }
 
@@ -4294,11 +4783,15 @@ button.btn-error {
       for (const f of g.facility) {
         f.name ||= (FACILITY_SYSTEMS.find(x => x.id === f.id)?.name || f.id);
         f.status ||= "ONLINE";
-        f.lastChange ||= Date.now();
-        if (typeof f.stableUntil !== "number") f.stableUntil = Date.now() + randRange(18 * 60_000, 40 * 60_000);
-        f.lastRepairAttemptAt ||= 0;
-        f.degradedSince ||= 0;
-        f.degradedTimeoutAt ||= 0;
+        f.lastChange = adjustTimestamp(f.lastChange) || Date.now();
+        if (typeof f.stableUntil === "number" && f.stableUntil > 0) {
+          f.stableUntil = adjustTimestamp(f.stableUntil);
+        } else {
+          f.stableUntil = Date.now() + randRange(18 * 60_000, 40 * 60_000);
+        }
+        f.lastRepairAttemptAt = adjustTimestamp(f.lastRepairAttemptAt) || 0;
+        f.degradedSince = adjustTimestamp(f.degradedSince) || 0;
+        f.degradedTimeoutAt = adjustTimestamp(f.degradedTimeoutAt) || 0;
       }
 
       g.dockSlots ||= ["SLOT-1", "SLOT-2", "SLOT-3", "SLOT-4"].map(id => ({
@@ -4317,7 +4810,7 @@ button.btn-error {
       for (const slot of g.dockSlots) {
         slot.state ||= "EMPTY";
         slot.shipId ??= null;
-        slot.phaseEndsAt ||= 0;
+        slot.phaseEndsAt = adjustTimestamp(slot.phaseEndsAt) || 0;
       }
 
       g.relays ||= [];
@@ -4329,6 +4822,7 @@ button.btn-error {
         g.relays.push({
           id: `RELAY-${g.relays.length + 1}`,
           status: "ONLINE",
+          health: randRange(80, 100),
           lastChange: Date.now(),
           lastPacketAt: 0,
           lastRelayPingAt: 0,
@@ -4341,27 +4835,46 @@ button.btn-error {
           hiddenOffline: false,
           hiccupRecoverable: false,
           offlineReason: null,
-          offlineSince: 0
+          offlineSince: 0,
+          lastHealthPingAt: 0,
+          nextHealthPingCooldown: Date.now()
         });
       }
       for (const r of g.relays) {
         r.status ||= "ONLINE";
-        r.lastChange ||= Date.now();
-        r.lastPacketAt ||= 0;
-        r.lastRelayPingAt ||= 0;
-        r.lastHeartbeatAt = (typeof r.lastHeartbeatAt === "number" && r.lastHeartbeatAt > 0) ? r.lastHeartbeatAt : Date.now();
+
+        // Migrate old relays to health-based system
+        if (typeof r.health !== "number") {
+          // Convert old status to health percentage
+          if (r.offline || r.status === "OFFLINE") {
+            r.health = 0;
+          } else if (r.status === "FAULT") {
+            r.health = randRange(25, 49);
+          } else if (r.status === "WEAK") {
+            r.health = randRange(50, 74);
+          } else { // ONLINE
+            r.health = randRange(75, 100);
+          }
+        }
+
+        r.lastChange = adjustTimestamp(r.lastChange) || Date.now();
+        r.lastPacketAt = adjustTimestamp(r.lastPacketAt) || 0;
+        r.lastRelayPingAt = adjustTimestamp(r.lastRelayPingAt) || 0;
+        r.lastHeartbeatAt = adjustTimestamp((typeof r.lastHeartbeatAt === "number" && r.lastHeartbeatAt > 0) ? r.lastHeartbeatAt : 0) || Date.now();
         r.nextHeartbeatAt = (typeof r.nextHeartbeatAt === "number" && r.nextHeartbeatAt > 0)
-          ? r.nextHeartbeatAt
+          ? adjustTimestamp(r.nextHeartbeatAt)
           : (Date.now() + randRange(RELAY_HEARTBEAT_MIN_MS, RELAY_HEARTBEAT_MAX_MS));
-        r.lastAckAt ||= 0;
+        r.lastAckAt = adjustTimestamp(r.lastAckAt) || 0;
         r.awaitingAck = typeof r.awaitingAck === "boolean" ? r.awaitingAck : false;
-        r.ackDueAt = typeof r.ackDueAt === "number" ? r.ackDueAt : 0;
-        r.offline = typeof r.offline === "boolean" ? r.offline : (r.status === "OFFLINE");
-        r.hiddenOffline = typeof r.hiddenOffline === "boolean" ? r.hiddenOffline : (r.offline && r.status !== "OFFLINE");
+        r.ackDueAt = adjustTimestamp(typeof r.ackDueAt === "number" ? r.ackDueAt : 0);
+        r.offline = typeof r.offline === "boolean" ? r.offline : (r.health === 0);
+        r.hiddenOffline = typeof r.hiddenOffline === "boolean" ? r.hiddenOffline : (r.offline && r.health > 0);
         r.hiccupRecoverable = typeof r.hiccupRecoverable === "boolean" ? r.hiccupRecoverable : false;
         r.offlineReason = r.offlineReason || null;
-        r.offlineSince = typeof r.offlineSince === "number" ? r.offlineSince : 0;
-        if (r.offline && !r.hiddenOffline) r.status = "OFFLINE";
+        r.offlineSince = adjustTimestamp(typeof r.offlineSince === "number" ? r.offlineSince : 0);
+        r.lastHealthPingAt = adjustTimestamp(r.lastHealthPingAt) || 0;
+        r.nextHealthPingCooldown = adjustTimestamp(r.nextHealthPingCooldown) || Date.now();
+        if (r.offline && !r.hiddenOffline) r.health = 0;
       }
 
       // Initialize relayHealth for existing gates
@@ -4374,11 +4887,11 @@ button.btn-error {
         totalRelayCount: g.relays.length
       };
       g.relayHealth.totalRelayCount = g.relays.length;
-      g.relayHealth.degradedSince = typeof g.relayHealth.degradedSince === "number" ? g.relayHealth.degradedSince : 0;
-      g.relayHealth.criticalSince = typeof g.relayHealth.criticalSince === "number" ? g.relayHealth.criticalSince : 0;
+      g.relayHealth.degradedSince = adjustTimestamp(typeof g.relayHealth.degradedSince === "number" ? g.relayHealth.degradedSince : 0);
+      g.relayHealth.criticalSince = adjustTimestamp(typeof g.relayHealth.criticalSince === "number" ? g.relayHealth.criticalSince : 0);
       g.relayHealth.lastHealthState ||= "HEALTHY";
       g.relayHealth.unackedPings = typeof g.relayHealth.unackedPings === "number" ? g.relayHealth.unackedPings : 0;
-      g.relayHealth.lastWarningAt = typeof g.relayHealth.lastWarningAt === "number" ? g.relayHealth.lastWarningAt : 0;
+      g.relayHealth.lastWarningAt = adjustTimestamp(typeof g.relayHealth.lastWarningAt === "number" ? g.relayHealth.lastWarningAt : 0);
 
       g.packets ||= [];
 
@@ -4390,15 +4903,15 @@ button.btn-error {
         s.priority ||= false;
         s.reason ||= null;
         s.notes ||= "";
-        s.doneAt ||= 0;
+        s.doneAt = adjustTimestamp(s.doneAt) || 0;
         s.slotId ??= null;
         s.dockState ??= null;
-        s.deconEndsAt ||= 0;
-        s.serviceEndsAt ||= 0;
-        s.clearingEndsAt ||= 0;
-        s.exposureDeadline ||= 0;
-        s.departureDeadline ||= 0;
-        s.deadlineWarningAt ||= 0;
+        s.deconEndsAt = adjustTimestamp(s.deconEndsAt) || 0;
+        s.serviceEndsAt = adjustTimestamp(s.serviceEndsAt) || 0;
+        s.clearingEndsAt = adjustTimestamp(s.clearingEndsAt) || 0;
+        s.exposureDeadline = adjustTimestamp(s.exposureDeadline) || 0;
+        s.departureDeadline = adjustTimestamp(s.departureDeadline) || 0;
+        s.deadlineWarningAt = adjustTimestamp(s.deadlineWarningAt) || 0;
         s.deadlineType ||= null;
         s.urgencyLevel = typeof s.urgencyLevel === "number" ? s.urgencyLevel : 0;
         s.missedDeadline = typeof s.missedDeadline === "boolean" ? s.missedDeadline : false;
@@ -4407,7 +4920,7 @@ button.btn-error {
         s.criticalAudioPlayed = typeof s.criticalAudioPlayed === "boolean" ? s.criticalAudioPlayed : false;
         s.finalWarningPlayed = typeof s.finalWarningPlayed === "boolean" ? s.finalWarningPlayed : false;
         s.holdUsed = typeof s.holdUsed === "boolean" ? s.holdUsed : false;
-        s.holdStartTime = typeof s.holdStartTime === "number" ? s.holdStartTime : 0;
+        s.holdStartTime = adjustTimestamp(typeof s.holdStartTime === "number" ? s.holdStartTime : 0);
         s.holdDuration = typeof s.holdDuration === "number" ? s.holdDuration : 0;
         s.wasCleared ||= false;
         s.queryPending ||= false;
@@ -4419,9 +4932,10 @@ button.btn-error {
         }
         s.shipmentType ||= null;
         s.shipmentDelivered = typeof s.shipmentDelivered === "boolean" ? s.shipmentDelivered : false;
-        s.hazardDeadline ||= 0;
+        s.hazardDeadline = adjustTimestamp(s.hazardDeadline) || 0;
         s.obscured = typeof s.obscured === "boolean" ? s.obscured : false;
         s.infoMasked = typeof s.infoMasked === "boolean" ? s.infoMasked : false;
+        s.hazardType = s.hazardType || null;  // Preserve hazard type for UNKNOWN ships
         s.hiddenThreat = typeof s.hiddenThreat === "boolean" ? s.hiddenThreat : false;
         if (typeof s.eta !== "number") s.eta = ETA.min + Math.floor(Math.random() * 400);
       }
@@ -4433,7 +4947,9 @@ button.btn-error {
       try {
         const raw = localStorage.getItem(LS.gateStatePrefix + gateId);
         if (!raw) return null;
-        return reviveGateState(JSON.parse(raw));
+        const parsed = JSON.parse(raw);
+        const lastSavedAt = typeof parsed.lastSavedAt === "number" ? parsed.lastSavedAt : null;
+        return reviveGateState(parsed, lastSavedAt);
       } catch (_) { return null; }
     }
 
@@ -4442,6 +4958,7 @@ button.btn-error {
         const copy = JSON.parse(JSON.stringify(g));
         copy.reports = (copy.reports || []).slice(-40);
         copy.packets = (copy.packets || []).slice(-20);
+        copy.lastSavedAt = Date.now();
         localStorage.setItem(LS.gateStatePrefix + g.id, JSON.stringify(copy));
       } catch (_) {}
     }
@@ -4462,13 +4979,16 @@ button.btn-error {
       });
       const shiftMs = Math.max(0, Date.now() - runtime.shiftStart);
       const shiftDurationMs = loadShiftDuration();
+      const shiftMode = loadShiftMode();
       return {
         v: 1,
+        exportedAt: Date.now(),
         theme: document.documentElement.dataset.theme || localStorage.getItem(LS.theme) || "green",
         gateList,
         activeGateId,
         shiftMs,
         shiftDurationMs,
+        shiftMode,
         operatorCallsign: runtime.operatorCallsign || "",
         gates,
         severed: !!runtime.severed,
@@ -4481,9 +5001,10 @@ button.btn-error {
       localStorage.setItem(LS.gateList, JSON.stringify(save.gateList));
       if (save.activeGateId) localStorage.setItem(LS.gateCurrent, save.activeGateId);
       if (save.theme) localStorage.setItem(LS.theme, save.theme);
+      const exportedAt = typeof save.exportedAt === "number" ? save.exportedAt : null;
       if (Array.isArray(save.gates)) {
         for (const raw of save.gates) {
-          const revived = reviveGateState(raw);
+          const revived = reviveGateState(raw, exportedAt);
           if (revived) saveGateState(revived);
         }
       }
@@ -4492,59 +5013,17 @@ button.btn-error {
       runtime.lastSevered = save.lastSevered || null;
       runtime.resumeShiftMs = typeof save.shiftMs === "number" ? save.shiftMs : 0;
 			safeStorageSet(LS.shiftMs, String(runtime.resumeShiftMs || 0));
-      if (typeof save.shiftDurationMs === "number" && save.shiftDurationMs > 0) {
+      if (typeof save.shiftDurationMs === "number" && (save.shiftDurationMs > 0 || save.shiftDurationMs === -1)) {
         safeStorageSet(LS.shiftDurationMs, String(save.shiftDurationMs));
+      }
+      if (typeof save.shiftMode === "string" && save.shiftMode) {
+        safeStorageSet(LS.shiftMode, save.shiftMode);
       }
       runtime.operatorCallsign = typeof save.operatorCallsign === "string" ? save.operatorCallsign : "";
       safeStorageSet(LS.operatorCallsign, runtime.operatorCallsign);
       updateOperatorLabel();
+      updateEnduranceButtons();
       return true;
-    }
-
-    function getHashSaveValue() {
-      const hash = location.hash.startsWith("#") ? location.hash.slice(1) : "";
-      if (!hash) return null;
-      if (hash.startsWith("v2")) {
-        return { version: "v2", payload: hash.slice(2) };
-      }
-      const params = new URLSearchParams(hash);
-      const value = params.get(SAVE_HASH_KEY);
-      if (!value) return null;
-      const [prefix, data] = value.split(":");
-      if (!prefix || !data) return null;
-      return { version: prefix, payload: data };
-    }
-
-    async function loadSaveFromHash() {
-      if (runtime.skipHashLoad) {
-        runtime.skipHashLoad = false;
-        return false;
-      }
-      const value = getHashSaveValue();
-      if (!value) return false;
-      const { version, payload } = value;
-      if (!payload || (version !== "v1" && version !== "v2")) return false;
-      try {
-        const save = await decompressJsonFromUrl(payload, version);
-        const applied = applySaveState(save);
-        if (applied && CLEAR_HASH_AFTER_LOAD) {
-          const cleared = safeReplaceState(location.pathname + location.search);
-          if (!cleared) {
-            try { location.hash = ""; } catch (_) {}
-          }
-        }
-        return applied;
-      } catch (_) {
-        return false;
-      }
-    }
-
-    async function writeShareHash() {
-      const save = buildSaveState();
-      const payload = await compressJsonToUrl(save, SAVE_VERSION);
-      const hashValue = `#${SAVE_VERSION}${payload}`;
-      safeReplaceState(hashValue);
-      return location.href;
     }
 
     function makeExportFilename(gateId) {
@@ -4578,7 +5057,6 @@ button.btn-error {
       const save = JSON.parse(text);
       const applied = applySaveState(save);
       if (!applied) return false;
-      runtime.skipHashLoad = true;
       safeReplaceState(location.pathname + location.search);
       await boot();
       return true;
@@ -4589,7 +5067,6 @@ button.btn-error {
       const save = JSON.parse(text);
       const applied = applySaveState(save);
       if (!applied) return false;
-      runtime.skipHashLoad = true;
       safeReplaceState(location.pathname + location.search);
       updateStartNameLabel();
 
@@ -4630,6 +5107,7 @@ button.btn-error {
       btnStart: document.getElementById("btn-start"),
       btnStartResume: document.getElementById("btn-start-resume"),
       btnStartHelp: document.getElementById("btn-start-help"),
+      btnStartOptions: document.getElementById("btn-start-options"),
       startResumeInput: document.getElementById("start-resume-file"),
       startNameSlot: document.getElementById("start-name-slot"),
       startNameLabel: document.getElementById("start-name-label"),
@@ -4638,7 +5116,6 @@ button.btn-error {
       gateDisplay: document.getElementById("gate-display"),
       startThemeSelect: document.getElementById("start-theme-select"),
       themeSelect: document.getElementById("theme-select"),
-      btnShare: document.getElementById("btn-share"),
       btnExport: document.getElementById("btn-export"),
       btnResume: document.getElementById("btn-resume"),
       resumeInput: document.getElementById("resume-file"),
@@ -4695,7 +5172,7 @@ button.btn-error {
       shiftTime: document.getElementById("shift-time"),
       shiftWage: document.getElementById("shift-wage"),
       alertCount: document.getElementById("alert-count"),
-      dataAge: document.getElementById("data-age"),
+			dataAge: document.getElementById("data-age"),
 
       inboundMeta: document.getElementById("inbound-meta"),
       outboundMeta: document.getElementById("outbound-meta"),
@@ -4723,6 +5200,8 @@ button.btn-error {
       concoursePill: document.getElementById("concourse-pill"),
       dockList: document.getElementById("dock-list"),
       relayList: document.getElementById("relay-list"),
+      gateNetworkPanel: document.getElementById("gate-network-panel"),
+      gateNetworkList: document.getElementById("gate-network-list"),
 
       btnRealign: document.getElementById("btn-realign"),
       btnReset: document.getElementById("btn-reset"),
@@ -4730,7 +5209,6 @@ button.btn-error {
       btnScan: document.getElementById("btn-scan"),
 
       console: document.getElementById("console-log"),
-      events: document.getElementById("events-log"),
       ps1: document.getElementById("ps1"),
       cmd: document.getElementById("cmd"),
 
@@ -4772,7 +5250,6 @@ button.btn-error {
       maintenance: {},
       processingCount: 0,
       resumeShiftMs: null,
-      skipHashLoad: false,
       operatorCallsign: "",
       pendingConfirmation: null,
       multiplayer: {
@@ -4793,7 +5270,8 @@ button.btn-error {
           ping: false,
           all: false
         },
-        pendingPings: new Map()
+        pendingPings: new Map(),
+        gateStates: new Map() // Tracks connection state, pings, etc. for each player gate
       },
       inlineDetailId: null,
       fontScale: 1.0,
@@ -4812,10 +5290,10 @@ button.btn-error {
         'systems-resources': false,
         'systems-concourse': false,
         'systems-relays': false,
+        'systems-gatenetwork': true,
         'systems-maintenance': false,
         // TERMINAL sub-sections
-        'terminal-console': false,
-        'terminal-events': false
+        'terminal-console': false
       },
       breakState: {
         active: false,
@@ -5046,6 +5524,7 @@ button.btn-error {
         blip: makeAudioPool("/gatecontrol/blip.ogg", 4, 0.4),
         msg: makeAudioPool("/gatecontrol/msg.ogg", 3, 0.6),
         ping: makeAudioPool("/gatecontrol/ping.ogg", 3, 0.6),
+        pingplayer: makeAudioPool("/gatecontrol/pingplayer.ogg", 3, 0.6),
         restore: makeAudioPool("/gatecontrol/restore.ogg", 3, 0.5),
         startup: makeAudioPool("/gatecontrol/startup.ogg", 1, 0.65),
         offline: makeAudioPool("/gatecontrol/offline.ogg", 2, 0.65),
@@ -5343,15 +5822,18 @@ button.btn-error {
 
     function corruptMessageText(text, combinedScore) {
       // Map combined score to corruption rate
+      // Stronger degradation: only score 0 (both healthy) gives clear messages
       let corruptionRate;
-      if (combinedScore <= 1) {
+      if (combinedScore === 0) {
         corruptionRate = 0;
+      } else if (combinedScore <= 2) {
+        corruptionRate = 0.55;  // One relay degraded/offline - hard to read
       } else if (combinedScore <= 4) {
-        corruptionRate = 0.20;
-      } else if (combinedScore <= 8) {
-        corruptionRate = 0.50;
+        corruptionRate = 0.75;  // Both degraded or one critical - very corrupted
+      } else if (combinedScore <= 6) {
+        corruptionRate = 0.85;  // Both critical or one severing - nearly unreadable
       } else {
-        corruptionRate = 0.80;
+        corruptionRate = 0.95;  // Severe network failure - almost total corruption
       }
 
       if (corruptionRate === 0) return text;
@@ -5506,7 +5988,32 @@ button.btn-error {
       }
     }
 
+    // Track recent messages for deduplication (max 5 entries)
+    const recentMessages = [];
+
     function logLine(el, text, cls = "dim") {
+      const now = Date.now();
+
+      // Clean old entries (>3 seconds)
+      while (recentMessages.length > 0 && now - recentMessages[0].timestamp > 3000) {
+        recentMessages.shift();
+      }
+
+      // Check for duplicates within last 2 seconds
+      const isDuplicate = recentMessages.some(msg =>
+        msg.text === text && (now - msg.timestamp) < 2000
+      );
+
+      if (isDuplicate) {
+        return; // Skip duplicate message
+      }
+
+      // Add message to recent list
+      recentMessages.push({ text, timestamp: now });
+      if (recentMessages.length > 5) {
+        recentMessages.shift(); // Keep only last 5
+      }
+
       const div = document.createElement("div");
       div.className = `terminal-line ${cls}`;
       div.innerHTML = escapeText(text);
@@ -5528,7 +6035,7 @@ button.btn-error {
     }
 
     function consoleLine(text, cls = "dim") { logLine(ui.console, text, cls); }
-    function eventLine(text, cls = "dim") { logLine(ui.events, text, cls); }
+    function eventLine(text, cls = "dim") { consoleLine(text, cls); }
 
     function flashErrorButton(btn) {
       if (!btn) return;
@@ -5567,17 +6074,16 @@ button.btn-error {
 
     function loadTheme() {
       const stored = safeStorageGet(LS.theme);
-      const hasData = hasSavedData();
 
-      if (stored && hasData) {
-        // If there's saved data, use the stored theme
+      if (stored) {
+        // If there's a stored theme, use it
         document.documentElement.dataset.theme = stored;
         if (ui.themeSelect) ui.themeSelect.value = stored;
         if (ui.startThemeSelect) ui.startThemeSelect.value = stored;
         return;
       }
 
-      // If no saved data, randomize theme without saving to storage
+      // If no stored theme, randomize theme without saving to storage
       const initial = pickRandomTheme();
       setTheme(initial, true, false);
     }
@@ -5663,7 +6169,10 @@ button.btn-error {
         lightgreen: "LIGHT - GREEN",
         paper: "PAPER",
         christmas: "CHRISTMAS",
-        halloween: "HALLOWEEN"
+        halloween: "HALLOWEEN",
+        soviet: "SOVIET",
+        synthwave: "SYNTHWAVE",
+        superearth: "SUPER EARTH"
       };
       const optionsHTML = available
         .map(id => `<option value="${id}">${themeNames[id] || id.toUpperCase()}</option>`)
@@ -5762,7 +6271,7 @@ button.btn-error {
 
       consoleLine(`GATE TERMINAL MONITORING`, "dim");
       consoleLine(`NODE: ${runtime.activeGateId}`, "dim");
-      consoleLine(`AUTH: LOCAL`, "dim");
+      consoleLine(`AUTH: CONFIRMED`, "dim");
       consoleLine(`TYPE HELP FOR COMMANDS`, "dim");
       consoleLine("", "dim");
 
@@ -5970,8 +6479,18 @@ button.btn-error {
       return { text: "QUIET", cls: "ok" };
     }
 
+    // Convert relay health percentage to status string
+    function relayHealthToStatus(health) {
+      if (health >= 75) return "ONLINE";
+      if (health >= 50) return "WEAK";
+      if (health >= 25) return "FAULT";
+      if (health > 0) return "CRITICAL";
+      return "OFFLINE";
+    }
+
     function relayDisplayStatus(r) {
-      return (r.offline && !r.hiddenOffline) ? "OFFLINE" : r.status;
+      if (r.offline && !r.hiddenOffline) return "OFFLINE";
+      return relayHealthToStatus(r.health);
     }
 
     function relayHeartbeatAgeSec(r, now) {
@@ -5979,8 +6498,41 @@ button.btn-error {
       return Math.max(0, Math.floor((now - r.lastHeartbeatAt) / 1000));
     }
 
-    function relayHeartbeatBand(ageSec) {
+    function relayHeartbeatBand(relay, ageSec) {
       if (typeof ageSec !== "number") return { cls: "hb-bad", stale: true };
+
+      // For offline relays, always show bad (red) as heartbeat extends
+      if (relay.offline || relay.health === 0) {
+        return { cls: "hb-bad", stale: true };
+      }
+
+      // Color based on expected heartbeat range based on health percentage
+      // Health 75-100% (ONLINE): 0-2s expected
+      if (relay.health >= 75) {
+        if (ageSec >= 4) return { cls: "hb-bad", stale: true };
+        if (ageSec >= 2) return { cls: "hb-warn", stale: false };
+        return { cls: "hb-ok", stale: false };
+      }
+      // Health 50-74% (WEAK): 2-4s expected
+      else if (relay.health >= 50) {
+        if (ageSec >= 6) return { cls: "hb-bad", stale: true };
+        if (ageSec >= 4) return { cls: "hb-warn", stale: false };
+        return { cls: "hb-ok", stale: false };
+      }
+      // Health 25-49% (FAULT): 4-6s expected
+      else if (relay.health >= 25) {
+        if (ageSec >= 8) return { cls: "hb-bad", stale: true };
+        if (ageSec >= 6) return { cls: "hb-warn", stale: false };
+        return { cls: "hb-ok", stale: false };
+      }
+      // Health 1-24% (CRITICAL): 6-8s expected
+      else if (relay.health > 0) {
+        if (ageSec >= 10) return { cls: "hb-bad", stale: true };
+        if (ageSec >= 8) return { cls: "hb-warn", stale: false };
+        return { cls: "hb-ok", stale: false };
+      }
+
+      // Fallback
       if (ageSec >= RELAY_HEARTBEAT_STALE_CRIT_SEC) return { cls: "hb-bad", stale: true };
       if (ageSec >= RELAY_HEARTBEAT_STALE_WARN_SEC) return { cls: "hb-warn", stale: true };
       return { cls: "hb-ok", stale: false };
@@ -5988,7 +6540,37 @@ button.btn-error {
 
     function scheduleRelayHeartbeat(relay, now) {
       relay.lastHeartbeatAt = now;
-      relay.nextHeartbeatAt = now + randRange(RELAY_HEARTBEAT_MIN_MS, RELAY_HEARTBEAT_MAX_MS);
+
+      // Don't schedule next heartbeat for offline relays - let counter extend
+      if (relay.offline || relay.health === 0) {
+        return;
+      }
+
+      // Set heartbeat interval based on relay health percentage
+      let minMs, maxMs;
+      if (relay.health >= 75) {
+        // ONLINE: 0-2s
+        minMs = 0;
+        maxMs = 2000;
+      } else if (relay.health >= 50) {
+        // WEAK: 2-4s
+        minMs = 2000;
+        maxMs = 4000;
+      } else if (relay.health >= 25) {
+        // FAULT: 4-6s
+        minMs = 4000;
+        maxMs = 6000;
+      } else if (relay.health > 0) {
+        // CRITICAL: 6-8s
+        minMs = 6000;
+        maxMs = 8000;
+      } else {
+        // Fallback to default for any edge cases
+        minMs = RELAY_HEARTBEAT_MIN_MS;
+        maxMs = RELAY_HEARTBEAT_MAX_MS;
+      }
+
+      relay.nextHeartbeatAt = now + randRange(minMs, maxMs);
     }
 
     function computeHealth(g) {
@@ -6116,11 +6698,12 @@ button.btn-error {
       const relays = g.relays || [];
       if (relays.length < 2) return { state: "HEALTHY", reason: null, score: 0 };
 
-      // Count relays by state
+      // Count relays by state (using health-based status)
       const offline = relays.filter(r => relayIsDown(r)).length;
-      const fault = relays.filter(r => !relayIsDown(r) && r.status === "FAULT").length;
-      const weak = relays.filter(r => !relayIsDown(r) && r.status === "WEAK").length;
-      const healthy = relays.filter(r => !relayIsDown(r) && r.status === "ONLINE").length;
+      const critical = relays.filter(r => !relayIsDown(r) && relayHealthToStatus(r.health) === "CRITICAL").length;
+      const fault = relays.filter(r => !relayIsDown(r) && relayHealthToStatus(r.health) === "FAULT").length;
+      const weak = relays.filter(r => !relayIsDown(r) && relayHealthToStatus(r.health) === "WEAK").length;
+      const healthy = relays.filter(r => !relayIsDown(r) && relayHealthToStatus(r.health) === "ONLINE").length;
 
       // Check for unacked PINGs
       const unackedPings = relays.filter(r => r.awaitingAck && !r.offline).length;
@@ -6131,12 +6714,12 @@ button.btn-error {
         if (offline === 2) {
           return { state: "SEVERING", reason: "ALL_RELAYS_OFFLINE", score: 4 };
         }
-        // CRITICAL: One offline + one FAULT/WEAK, OR both FAULT
-        if ((offline === 1 && (fault + weak >= 1)) || fault === 2) {
+        // CRITICAL: One offline + one degraded, OR both severely degraded (FAULT/CRITICAL)
+        if ((offline === 1 && (critical + fault + weak >= 1)) || (critical + fault) >= 2) {
           return { state: "CRITICAL", reason: "IMMINENT_FAILURE", score: 3 };
         }
-        // DEGRADED: One offline OR one FAULT OR 2+ unacked PINGs
-        if (offline === 1 || fault === 1 || unackedPings >= 2) {
+        // DEGRADED: One offline OR one FAULT/CRITICAL OR 2+ unacked PINGs
+        if (offline === 1 || critical >= 1 || fault >= 1 || unackedPings >= 2) {
           return { state: "DEGRADED", reason: "REDUCED_REDUNDANCY", score: 2 };
         }
       }
@@ -6147,12 +6730,12 @@ button.btn-error {
         if (offline === 3) {
           return { state: "SEVERING", reason: "ALL_RELAYS_OFFLINE", score: 4 };
         }
-        // CRITICAL: 2 offline OR (1 offline + 2 FAULT/WEAK)
-        if (offline >= 2 || (offline === 1 && (fault + weak >= 2))) {
+        // CRITICAL: 2 offline OR (1 offline + 2 degraded)
+        if (offline >= 2 || (offline === 1 && (critical + fault + weak >= 2))) {
           return { state: "CRITICAL", reason: "IMMINENT_FAILURE", score: 3 };
         }
-        // DEGRADED: 1 offline OR 2 FAULT OR 3+ unacked PINGs
-        if (offline === 1 || fault >= 2 || unackedPings >= 3) {
+        // DEGRADED: 1 offline OR 2 FAULT/CRITICAL OR 3+ unacked PINGs
+        if (offline === 1 || (critical + fault) >= 2 || unackedPings >= 3) {
           return { state: "DEGRADED", reason: "REDUCED_REDUNDANCY", score: 2 };
         }
       }
@@ -6174,7 +6757,10 @@ button.btn-error {
     }
 
     function isGateSystemsFailed(g) {
-      const relaysFailed = (g.relays || []).length > 0 && g.relays.every(r => r.status === "FAULT");
+      const relaysFailed = (g.relays || []).length > 0 && g.relays.every(r => {
+        const status = relayHealthToStatus(r.health);
+        return status === "FAULT" || status === "CRITICAL";
+      });
       return g.health.includes("MAINTENANCE")
         && g.beacon === "OFFLINE"
         && g.alignment === "OUT OF TOLERANCE"
@@ -6666,15 +7252,15 @@ button.btn-error {
         }
 
         ui.relayList.innerHTML = healthBanner + (g.relays || []).map(r => {
-          const displayStatus = (r.offline && !r.hiddenOffline) ? "OFFLINE" : r.status;
+          const displayStatus = relayDisplayStatus(r);
           const pr = pillForState(RELAY_STATES, displayStatus);
           const ackMeta = r.awaitingAck ? `<span class="status-meta">ACK REQUIRED</span>` : "";
           const ackClass = r.awaitingAck ? "attn" : "";
-          const canRestore = displayStatus === "FAULT" || displayStatus === "WEAK";
+          const canRestore = ["FAULT", "WEAK", "CRITICAL"].includes(displayStatus);
           const needsRelayWO = relayIsDown(r) && !r.hiddenOffline && !hasActiveWorkOrder(g, r.id);
           const pingPulse = r.pingPulseUntil && r.pingPulseUntil > now;
           const hbAgeSec = relayHeartbeatAgeSec(r, now);
-          const hbBand = relayHeartbeatBand(hbAgeSec);
+          const hbBand = relayHeartbeatBand(r, hbAgeSec);
           const hbValue = (typeof hbAgeSec === "number") ? `${hbAgeSec}s` : "--";
           return `
             <div class="status-row relay-row${pingPulse ? " relay-ping" : ""}">
@@ -6785,6 +7371,188 @@ button.btn-error {
       ui.alertCount.textContent = String(computeAlerts(g).length);
     }
 
+    function getGateLatency(gateA, gateB, relayScoreA = 0, relayScoreB = 0) {
+      const a = String(gateA || "").toUpperCase();
+      const b = String(gateB || "").toUpperCase();
+      if (!a || !b || a === b) return 0;
+
+      // Get base latency from ping matrix or deterministic hash
+      const pm = runtime.multiplayer?.pingMatrix || {};
+      const g1 = a < b ? a : b;
+      const g2 = a < b ? b : a;
+
+      const candidates = [
+        pm?.[a]?.[b],
+        pm?.[b]?.[a],
+        pm?.[`${g1}|${g2}`],
+        pm?.[`${g1}-${g2}`],
+        pm?.[`${g1}:${g2}`],
+      ];
+
+      let baseLatency = 0;
+      for (const v of candidates) {
+        if (typeof v === "number" && Number.isFinite(v)) {
+          baseLatency = Math.round(v);
+          break;
+        }
+      }
+
+      // Fallback: deterministic hash
+      if (baseLatency === 0) {
+        const s = `${g1}|${g2}|TQE_LINKPING`;
+        let h = 2166136261;
+        for (let i = 0; i < s.length; i++) {
+          h ^= s.charCodeAt(i);
+          h = Math.imul(h, 16777619);
+        }
+        const u = (h >>> 0);
+        baseLatency = 1000 + (u % 8001);
+      }
+
+      // Apply degradation based on relay scores (0=healthy, 2=degraded, 3=critical, 4=severing)
+      let degradation = 0;
+      if (relayScoreA >= 2 || relayScoreB >= 2) {
+        degradation = Math.max(relayScoreA, relayScoreB) * 500; // Add 500ms per degradation level
+      }
+
+      return Math.max(1000, Math.min(9000, baseLatency + degradation));
+    }
+
+    function renderGateNetwork() {
+      const g = activeGate();
+      const now = Date.now();
+      const myGateId = g?.id || runtime.activeGateId;
+
+      // Show/hide panel based on multiplayer connection
+      if (!runtime.multiplayer.enabled || !ui.gateNetworkPanel) {
+        if (ui.gateNetworkPanel) {
+          ui.gateNetworkPanel.style.display = "none";
+        }
+        return;
+      }
+
+      ui.gateNetworkPanel.style.display = "";
+
+      // Get other players (exclude self)
+      const otherPlayers = (runtime.multiplayer.players || []).filter(p => p.gateId !== myGateId);
+
+      // Get my relay health score
+      const myRelayHealth = computeRelayHealthState(g);
+      const myRelayScore = myRelayHealth.score;
+
+      // Update gate states for each player
+      otherPlayers.forEach(player => {
+        if (!runtime.multiplayer.gateStates.has(player.gateId)) {
+          runtime.multiplayer.gateStates.set(player.gateId, {
+            gateId: player.gateId,
+            status: "CONNECTED",
+            connectedAt: now,
+            showConnectedUntil: now + 5000,
+            disconnectReason: null,
+            disconnectStartedAt: null,
+            removeAt: null,
+            pendingPing: null,
+            pingAudioTimer: null
+          });
+        }
+      });
+
+      // Clean up states for players no longer in the list
+      const currentGateIds = new Set(otherPlayers.map(p => p.gateId));
+      for (const [gateId, state] of runtime.multiplayer.gateStates.entries()) {
+        if (!currentGateIds.has(gateId) && !state.removeAt) {
+          // Player left - mark for removal (will be handled in player list handler)
+        }
+      }
+
+      // Render the list
+      const rows = [];
+      for (const [gateId, state] of runtime.multiplayer.gateStates.entries()) {
+        // Skip if marked for removal and past removal time
+        if (state.removeAt && now >= state.removeAt) {
+          runtime.multiplayer.gateStates.delete(gateId);
+          continue;
+        }
+
+        const player = otherPlayers.find(p => p.gateId === gateId);
+        const playerRelayScore = player?.relayScore || 0;
+
+        // Check if this gate has a pending ping
+        const hasPendingPing = g.pendingPlayerPings?.some(p => p.sourceGateId === gateId && !p.acked) || false;
+
+        // Calculate latency
+        let latencyDisplay = "";
+        let statusDisplay = "";
+        let indicatorClass = "";
+
+        if (state.status === "CONNECTED" && now < state.showConnectedUntil) {
+          statusDisplay = "CONNECTED";
+          indicatorClass = "ok";
+        } else if (state.status === "SEVERING") {
+          // Increase latency over 10 seconds
+          const elapsed = now - state.disconnectStartedAt;
+          const baseLatency = getGateLatency(myGateId, gateId, myRelayScore, playerRelayScore);
+          const increase = Math.min(elapsed / 10000, 1) * 5000; // Increase up to +5000ms
+          latencyDisplay = `${Math.round(baseLatency + increase)}ms`;
+          statusDisplay = elapsed >= 10000 ? "CONNECTION LOST" : latencyDisplay;
+          indicatorClass = "bad blink";
+        } else if (state.status === "DISCONNECTING") {
+          const elapsed = now - state.disconnectStartedAt;
+          const baseLatency = getGateLatency(myGateId, gateId, myRelayScore, playerRelayScore);
+          const increase = Math.min(elapsed / 10000, 1) * 3000; // Increase up to +3000ms
+          latencyDisplay = `${Math.round(baseLatency + increase)}ms`;
+          statusDisplay = elapsed >= 10000 ? "DISCONNECTED" : latencyDisplay;
+          indicatorClass = "warn blink";
+        } else {
+          // Normal operation - show latency with simulated variance
+          const baseLatency = getGateLatency(myGateId, gateId, myRelayScore, playerRelayScore);
+          const jitter = Math.floor(Math.random() * 200 - 100); // -100 to +100ms variance
+          const displayLatency = Math.max(baseLatency + jitter, 100); // Keep minimum at 100ms
+          latencyDisplay = `${displayLatency}ms`;
+          statusDisplay = latencyDisplay;
+          indicatorClass = hasPendingPing ? "warn blink" : "ok";
+        }
+
+        const row = `
+          <div class="status-row gate-network-row${hasPendingPing ? " gate-ping" : ""}">
+            <div class="status-name">${escapeText(gateId)}
+              <span class="relay-hb">
+                <span class="hb-indicator ${indicatorClass}" aria-hidden="true"></span>
+                <span>${escapeText(statusDisplay)}</span>
+              </span>
+            </div>
+            <div class="status-right">
+              <button class="btn-mini approve" data-action="ping-gate" data-gate="${escapeText(gateId)}">PING</button>
+              <button class="btn-mini hold${hasPendingPing ? " attn" : ""}" data-action="ack-gate" data-gate="${escapeText(gateId)}">ACK</button>
+            </div>
+          </div>
+        `;
+        rows.push(row);
+      }
+
+      ui.gateNetworkList.innerHTML = rows.join("");
+
+      // Bind event handlers
+      ui.gateNetworkList.querySelectorAll("[data-action='ping-gate']").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const targetGateId = btn.getAttribute("data-gate");
+          cmdPingPlayer(targetGateId);
+        });
+      });
+
+      ui.gateNetworkList.querySelectorAll("[data-action='ack-gate']").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const sourceGateId = btn.getAttribute("data-gate");
+          const g = activeGate();
+          if (!g.pendingPlayerPings) return;
+          const ping = g.pendingPlayerPings.find(p => p.sourceGateId === sourceGateId && !p.acked);
+          if (ping) {
+            cmdAckPlayer(sourceGateId);
+          }
+        });
+      });
+    }
+
     function updateConnectionIndicator(changeType) {
       const light = document.querySelector(".connection-light");
       const text = document.getElementById("connection-text");
@@ -6816,10 +7584,14 @@ button.btn-error {
       recomputeHealth(g);
       renderQueues();
       renderSystems();
+      renderGateNetwork();
       ui.dataAge.textContent = formatMMSS((Date.now() - g.lastRefresh) / 1000);
 
       // Apply collapsed states after rendering
       applyCollapsedStates();
+
+      // Propagate alerts to collapsed panel headers
+      propagateAlertsToHeaders();
     }
 
     function findShipById(g, id) {
@@ -7221,8 +7993,8 @@ button.btn-error {
           if (!target) return;
           target.queryPending = false;
 
-          // Scan-only identities: QUERY cannot unmask PIRATE/RAIDER/INFESTED/IRRADIATED ships (SCAN required)
-          if (["PIRATE", "RAIDER", "INFESTED", "IRRADIATED"].includes(target.type)) {
+          // Scan-only identities: QUERY cannot unmask ships with hazards (SCAN required)
+          if (target.hazardType) {
             if (g.id === runtime.activeGateId) eventLine(`QUERY FAILED: ${target.id} SCAN REQUIRED`, "warn");
             g.lastRefresh = Date.now();
             renderAll();
@@ -7466,6 +8238,7 @@ button.btn-error {
       runtime.collapsedPanels[panelId] = !runtime.collapsedPanels[panelId];
       saveCollapsedPanels();
       applyCollapsedStates();
+      propagateAlertsToHeaders();
       playSfx("showhide");
     }
 
@@ -7501,9 +8274,9 @@ button.btn-error {
         { id: 'systems-resources', selector: '#systems .sys-block:nth-child(4)' },
         { id: 'systems-concourse', selector: '#systems .sys-block:nth-child(5)' },
         { id: 'systems-relays', selector: '#systems .sys-block:nth-child(6)' },
-        { id: 'systems-maintenance', selector: '#systems .sys-block:nth-child(7)' },
-        { id: 'terminal-console', selector: '#console-log' },
-        { id: 'terminal-events', selector: '#events-log' }
+        { id: 'systems-gatenetwork', selector: '#gate-network-panel' },
+        { id: 'systems-maintenance', selector: '#systems .sys-block:nth-child(8)' },
+        { id: 'terminal-console', selector: '#console-log' }
       ];
 
       subSections.forEach(({ id, selector }) => {
@@ -7518,6 +8291,95 @@ button.btn-error {
           header.setAttribute('aria-expanded', String(!isCollapsed));
           header.setAttribute('role', 'button');
           header.setAttribute('tabindex', '0');
+        }
+      });
+    }
+
+    function propagateAlertsToHeaders() {
+      // Remove all existing propagated alert classes from headers
+      document.querySelectorAll('.panel-header, .subsection-header').forEach(header => {
+        header.classList.remove(
+          'alert-propagated-ack',
+          'alert-propagated-exposure',
+          'alert-propagated-congested',
+          'alert-propagated-relay-ping'
+        );
+      });
+
+      // Define alert types to watch for (in priority order - highest priority first)
+      const alertTypes = [
+        { selector: '.exposure-critical', className: 'alert-propagated-exposure' },
+        { selector: '.congested-pulse', className: 'alert-propagated-congested' },
+        { selector: '.relay-ping', className: 'alert-propagated-relay-ping' }
+      ];
+
+      // Track which headers have received alerts and their priority
+      const headerAlerts = new Map();
+
+      alertTypes.forEach(({ selector, className }, priority) => {
+        const alertElements = document.querySelectorAll(selector);
+
+        alertElements.forEach(alertElement => {
+          // Find the nearest parent subsection or panel
+          let currentElement = alertElement;
+          let foundVisibleHeader = false;
+
+          while (currentElement && !foundVisibleHeader) {
+            // Check if we're inside a subsection
+            const subsection = currentElement.closest('.queue-section, .sys-block, .logbox');
+            if (subsection) {
+              const subsectionHeader = subsection.querySelector('.subsection-header');
+
+              // If the subsection is collapsed, propagate to its header
+              if (subsection.classList.contains('collapsed') && subsectionHeader) {
+                // Only apply if this is higher priority than existing alert on this header
+                const existingPriority = headerAlerts.get(subsectionHeader);
+                if (existingPriority === undefined || priority < existingPriority) {
+                  headerAlerts.set(subsectionHeader, priority);
+                  foundVisibleHeader = true;
+                }
+                break;
+              }
+
+              // If subsection is expanded, check if parent panel is collapsed
+              const panel = subsection.closest('.panel');
+              if (panel && panel.classList.contains('collapsed')) {
+                const panelHeader = panel.querySelector('.panel-header');
+                if (panelHeader) {
+                  const existingPriority = headerAlerts.get(panelHeader);
+                  if (existingPriority === undefined || priority < existingPriority) {
+                    headerAlerts.set(panelHeader, priority);
+                    foundVisibleHeader = true;
+                  }
+                }
+                break;
+              }
+            } else {
+              // Check if we're directly in a panel without being in a subsection
+              const panel = currentElement.closest('.panel');
+              if (panel && panel.classList.contains('collapsed')) {
+                const panelHeader = panel.querySelector('.panel-header');
+                if (panelHeader) {
+                  const existingPriority = headerAlerts.get(panelHeader);
+                  if (existingPriority === undefined || priority < existingPriority) {
+                    headerAlerts.set(panelHeader, priority);
+                    foundVisibleHeader = true;
+                  }
+                }
+                break;
+              }
+            }
+
+            currentElement = currentElement.parentElement;
+          }
+        });
+      });
+
+      // Apply the alert classes based on priority
+      headerAlerts.forEach((priority, header) => {
+        const alertType = alertTypes[priority];
+        if (alertType) {
+          header.classList.add(alertType.className);
         }
       });
     }
@@ -7561,6 +8423,8 @@ button.btn-error {
         // Tiny mobile - reset to CSS defaults
         interfaceEl.style.gridTemplateColumns = '';
         interfaceEl.style.gridTemplateRows = '';
+        updateTerminalLogsLayout(width);
+        updateTrafficQueueLayout(width);
         return;
       }
 
@@ -7571,6 +8435,12 @@ button.btn-error {
         // Desktop layout - two columns
         applyDesktopLayout(trafficCollapsed, systemsCollapsed, terminalCollapsed, interfaceEl);
       }
+
+      // Update terminal sub-panel layout
+      updateTerminalLogsLayout(width);
+
+      // Update traffic queue sub-panel layout
+      updateTrafficQueueLayout(width);
     }
 
     function applyDesktopLayout(trafficCollapsed, systemsCollapsed, terminalCollapsed, interfaceEl) {
@@ -7578,7 +8448,7 @@ button.btn-error {
 
       // Determine column sizing based on top panels
       if (trafficCollapsed && systemsCollapsed) {
-        columns = 'auto auto'; // Both collapsed - minimal width
+        columns = '1fr 1fr'; // Both collapsed - terminal expands to fill space
       } else if (trafficCollapsed) {
         columns = 'auto 1fr'; // Traffic collapsed, Systems takes full width
       } else if (systemsCollapsed) {
@@ -7587,10 +8457,14 @@ button.btn-error {
         columns = '1.25fr 1fr'; // Both expanded - original ratio
       }
 
-      // Determine row sizing based on terminal
-      rows = terminalCollapsed
-        ? 'minmax(0, 1fr) auto'
-        : 'minmax(0, 1fr) var(--terminal-h)';
+      // Determine row sizing based on collapsed states
+      if (terminalCollapsed) {
+        rows = 'minmax(0, 1fr) auto'; // Top row expands, terminal minimal
+      } else if (trafficCollapsed && systemsCollapsed) {
+        rows = 'auto 1fr'; // Both top panels collapsed - terminal expands to fill vertical space
+      } else {
+        rows = 'minmax(0, 1fr) var(--terminal-h)'; // Normal layout
+      }
 
       interfaceEl.style.gridTemplateColumns = columns;
       interfaceEl.style.gridTemplateRows = rows;
@@ -7604,6 +8478,44 @@ button.btn-error {
 
       interfaceEl.style.gridTemplateColumns = '1fr';
       interfaceEl.style.gridTemplateRows = `${trafficRow} ${systemsRow} ${terminalRow}`;
+    }
+
+    function updateTerminalLogsLayout(width) {
+      const logsEl = document.querySelector('.logs');
+      if (!logsEl) return;
+
+      // Single console log - no dynamic column adjustment needed
+      // Mobile layout resets inline styles
+      if (width <= 780) {
+        logsEl.style.gridTemplateColumns = '';
+        return;
+      }
+
+      // Desktop layout - single column (defined in CSS)
+      logsEl.style.gridTemplateColumns = '1fr';
+    }
+
+    function updateTrafficQueueLayout(width) {
+      const queueEl = document.querySelector('.queue');
+      if (!queueEl) return;
+
+      // Get collapsed state for traffic queue sub-panels
+      const inboundCollapsed = runtime.collapsedPanels['traffic-inbound'] || false;
+      const outboundCollapsed = runtime.collapsedPanels['traffic-outbound'] || false;
+
+      // Determine row sizing based on collapsed state (applies to both mobile and desktop)
+      let rows;
+      if (inboundCollapsed && outboundCollapsed) {
+        rows = 'max-content max-content'; // Both collapsed - minimal height
+      } else if (inboundCollapsed) {
+        rows = 'max-content 1fr'; // Inbound collapsed, Outbound expands
+      } else if (outboundCollapsed) {
+        rows = '1fr max-content'; // Outbound collapsed, Inbound expands
+      } else {
+        rows = 'minmax(0, 1fr) minmax(0, 1fr)'; // Both expanded - equal height
+      }
+
+      queueEl.style.gridTemplateRows = rows;
     }
 
     // ---------------------------
@@ -7916,7 +8828,7 @@ button.btn-error {
           if (relay) {
             relay.offline = false;
             relay.hiddenOffline = false;
-            relay.status = "ONLINE";
+            relay.health = randRange(85, 100); // Work order restores relay to excellent health
             relay.lastChange = now;
             relay.hiccupRecoverable = false;
             scheduleRelayHeartbeat(relay, now);
@@ -8006,6 +8918,8 @@ button.btn-error {
             slot.state = "DOCKED";
             ship.state = "WAITING DECON";
             ship.dockState = "WAITING DECON";
+            // Reset EXPOSURE timer to exactly 20 seconds on DECON failure
+            ship.exposureDeadline = Date.now() + 20 * 1000;
             if (shipHasDangerEffect(ship)) {
               ship.hazardDeadline = Date.now() + randRange(60, 2 * 60) * 1000;
             }
@@ -8092,7 +9006,7 @@ button.btn-error {
           r.hiccupRecoverable = false;
           r.offlineReason = "ACK_TIMEOUT";
           r.offlineSince = now;
-          r.status = "OFFLINE";
+          r.health = 0;
           r.lastChange = now;
           if (g.id === runtime.activeGateId) {
             playSfx("offline");
@@ -8128,16 +9042,31 @@ button.btn-error {
         }
 
         if (Math.random() < RATES.relayShiftChance) {
-          const prevStatus = r.status;
-          if (r.status === "ONLINE" && Math.random() < 0.55) r.status = "WEAK";
-          else if (r.status === "WEAK" && Math.random() < 0.4) r.status = "FAULT";
-          else if (r.status !== "ONLINE" && Math.random() < 0.5) r.status = "ONLINE";
-          r.lastChange = now;
-          if (g.id === runtime.activeGateId) {
-            if (["WEAK", "FAULT"].includes(r.status) && r.status !== prevStatus) {
-              playSfx("restore");
+          const prevStatus = relayHealthToStatus(r.health);
+          const currentHealth = r.health;
+
+          // Health-based degradation with random variance
+          if (currentHealth >= 75 && Math.random() < 0.55) {
+            // ONLINE -> degrade by 15-30%
+            r.health = Math.max(1, currentHealth - randRange(15, 30));
+          } else if (currentHealth >= 50 && currentHealth < 75 && Math.random() < 0.4) {
+            // WEAK -> degrade by 10-20%
+            r.health = Math.max(1, currentHealth - randRange(10, 20));
+          } else if (currentHealth < 75 && Math.random() < 0.5) {
+            // Any degraded state -> chance to improve by 10-25%
+            r.health = Math.min(100, currentHealth + randRange(10, 25));
+          }
+
+          const newStatus = relayHealthToStatus(r.health);
+          if (prevStatus !== newStatus) {
+            r.lastChange = now;
+            scheduleRelayHeartbeat(r, now);
+            if (g.id === runtime.activeGateId) {
+              if (["WEAK", "FAULT", "CRITICAL"].includes(newStatus) && newStatus !== prevStatus) {
+                playSfx("restore");
+              }
+              eventLine(`RELAY ${r.id}: ${newStatus}`, ["FAULT", "CRITICAL"].includes(newStatus) ? "bad" : "warn");
             }
-            eventLine(`RELAY ${r.id}: ${r.status}`, r.status === "FAULT" ? "bad" : "warn");
           }
         }
         if (Math.random() < RATES.relayPacketChance) {
@@ -8933,7 +9862,7 @@ function tickGate(g) {
           );
           const flagged = activeShips.filter(s => s.transponder !== "VALID");
           if (!flagged.length) {
-            consoleLine("SCAN: NO ANOMALIES (LOW CONF)", "good");
+            consoleLine("SCAN: NO ANOMALIES", "good");
             if (g.id === runtime.activeGateId) eventLine("SCAN: NO ANOMALIES", "good");
           } else {
             const sample = flagged.slice(0, 3).map(s => s.id).join(" / ");
@@ -8948,9 +9877,12 @@ function tickGate(g) {
 
 					const effectHits = [];
           for (const s of activeShips) {
-            // CHANGE: 100% reveal of hazardous identities
-            if (s.infoMasked && ["PIRATE", "RAIDER", "INFESTED", "IRRADIATED"].includes(s.type)) {
+            // CRITICAL: Reveal hazard ships by changing type from UNKNOWN to actual hazard type
+            if (s.hazardType && s.type === "UNKNOWN" && s.infoMasked) {
+              s.type = s.hazardType;  // Change from UNKNOWN to PIRATE/RAIDER/INFESTED/IRRADIATED
               s.infoMasked = false;
+              effectHits.push(`${s.id} IDENTIFIED: ${s.type}`);
+              s.hazardType = null;  // Clear hazardType since it's now revealed in type
             }
 
             for (const ef of s.effects || []) {
@@ -9212,8 +10144,23 @@ function tickGate(g) {
       // Mark as ACKed
       ping.acked = true;
 
+      // Clear the repeating audio timer
+      if (ping.audioTimer) {
+        clearInterval(ping.audioTimer);
+        ping.audioTimer = null;
+      }
+
+      // Clear from gate state
+      const gateState = runtime.multiplayer.gateStates.get(sourceGateId);
+      if (gateState) {
+        gateState.pendingPing = null;
+      }
+
       // Send ACK to server
       sendPlayerAck(sourceGateId, ping.expectedLatency);
+
+      consoleLine(`ACK SENT: ${sourceGateId}`, "good");
+      playSfx("pingplayer");
     }
 
     function sendPlayerAck(targetGateId, expectedLatency) {
@@ -9257,8 +10204,9 @@ function tickGate(g) {
         playSfx("error");
         return;
       }
-      if (!["FAULT", "WEAK"].includes(relay.status)) {
-        consoleLine(`RESTORE REFUSED: ${relay.id} NOT FAULT/WEAK`, "dim");
+      const relayStatus = relayHealthToStatus(relay.health);
+      if (!["FAULT", "WEAK", "CRITICAL"].includes(relayStatus)) {
+        consoleLine(`RESTORE REFUSED: ${relay.id} NOT DEGRADED`, "dim");
         playSfx("error");
         return;
       }
@@ -9268,7 +10216,8 @@ function tickGate(g) {
 
       const now = Date.now();
       if (Math.random() < 0.5) {
-        relay.status = "ONLINE";
+        // Success: restore to healthy level (80-95%)
+        relay.health = randRange(80, 95);
         relay.lastChange = now;
         relay.awaitingAck = false;
         relay.ackDueAt = 0;
@@ -9287,6 +10236,8 @@ function tickGate(g) {
         if (backlash < 0.55) {
           consoleLine(`RESTORE FAILED: ${relay.id} NO CHANGE`, "dim");
         } else if (backlash < 0.7) {
+          // Backlash: relay goes offline (health = 0)
+          relay.health = 0;
           relay.offline = true;
           relay.hiddenOffline = false;
           relay.hiccupRecoverable = false;
@@ -9294,7 +10245,6 @@ function tickGate(g) {
           relay.offlineSince = now;
           relay.awaitingAck = false;
           relay.ackDueAt = 0;
-          relay.status = "OFFLINE";
           relay.lastChange = now;
           if (g.id === runtime.activeGateId) playSfx("offline");
           consoleLine(`RESTORE FAILED: ${relay.id} OFFLINE`, "bad");
@@ -9319,12 +10269,16 @@ function tickGate(g) {
       } else {
         const other = (g.relays || []).find(r => r.id !== relay.id && !r.offline);
         if (other) {
-            other.status = "FAULT";
+            // Backlash degrades the other relay by 20-40%
+            const prevStatus = relayHealthToStatus(other.health);
+            other.health = Math.max(1, other.health - randRange(20, 40));
             other.lastChange = now;
-            consoleLine(`RESTORE FAILED: ${other.id} FAULT`, "warn");
+            scheduleRelayHeartbeat(other, now);
+            const newStatus = relayHealthToStatus(other.health);
+            consoleLine(`RESTORE FAILED: ${other.id} ${newStatus}`, "warn");
             if (g.id === runtime.activeGateId) {
               playSfx("restore");
-              eventLine(`RELAY ${other.id}: FAULT (BACKLASH)`, "warn");
+              eventLine(`RELAY ${other.id}: ${newStatus} (BACKLASH)`, "warn");
             }
           } else {
             const prevSync = g.sync;
@@ -9407,7 +10361,7 @@ function cmdPingRelay(id) {
       }
       const now = Date.now();
       const hbAgeSec = relayHeartbeatAgeSec(relay, now);
-      const hbBand = relayHeartbeatBand(hbAgeSec);
+      const hbBand = relayHeartbeatBand(relay, hbAgeSec);
       if (relay.offline && !relay.hiddenOffline) playSfx("error");
       consoleLine(`PING SENT: ${relay.id}`, "dim");
       pushPacket(g, `PING ${relay.id}`);
@@ -9420,7 +10374,7 @@ function cmdPingRelay(id) {
             relay.offline = false;
             relay.hiddenOffline = false;
             relay.hiccupRecoverable = false;
-            relay.status = "ONLINE";
+            relay.health = randRange(60, 85); // Recovered from hiccup, but not perfect health
             relay.lastChange = now;
             relay.awaitingAck = false;
             relay.ackDueAt = 0;
@@ -9435,13 +10389,13 @@ function cmdPingRelay(id) {
           }
           relay.hiddenOffline = false;
           relay.hiccupRecoverable = false;
-          relay.status = "OFFLINE";
+          relay.health = 0;
           relay.lastChange = now;
           if (g.id === runtime.activeGateId) playSfx("error");
         } else if (relay.hiddenOffline) {
           relay.hiddenOffline = false;
           relay.hiccupRecoverable = false;
-          relay.status = "OFFLINE";
+          relay.health = 0;
           relay.lastChange = now;
           if (g.id === runtime.activeGateId) playSfx("error");
         }
@@ -9451,11 +10405,11 @@ function cmdPingRelay(id) {
         renderAll();
         return;
       }
-      const latency = randRange(120, relay.status === "ONLINE" ? 520 : 1200);
+      const latency = randRange(120, relay.health >= 75 ? 520 : 1200);
       setTimeout(() => {
         if (relay.offline) {
           if (relay.hiddenOffline) {
-            relay.status = "OFFLINE";
+            relay.health = 0;
             relay.hiddenOffline = false;
             relay.hiccupRecoverable = false;
             relay.lastChange = Date.now();
@@ -9467,12 +10421,43 @@ function cmdPingRelay(id) {
           renderAll();
           return;
         }
-        if (relay.status === "FAULT" && Math.random() < 0.6) {
+        // Degraded relays (FAULT/CRITICAL) have higher chance of timeout
+        if (relay.health < 50 && Math.random() < 0.6) {
           consoleLine(`PING TIMEOUT: ${relay.id}`, "warn");
           if (g.id === runtime.activeGateId) eventLine(`RELAY ${relay.id}: TIMEOUT`, "warn");
           return;
         }
-        consoleLine(`PING ACK: ${relay.id} (${latency}ms)`, relay.status === "ONLINE" ? "good" : "warn");
+
+        // Health effect logic (silent, no user notification)
+        const pingTime = Date.now();
+        if (pingTime >= relay.nextHealthPingCooldown) {
+          const roll = Math.random();
+          const prevStatus = relayHealthToStatus(relay.health);
+
+          // 20% chance to improve health by 5-15%
+          if (roll < 0.20) {
+            relay.health = Math.min(100, relay.health + randRange(5, 15));
+          }
+          // 2% chance to degrade health by 3-8%
+          else if (roll < 0.22) { // 0.20 + 0.02 = 0.22
+            relay.health = Math.max(1, relay.health - randRange(3, 8));
+          }
+
+          // Update lastChange if status threshold was crossed
+          const newStatus = relayHealthToStatus(relay.health);
+          if (prevStatus !== newStatus) {
+            relay.lastChange = pingTime;
+          }
+
+          // Update heartbeat interval based on new health
+          scheduleRelayHeartbeat(relay, pingTime);
+
+          // Set next cooldown (15-90 seconds from now)
+          relay.lastHealthPingAt = pingTime;
+          relay.nextHealthPingCooldown = pingTime + randRange(15000, 90000);
+        }
+
+        consoleLine(`PING ACK: ${relay.id} (${latency}ms)`, relay.health >= 75 ? "good" : "warn");
         pushPacket(g, `ACK ${relay.id} ${latency}ms`);
       }, latency);
     }
@@ -9593,8 +10578,7 @@ function cmdPingRelay(id) {
       consoleLine("  THEME GREEN|RED|BLUE|PURPLE|AMBER|CYAN|ORANGE|PINK|YELLOW|BLACK|LIGHTBLUE|LIGHTRED|LIGHTGREEN|PAPER", "dim");
       consoleLine("  CODE - USE WITH ACCESS CODE", "dim");
       consoleLine("  ZOOM UP | ZOOM DOWN | ZOOM RESET | ZOOM <50-200>%", "dim");
-      consoleLine("  CLEAR (console)", "dim");
-      consoleLine("  CLEAR EVENTS", "dim");
+      consoleLine("  CLEAR", "dim");
     }
 
     function cmdStatus() {
@@ -9982,6 +10966,21 @@ function cmdPingRelay(id) {
             type: "theme",
             value: "halloween",
             name: "HALLOWEEN"
+          },
+          "SOVIETSOLARUNION": {
+            type: "theme",
+            value: "soviet",
+            name: "SOVIET"
+          },
+          "1-800-OPERATOR": {
+            type: "theme",
+            value: "synthwave",
+            name: "SYNTHWAVE"
+          },
+          "FORDEMOCRACY": {
+            type: "theme",
+            value: "superearth",
+            name: "SUPER EARTH"
           }
         };
 
@@ -10072,13 +11071,8 @@ function cmdPingRelay(id) {
       }
 
       if (cmd === "CLEAR" || cmd === "CLS") {
-        if ((parts[1] || "").toUpperCase() === "EVENTS") {
-          clearLog(ui.events);
-          eventLine("EVENT LOG CLEARED", "dim");
-        } else {
-          clearLog(ui.console);
-          consoleLine("CONSOLE CLEARED", "dim");
-        }
+        clearLog(ui.console);
+        consoleLine("CONSOLE CLEARED", "dim");
         return;
       }
 
@@ -10294,17 +11288,6 @@ function cmdPingRelay(id) {
         // Otherwise, theme will be saved when game begins
         const shouldSave = hasSavedData();
         setTheme(ui.startThemeSelect.value, false, shouldSave);
-      });
-    }
-    if (ui.btnShare) {
-      ui.btnShare.addEventListener("click", async () => {
-        try {
-          const url = await writeShareHash();
-          const copied = await copyToClipboard(url);
-          consoleLine(copied ? "SHARE URL COPIED" : "SHARE URL READY", copied ? "good" : "warn");
-        } catch (_) {
-          consoleLine("SHARE FAILED", "warn");
-        }
       });
     }
     if (ui.btnExport) {
@@ -10539,6 +11522,35 @@ function cmdPingRelay(id) {
       // Close multiplayer connection cleanly so it can reconnect when START is pressed
       cleanupMultiplayer("reset");
 
+      // Stop all game timers
+      if (runtime.tickTimer) {
+        clearInterval(runtime.tickTimer);
+        runtime.tickTimer = null;
+      }
+      if (runtime.uiTimer) {
+        clearInterval(runtime.uiTimer);
+        runtime.uiTimer = null;
+      }
+
+      // Clear all maintenance timers
+      for (const kind in runtime.maintenance) {
+        const maint = runtime.maintenance[kind];
+        if (maint.timer) clearTimeout(maint.timer);
+        if (maint.tick) clearInterval(maint.tick);
+        if (maint.progressTick) clearInterval(maint.progressTick);
+      }
+      runtime.maintenance = {};
+
+      // Stop all sound effects
+      stopMaintenanceSfx();
+      runtime.processingCount = 0;
+      updateProcessingSound();
+      setAckAlarm(false);
+      if (audio.music) {
+        audio.music.pause();
+        audio.music.currentTime = 0;
+      }
+
       // Preserve audio and VFX preferences
       const sfxEnabled = localStorage.getItem(LS.sfxEnabled);
       const sfxVolume = localStorage.getItem(LS.sfxVolume);
@@ -10548,20 +11560,25 @@ function cmdPingRelay(id) {
 
       // Clear all localStorage
       localStorage.clear();
-		runtime.lastSevered = null;
-		runtime.operatorCallsign = "";
-		runtime.skipHashLoad = true;
-			runtime.severed = false;
-			runtime.shiftStart = Date.now();
-			runtime.resumeShiftMs = 0;
-			runtime.gates.clear();
-			runtime.activeGateId = null;
+
+      // Reset runtime state
+      runtime.gates.clear();
+      runtime.severed = false;
+      runtime.lastSevered = null;
+      runtime.shiftCompleteShown = false;
+      runtime.operatorCallsign = "";
+
       // Restore audio and VFX preferences
       if (sfxEnabled !== null) localStorage.setItem(LS.sfxEnabled, sfxEnabled);
       if (sfxVolume !== null) localStorage.setItem(LS.sfxVolume, sfxVolume);
       if (musicEnabled !== null) localStorage.setItem(LS.musicEnabled, musicEnabled);
       if (musicVolume !== null) localStorage.setItem(LS.musicVolume, musicVolume);
       if (vfxEnabled !== null) localStorage.setItem(LS.vfxEnabled, vfxEnabled);
+
+      // Update start screen state
+      updateStartNameLabel();
+      updateDataResetButtonVisibility();
+      updateShiftTimeButtonVisibility();
 
       // Randomize theme
       randomizeTheme(true, false);
@@ -10756,6 +11773,9 @@ function cmdPingRelay(id) {
       if (ui.btnOptions) {
         ui.btnOptions.setAttribute("aria-expanded", open ? "true" : "false");
       }
+      if (ui.btnStartOptions) {
+        ui.btnStartOptions.setAttribute("aria-expanded", open ? "true" : "false");
+      }
     }
 
     function setResetConfirmOpen(open) {
@@ -10832,6 +11852,8 @@ function cmdPingRelay(id) {
         if (ui.btnStart) ui.btnStart.classList.remove("btn-disabled");
       } else {
         ui.btnShiftTime.classList.add("visible");
+        // Update button text to show selected duration or default text
+        updateShiftTimeButtonText();
         // Disable START button if no shift duration selected
         if (ui.btnStart) {
           if (hasShiftDurationSelected()) {
@@ -10872,6 +11894,9 @@ function cmdPingRelay(id) {
       const stored = localStorage.getItem(LS.shiftDurationMs);
       if (stored) {
         const parsed = parseInt(stored, 10);
+        if (!isNaN(parsed) && parsed === -1) {
+          return -1; // Unlimited mode
+        }
         if (!isNaN(parsed) && parsed > 0) {
           return parsed;
         }
@@ -10879,14 +11904,93 @@ function cmdPingRelay(id) {
       return 28_800_000; // Default 8 hours
     }
 
+    function saveShiftMode(mode) {
+      localStorage.setItem(LS.shiftMode, mode || "normal");
+    }
+
+    function loadShiftMode() {
+      return localStorage.getItem(LS.shiftMode) || "normal";
+    }
+
+    function formatShiftDuration(durationMs) {
+      const mode = loadShiftMode();
+      if (mode === "unlimited") {
+        return "UNLIMITED";
+      }
+      if (mode === "endurance") {
+        return "ENDURANCE";
+      }
+      if (durationMs === -1) {
+        return "UNLIMITED";
+      }
+
+      const totalMinutes = Math.floor(durationMs / 60000);
+      const hours = Math.floor(totalMinutes / 60);
+      const minutes = totalMinutes % 60;
+
+      if (hours === 0) {
+        return `${minutes} MIN`;
+      } else if (minutes === 0) {
+        return hours === 1 ? "1 HR" : `${hours} HR`;
+      } else {
+        return `${hours} HR ${minutes} MIN`;
+      }
+    }
+
+    function updateShiftTimeButtonText() {
+      if (!ui.btnShiftTime) return;
+
+      if (hasShiftDurationSelected()) {
+        const durationMs = loadShiftDuration();
+        ui.btnShiftTime.textContent = formatShiftDuration(durationMs);
+      } else {
+        ui.btnShiftTime.textContent = "SHIFT TIME";
+      }
+    }
+
+    function updateEnduranceButtons() {
+      const shiftMode = loadShiftMode();
+      const isEndurance = shiftMode === "endurance";
+
+      // Disable LOAD FILE and EXPORT buttons in endurance mode
+      if (ui.btnResume) {
+        ui.btnResume.disabled = isEndurance;
+        ui.btnResume.style.opacity = isEndurance ? "0.4" : "";
+        ui.btnResume.style.cursor = isEndurance ? "not-allowed" : "";
+        if (isEndurance) {
+          ui.btnResume.title = "Disabled in ENDURANCE mode";
+        } else {
+          ui.btnResume.title = "";
+        }
+      }
+      if (ui.btnExport) {
+        ui.btnExport.disabled = isEndurance;
+        ui.btnExport.style.opacity = isEndurance ? "0.4" : "";
+        ui.btnExport.style.cursor = isEndurance ? "not-allowed" : "";
+        if (isEndurance) {
+          ui.btnExport.title = "Disabled in ENDURANCE mode";
+        } else {
+          ui.btnExport.title = "";
+        }
+      }
+    }
+
     function confirmShiftTimeSelection() {
       let selectedDurationMs = null;
+      let selectedMode = "normal"; // normal, unlimited, endurance
 
       // Check if a preset is selected
       const selectedPreset = document.querySelector(".shift-time-preset-btn.selected");
       if (selectedPreset) {
-        const minutes = parseInt(selectedPreset.getAttribute("data-minutes"));
-        selectedDurationMs = minutes * 60 * 1000;
+        const mode = selectedPreset.getAttribute("data-mode");
+        if (mode) {
+          // Special modes: unlimited or endurance
+          selectedMode = mode;
+          selectedDurationMs = -1; // Special value for unlimited modes
+        } else {
+          const minutes = parseInt(selectedPreset.getAttribute("data-minutes"));
+          selectedDurationMs = minutes * 60 * 1000;
+        }
       } else {
         // Check custom input
         const hours = parseInt(ui.shiftTimeCustomHours?.value || "0", 24);
@@ -10913,9 +12017,13 @@ function cmdPingRelay(id) {
       }
 
       saveShiftDuration(selectedDurationMs);
+      saveShiftMode(selectedMode);
+      updateEnduranceButtons();
       // Enable the START button now that shift duration is selected
       if (ui.btnStart) ui.btnStart.classList.remove("btn-disabled");
       if (ui.startShiftError) ui.startShiftError.textContent = "";
+      // Update the shift time button to show the selected duration
+      updateShiftTimeButtonText();
       closeShiftTimeModal();
       playSfx("click");
     }
@@ -11127,6 +12235,7 @@ function cmdPingRelay(id) {
         localStorage.removeItem(LS.shiftMs);
         localStorage.removeItem(LS.shiftCompleteShown);
         localStorage.removeItem(LS.shiftDurationMs);
+        localStorage.removeItem(LS.shiftMode);
         localStorage.removeItem(LS.gateList);
         localStorage.removeItem(LS.gateCurrent);
         localStorage.removeItem(LS.collapsedPanels);
@@ -11160,6 +12269,11 @@ function cmdPingRelay(id) {
     }
     if (ui.btnOptions && ui.optionsPanel) {
       ui.btnOptions.addEventListener("click", () => {
+        setOptionsOpen(!ui.optionsPanel.classList.contains("open"));
+      });
+    }
+    if (ui.btnStartOptions && ui.optionsPanel) {
+      ui.btnStartOptions.addEventListener("click", () => {
         setOptionsOpen(!ui.optionsPanel.classList.contains("open"));
       });
     }
@@ -11197,7 +12311,7 @@ function cmdPingRelay(id) {
     document.addEventListener("click", (e) => {
       if (!ui.optionsPanel || !ui.btnOptions) return;
       if (!ui.optionsPanel.classList.contains("open")) return;
-      if (ui.optionsPanel.contains(e.target) || ui.btnOptions.contains(e.target)) return;
+      if (ui.optionsPanel.contains(e.target) || ui.btnOptions.contains(e.target) || (ui.btnStartOptions && ui.btnStartOptions.contains(e.target))) return;
       setOptionsOpen(false);
     });
     document.addEventListener("keydown", (e) => {
@@ -11323,7 +12437,6 @@ function cmdPingRelay(id) {
     // Boot
     // ---------------------------
     async function boot() {
-      await loadSaveFromHash();
       loadTheme();
       populateThemeDropdown();
       loadFontScale();
@@ -11368,16 +12481,21 @@ function cmdPingRelay(id) {
       runtime.uiTimer = setInterval(() => {
         const shiftMs = Date.now() - runtime.shiftStart;
         const shiftDurationMs = loadShiftDuration();
+        const shiftMode = loadShiftMode();
 
-        // Check for shift completion
-        if (!runtime.shiftCompleteShown && !runtime.severed && shiftMs >= shiftDurationMs) {
+        // Check for shift completion (skip for unlimited/endurance modes)
+        if (!runtime.shiftCompleteShown && !runtime.severed && shiftDurationMs !== -1 && shiftMs >= shiftDurationMs) {
           triggerShiftComplete();
         }
 
         if (runtime.severed) return;
         // Update display to show current / total format with percentage
-        const percentage = Math.min(100, Math.floor((shiftMs / shiftDurationMs) * 100));
-        ui.shiftTime.textContent = `${formatHMS(shiftMs)} // ${formatHMS(shiftDurationMs)} // ${percentage}%`;
+        if (shiftMode === "unlimited" || shiftMode === "endurance" || shiftDurationMs === -1) {
+          ui.shiftTime.textContent = `${formatHMS(shiftMs)} // ${shiftMode.toUpperCase()}`;
+        } else {
+          const percentage = Math.min(100, Math.floor((shiftMs / shiftDurationMs) * 100));
+          ui.shiftTime.textContent = `${formatHMS(shiftMs)} // ${formatHMS(shiftDurationMs)} // ${percentage}%`;
+        }
         const g = activeGate();
         const stats = ensureGateStats(g);
         if (ui.shiftWage) {
@@ -11389,6 +12507,9 @@ function cmdPingRelay(id) {
 
       // Initialize multiplayer connection
       initMultiplayer();
+
+      // Update endurance button states
+      updateEnduranceButtons();
 
       setTimeout(() => ui.cmd.focus(), 150);
     }
@@ -11467,6 +12588,21 @@ function cmdPingRelay(id) {
         clearInterval(runtime.multiplayer.heartbeatTimer);
         runtime.multiplayer.heartbeatTimer = null;
       }
+
+      // Clean up all gate states and ping audio timers
+      const g = activeGate();
+      if (g.pendingPlayerPings) {
+        g.pendingPlayerPings.forEach(ping => {
+          if (ping.audioTimer) {
+            clearInterval(ping.audioTimer);
+            ping.audioTimer = null;
+          }
+        });
+        g.pendingPlayerPings = [];
+      }
+
+      // Clear all gate states
+      runtime.multiplayer.gateStates.clear();
 
       updateConnectionIndicator();
       eventLine("GATE NETWORK: DISCONNECTED", "warn");
@@ -11587,8 +12723,24 @@ function cmdPingRelay(id) {
           eventLine(`OPERATOR CONNECTED (${data.playerCount} NODES)`, "dim");
         }
       } else if (data.changeType === "leave") {
-        // Only log other players disconnecting
-        if (!isOwnEvent) {
+        // Update gate state for disconnecting player
+        const now = Date.now();
+        const gateState = runtime.multiplayer.gateStates.get(data.gateId);
+
+        if (gateState && !isOwnEvent) {
+          // Determine disconnection type
+          if (data.reason === "severed") {
+            gateState.status = "SEVERING";
+            gateState.disconnectReason = "SEVERED";
+          } else {
+            gateState.status = "DISCONNECTING";
+            gateState.disconnectReason = data.reason || "DISCONNECT";
+          }
+
+          gateState.disconnectStartedAt = now;
+          // Schedule removal 5 seconds after the final message shows (which appears at 10 seconds)
+          gateState.removeAt = now + 15000;
+
           // Display different messages based on disconnect reason
           let message;
           if (data.reason === "shift_complete") {
@@ -11612,25 +12764,60 @@ function cmdPingRelay(id) {
       const g = activeGate();
       eventLine(`PING RECEIVED: ${data.sourceGateId} (${data.sourceOperator})`, "warn");
       pushPacket(g, `PING FROM ${data.sourceGateId}`);
-      playSfx("ping");
+      playSfx("pingplayer");
 
       // Store pending ping for manual ACK
       if (!g.pendingPlayerPings) g.pendingPlayerPings = [];
-      g.pendingPlayerPings.push({
+
+      // Check if there's already a pending ping from this gate
+      const existingPing = g.pendingPlayerPings.find(p =>
+        p.sourceGateId === data.sourceGateId && !p.acked
+      );
+
+      if (existingPing) {
+        // Update existing ping instead of creating duplicate
+        existingPing.receivedAt = Date.now();
+        existingPing.expectedLatency = data.expectedLatency;
+        return;
+      }
+
+      const ping = {
         sourceGateId: data.sourceGateId,
         sourceOperator: data.sourceOperator,
         receivedAt: Date.now(),
         expectedLatency: data.expectedLatency,
-        acked: false
-      });
+        acked: false,
+        audioTimer: null
+      };
+
+      g.pendingPlayerPings.push(ping);
+
+      // Start repeating audio every 2 seconds
+      ping.audioTimer = setInterval(() => {
+        if (!ping.acked) {
+          playSfx("pingplayer");
+        } else {
+          clearInterval(ping.audioTimer);
+        }
+      }, 2000);
+
+      // Update gate state to show blinking indicator
+      const gateState = runtime.multiplayer.gateStates.get(data.sourceGateId);
+      if (gateState) {
+        gateState.pendingPing = ping;
+      }
 
       // 30-second timeout - show "PING IGNORED" if not ACKed
       setTimeout(() => {
-        const ping = g.pendingPlayerPings.find(p =>
+        const stillPending = g.pendingPlayerPings.find(p =>
           p.sourceGateId === data.sourceGateId && !p.acked
         );
-        if (ping) {
-          ping.acked = true; // Mark as timed out
+        if (stillPending) {
+          stillPending.acked = true; // Mark as timed out
+          if (stillPending.audioTimer) {
+            clearInterval(stillPending.audioTimer);
+            stillPending.audioTimer = null;
+          }
           consoleLine(`PING IGNORED: ${data.sourceGateId}`, "warn");
           eventLine(`TIMEOUT: PING FROM ${data.sourceGateId}`, "warn");
         }
@@ -11649,6 +12836,7 @@ function cmdPingRelay(id) {
 
         const g = activeGate();
         pushPacket(g, `ACK ${data.sourceGateId} ${actualRTT}ms`);
+        playSfx("pingplayer");
 
         runtime.multiplayer.pendingPings.delete(data.sourceGateId);
       }
@@ -11760,7 +12948,6 @@ function cmdPingRelay(id) {
       window.addEventListener("load", () => {
         navigator.serviceWorker.register("./sw.js").then(reg => {
           // Force update check (helps Firefox pick up new version)
-          reg.update();
         }).catch(() => {});
       });
     }

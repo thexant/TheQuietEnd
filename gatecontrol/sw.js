@@ -1,4 +1,4 @@
-const CACHE_VERSION = "gatecontrol-v2.6";
+const CACHE_VERSION = "gatecontrol-v3";
 const PRECACHE_URLS = [
   "./",
   "./index.html",
@@ -15,10 +15,14 @@ const PRECACHE_URLS = [
   "./offline.ogg",
   "./processing.ogg",
   "./purge.ogg",
+	"./clack.ogg",
   "./reset.ogg",
   "./restore.ogg",
   "./scan.ogg",
-  "./startup.ogg"
+  "./startup.ogg",
+	"./klaxon.ogg",
+	"./pingplayer.ogg",
+	"./ping.ogg"
 ];
 
 self.addEventListener("install", (event) => {
