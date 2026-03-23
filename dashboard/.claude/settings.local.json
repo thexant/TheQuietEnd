@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls:*)",
+      "Bash(chown:*)",
+      "Bash(npm install)",
+      "Bash(netstat:*)",
+      "Bash(ss:*)",
+      "Bash(fuser:*)",
+      "Bash(pgrep:*)",
+      "Bash(pkill:*)"
+    ]
+  }
+}

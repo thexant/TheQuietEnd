@@ -33,6 +33,7 @@
       </div>
       <div class="actions">
         <button type="button" class="btn ghost" id="sheet-toggle-btn">Ship</button>
+        <button type="button" class="btn ghost" id="dice-roller-btn">Dice Roller</button>
         <button type="button" class="btn primary" id="export-btn">Export Sheet</button>
         <label class="btn ghost" for="import-input">
           Import Sheet
@@ -72,6 +73,8 @@
                 <option value="Broker">Broker</option>
                 <option value="Reclaimer">Reclaimer</option>
                 <option value="Cipher">Cipher</option>
+                <option value="Civilian">Civilian</option>
+                <option value="Laborer">Laborer</option>
               </select>
             </div>
             <div class="field">
@@ -590,6 +593,18 @@
             <input id="gear-tags" type="text" placeholder="close, loud, bulky" />
           </div>
           <div class="field">
+            <label for="gear-multiple">Multiple</label>
+            <input id="gear-multiple" type="checkbox" />
+          </div>
+          <div class="field is-hidden" id="gear-quantity-field">
+            <label for="gear-quantity">Quantity</label>
+            <div class="quantity-controls">
+              <button type="button" class="btn ghost small qty-btn" id="gear-quantity-minus">-</button>
+              <input id="gear-quantity" type="number" min="1" step="1" value="1" inputmode="numeric" />
+              <button type="button" class="btn ghost small qty-btn" id="gear-quantity-plus">+</button>
+            </div>
+          </div>
+          <div class="field">
             <label for="gear-description">Description</label>
             <textarea id="gear-description" rows="4" placeholder="What it does, special notes"></textarea>
           </div>
@@ -757,6 +772,92 @@
             <button type="submit" class="btn primary">Add Module</button>
           </div>
         </form>
+      </div>
+    </div>
+
+    <div class="modal" id="dice-roller-modal" aria-hidden="true">
+      <div class="modal-backdrop" data-modal-close></div>
+      <div class="modal-card dice-roller-card" role="dialog" aria-modal="true" aria-labelledby="dice-roller-modal-title">
+        <h3 id="dice-roller-modal-title">Dice Roller</h3>
+
+        <div class="field">
+          <label for="roll-name">Roll Name (optional)</label>
+          <input id="roll-name" type="text" placeholder="Attack the raider" />
+        </div>
+
+        <div id="character-roll-section" class="roll-section">
+          <div class="field">
+            <label for="character-stat-select">Stat</label>
+            <select id="character-stat-select">
+              <option value="grit">GRIT</option>
+              <option value="wits">WITS</option>
+              <option value="tech">TECH</option>
+              <option value="tact">TACT</option>
+              <option value="face">FACE</option>
+            </select>
+          </div>
+          <div class="roll-info">
+            <p id="character-stat-display">Current stat: +0</p>
+            <p id="character-modifier-display">Roll modifier: +0</p>
+          </div>
+          <div class="field is-hidden" id="extra-modifier-field">
+            <label for="extra-modifier">Extra Modifier</label>
+            <input id="extra-modifier" type="number" value="0" min="-10" max="10" />
+          </div>
+          <button type="button" class="btn ghost small" id="toggle-extra-modifier-btn">
+            <span id="extra-modifier-btn-text">Add Extra Modifier</span>
+          </button>
+        </div>
+
+        <div id="ship-roll-section" class="roll-section is-hidden">
+          <div class="field">
+            <label for="ship-stat-select">Ship Stat</label>
+            <select id="ship-stat-select">
+              <option value="hull">HULL</option>
+              <option value="drive">DRIVE</option>
+              <option value="shields">SHIELDS</option>
+              <option value="sensors">SENSORS</option>
+              <option value="weapons">WEAPONS</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="operator-stat-select">Operator Stat</label>
+            <select id="operator-stat-select">
+              <option value="grit">GRIT</option>
+              <option value="wits">WITS</option>
+              <option value="tech">TECH</option>
+              <option value="tact">TACT</option>
+              <option value="face">FACE</option>
+            </select>
+          </div>
+          <div class="roll-info">
+            <p id="ship-stat-display">Ship stat: +0</p>
+            <p id="operator-stat-display">Operator stat: +0</p>
+            <p id="operator-edge-display">Operator edge: +0</p>
+            <p id="ship-modifier-display">Roll modifier: +0</p>
+          </div>
+        </div>
+
+        <button type="button" class="btn primary" id="roll-dice-btn">Roll Dice</button>
+
+        <div id="dice-result" class="dice-result">
+          <p class="result-label">Result:</p>
+          <p id="dice-display" class="dice-display">—</p>
+          <p id="total-display" class="total-display">—</p>
+          <p id="outcome-display" class="outcome-display">—</p>
+        </div>
+
+        <div class="roll-history-section">
+          <div class="section-header">
+            <p class="label">Recent Rolls</p>
+            <button type="button" class="btn ghost small" id="clear-history-btn">Clear History</button>
+          </div>
+          <div id="roll-history" class="roll-history"></div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn ghost" id="dice-roller-close">Close</button>
+        </div>
       </div>
     </div>
   </body>

@@ -1,13 +1,10 @@
 (() => {
-  const payload = window.LORE_ENTRIES || null;
   const recordCount = document.getElementById("record-count");
   const indexRoot = document.getElementById("lore-index");
   const searchInput = document.getElementById("search-input");
   const searchClear = document.getElementById("search-clear");
   const searchStatus = document.getElementById("search-status");
-  const viewBase = document.body?.getAttribute("data-view") || "view.php";
-  const indexSource =
-    document.body?.getAttribute("data-index") || "lore-index.json";
+  const viewBase = "view.php";
 
   if (!indexRoot) {
     return;
@@ -228,23 +225,12 @@
   };
 
   const loadEntries = async () => {
-    if (payload && Array.isArray(payload.entries)) {
-      return payload;
+    try {
+      return await fetchEntries("index.php?format=json");
+    } catch (error) {
+      console.error("Failed to load entries:", error);
+      return { count: 0, entries: [] };
     }
-
-    const sources = ["index.php?format=json", indexSource].filter(
-      (value, index, self) => self.indexOf(value) === index
-    );
-
-    for (const source of sources) {
-      try {
-        return await fetchEntries(source);
-      } catch (error) {
-        continue;
-      }
-    }
-
-    return { count: 0, entries: [] };
   };
 
   const init = async () => {

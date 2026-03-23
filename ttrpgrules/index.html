@@ -371,6 +371,43 @@
         margin-bottom: 6px;
       }
 
+      .rules-section hr {
+        border: none;
+        border-top: 1px solid var(--line);
+        margin: 14px 0;
+      }
+
+      .rules-section blockquote {
+        margin: 12px 0;
+        padding-left: 14px;
+        border-left: 2px solid var(--line);
+        color: var(--muted);
+      }
+
+      .rules-section code {
+        font-family: var(--font-body);
+        font-size: 0.9em;
+        padding: 0 4px;
+        border-radius: 2px;
+        background: rgba(210, 169, 90, 0.12);
+        color: var(--amber-bright);
+      }
+
+      .rules-section pre {
+        margin: 12px 0;
+        padding: 12px 14px;
+        border-radius: var(--radius);
+        background: rgba(6, 5, 3, 0.85);
+        border: 1px solid rgba(210, 169, 90, 0.24);
+        overflow-x: auto;
+      }
+
+      .rules-section pre code {
+        padding: 0;
+        background: transparent;
+        color: var(--ink);
+      }
+
       .empty-state {
         border: 1px dashed rgba(210, 169, 90, 0.35);
         border-radius: var(--radius);
@@ -577,16 +614,38 @@
           .replace(/</g, "&lt;")
           .replace(/>/g, "&gt;");
 
+      const renderInline = (value) => {
+        const unescaped = value.replace(/\\([\\`*_{}\[\]()#+\-.!])/g, "$1");
+        return unescaped
+          .split(/(`[^`]*`)/g)
+          .map((segment) => {
+            if (segment.startsWith("`") && segment.endsWith("`")) {
+              return `<code>${escapeHtml(segment.slice(1, -1))}</code>`;
+            }
+            let html = escapeHtml(segment);
+            html = html.replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>");
+            html = html.replace(/(\*\*|__)(.+?)\1/g, "<strong>$2</strong>");
+            html = html.replace(/(\*|_)(.+?)\1/g, "<em>$2</em>");
+            return html;
+          })
+          .join("");
+      };
+
       const slugify = (value) =>
         value
           .toLowerCase()
           .replace(/[^a-z0-9]+/g, "-")
           .replace(/(^-|-$)/g, "");
 
-      const renderLines = (lines) => {
+      const stripTags = (value) => value.replace(/<[^>]*>/g, "");
+
+      const renderMarkdown = (lines) => {
         let html = "";
         let listType = null;
         let listItems = [];
+        let paragraph = [];
+        let inCodeBlock = false;
+        let codeLines = [];
 
         const flushList = () => {
           if (!listType) {
@@ -597,91 +656,160 @@
           listItems = [];
         };
 
+        const flushParagraph = () => {
+          if (!paragraph.length) {
+            return;
+          }
+          const text = paragraph.join(" ").trim();
+          if (text) {
+            html += `<p>${renderInline(text)}</p>`;
+          }
+          paragraph = [];
+        };
+
+        const flushCode = () => {
+          if (!inCodeBlock) {
+            return;
+          }
+          html += `<pre><code>${escapeHtml(codeLines.join("\n"))}</code></pre>`;
+          codeLines = [];
+          inCodeBlock = false;
+        };
+
         lines.forEach((line) => {
+          if (/^```/.test(line.trim())) {
+            if (inCodeBlock) {
+              flushCode();
+            } else {
+              flushParagraph();
+              flushList();
+              inCodeBlock = true;
+            }
+            return;
+          }
+
+          if (inCodeBlock) {
+            codeLines.push(line);
+            return;
+          }
+
           const trimmed = line.trim();
           if (!trimmed) {
+            flushParagraph();
             flushList();
             return;
           }
 
-          if (/^\* /.test(trimmed)) {
+          if (/^---$/.test(trimmed)) {
+            flushParagraph();
+            flushList();
+            html += "<hr />";
+            return;
+          }
+
+          const headingMatch = trimmed.match(/^(#{1,6})\s+(.+)$/);
+          if (headingMatch) {
+            const level = headingMatch[1].length;
+            const text = headingMatch[2].replace(/\s+#+\s*$/, "").trim();
+            const tag = level <= 4 ? `h${level}` : "h4";
+            flushParagraph();
+            flushList();
+            html += `<${tag}>${renderInline(text)}</${tag}>`;
+            return;
+          }
+
+          const listMatch = trimmed.match(/^([-*+])\s+(.+)$/);
+          if (listMatch) {
             if (listType && listType !== "ul") {
               flushList();
             }
             listType = "ul";
-            listItems.push(`<li>${escapeHtml(trimmed.slice(2))}</li>`);
+            listItems.push(`<li>${renderInline(listMatch[2])}</li>`);
             return;
           }
 
-          if (/^\d+\.\s+/.test(trimmed)) {
+          const orderedMatch = trimmed.match(/^\d+\.\s+(.+)$/);
+          if (orderedMatch) {
             if (listType && listType !== "ol") {
               flushList();
             }
             listType = "ol";
-            listItems.push(`<li>${escapeHtml(trimmed.replace(/^\d+\.\s+/, ""))}</li>`);
+            listItems.push(`<li>${renderInline(orderedMatch[1])}</li>`);
             return;
           }
 
-          if (/^[A-Z]\)\s+/.test(trimmed)) {
+          const quoteMatch = trimmed.match(/^>\s+(.+)$/);
+          if (quoteMatch) {
+            flushParagraph();
             flushList();
-            html += `<h4>${escapeHtml(trimmed)}</h4>`;
-            return;
-          }
-
-          if (/:$/.test(trimmed) && trimmed.length < 50) {
-            flushList();
-            html += `<h4>${escapeHtml(trimmed.slice(0, -1))}</h4>`;
+            html += `<blockquote><p>${renderInline(quoteMatch[1])}</p></blockquote>`;
             return;
           }
 
           flushList();
-          html += `<p>${escapeHtml(trimmed)}</p>`;
+          paragraph.push(trimmed);
         });
 
+        flushParagraph();
         flushList();
+        flushCode();
         return html;
       };
 
       const buildSections = (text) => {
         const lines = text.split(/\r?\n/);
         const sections = [];
-        let current = {
-          title: "Overview",
-          level: 2,
-          lines: [],
+        let current = null;
+
+        const pushCurrent = () => {
+          if (!current) {
+            return;
+          }
+          current.html = renderMarkdown(current.lines);
+          current.searchText = stripTags(current.html);
+          sections.push(current);
         };
 
         const startSection = (title, level) => {
-          if (current && current.lines.length) {
-            sections.push(current);
+          if (current) {
+            pushCurrent();
           }
           current = { title, level, lines: [] };
         };
 
         lines.forEach((line) => {
-          const trimmed = line.trim();
-          if (!trimmed || /^_{6,}$/.test(trimmed)) {
-            current.lines.push("");
-            return;
+          const headingMatch = line.trim().match(/^(#{1,6})\s+(.+)$/);
+          if (headingMatch) {
+            const level = headingMatch[1].length;
+            const titleRaw = headingMatch[2].replace(/\s+#+\s*$/, "").trim();
+            if (level === 1) {
+              return;
+            }
+            if (level === 2 || level === 3) {
+              const title = stripTags(renderInline(titleRaw));
+              startSection(title, level);
+              return;
+            }
           }
 
-          let match = trimmed.match(/^(\d+)\)\s+(.+)$/);
-          if (match) {
-            startSection(`${match[1]}) ${match[2]}`, 2);
-            return;
+          if (current) {
+            current.lines.push(line);
           }
-
-          match = trimmed.match(/^(\d+\.\d+)\s+(.+)$/);
-          if (match) {
-            startSection(`${match[1]} ${match[2]}`, 3);
-            return;
-          }
-
-          current.lines.push(trimmed);
         });
 
-        if (current && current.lines.length) {
-          sections.push(current);
+        if (current) {
+          pushCurrent();
+        }
+
+        if (!sections.length) {
+          const fallback = {
+            title: "Overview",
+            level: 2,
+            lines,
+          };
+          fallback.html = renderMarkdown(fallback.lines);
+          fallback.searchText = stripTags(fallback.html);
+          sections.push(fallback);
         }
 
         return sections;
@@ -705,14 +833,32 @@
           usedSlugs.add(slug);
           section.slug = slug;
           wrapper.id = slug;
-          wrapper.dataset.search = `${section.title} ${section.lines.join(" ")}`.toLowerCase();
+          wrapper.dataset.search = `${section.title} ${section.searchText}`.toLowerCase();
 
           const heading = document.createElement(section.level === 2 ? "h2" : "h3");
           heading.textContent = section.title;
+          heading.style.cursor = "pointer";
+
+          // Clear search when clicking a section heading to show full context
+          heading.addEventListener("click", () => {
+            if (searchInput.value.trim()) {
+              searchInput.value = "";
+              searchInput.dispatchEvent(new Event("input"));
+
+              // Wait for DOM update, then scroll to section
+              setTimeout(() => {
+                const targetSection = document.getElementById(slug);
+                if (targetSection) {
+                  targetSection.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+              }, 50);
+            }
+          });
+
           wrapper.appendChild(heading);
 
           const body = document.createElement("div");
-          body.innerHTML = renderLines(section.lines);
+          body.innerHTML = section.html;
           wrapper.appendChild(body);
 
           fragment.appendChild(wrapper);
@@ -734,6 +880,24 @@
           if (section.level === 3) {
             link.classList.add("sub");
           }
+
+          // Clear search when clicking a TOC link to show full context
+          link.addEventListener("click", (event) => {
+            if (searchInput.value.trim()) {
+              event.preventDefault();
+              searchInput.value = "";
+              searchInput.dispatchEvent(new Event("input"));
+
+              // Wait for DOM update, then scroll to section
+              setTimeout(() => {
+                const targetSection = document.getElementById(section.slug);
+                if (targetSection) {
+                  targetSection.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+              }, 50);
+            }
+          });
+
           tocContainer.appendChild(link);
         });
       };
@@ -789,7 +953,7 @@
         });
       };
 
-      fetch("The%20Quiet%20End%20TTRPG%20Rules.txt")
+      fetch("The%20Quiet%20End%20TTRPG%20Rules.md")
         .then((response) => {
           if (!response.ok) {
             throw new Error("Rules file not found.");
@@ -805,7 +969,7 @@
         })
         .catch(() => {
           rulesContainer.innerHTML =
-            "<div class=\"empty-state\">Unable to load the rules file. Keep the text file in this folder.</div>";
+            "<div class=\"empty-state\">Unable to load the rules file. Keep the markdown file in this folder.</div>";
           searchCount.textContent = "Rules file missing.";
         });
     </script>

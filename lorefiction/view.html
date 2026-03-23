@@ -2,141 +2,15 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Record - Lore &amp; Fiction</title>
-    <meta property="og:title" content="Record - Lore &amp; Fiction" />
-    <meta
-      property="og:description"
-      content="Lore &amp; Fiction record viewer for recovered texts and archival notes."
-    />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://thequietend.com/LoreFiction/view.html" />
-    <meta property="og:image" content="https://thequietend.com/LoreFiction/embed.png" />
-    <meta property="og:image:alt" content="Lore &amp; Fiction Record" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Record - Lore &amp; Fiction" />
-    <meta
-      name="twitter:description"
-      content="Lore &amp; Fiction record viewer for recovered texts and archival notes."
-    />
-    <meta name="twitter:image" content="https://thequietend.com/LoreFiction/embed.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=B612+Mono:wght@400;700&family=Literata:wght@400;600&family=Share+Tech+Mono&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="styles.css" />
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js" defer></script>
-    <script defer>
-      const cleanText = (text) =>
-        text
-          .replace(/`([^`]+)`/g, "$1")
-          .replace(/\*\*([^*]+)\*\*/g, "$1")
-          .replace(/\*([^*]+)\*/g, "$1")
-          .replace(/\[([^\]]+)\]\([^\)]+\)/g, "$1")
-          .replace(/[_#>]/g, "")
-          .trim();
-
-      const extractTitle = (text, fallback) => {
-        const lines = text.split(/\r?\n/);
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed) {
-            continue;
-          }
-          const match = trimmed.match(/^#{1,6}\s+(.*)$/);
-          if (match) {
-            return cleanText(match[1]);
-          }
-        }
-        return fallback;
-      };
-
-      const formatDate = (value) => {
-        if (!value) {
-          return "";
-        }
-        const parsed = new Date(value);
-        if (Number.isNaN(parsed.getTime())) {
-          return "";
-        }
-        return parsed.toISOString().slice(0, 16).replace("T", " ");
-      };
-
-      const showError = (message) => {
-        const titleEl = document.getElementById("record-title");
-        const metaEl = document.getElementById("record-meta");
-        const contentEl = document.getElementById("record-content");
-        titleEl.textContent = "Record missing";
-        metaEl.textContent = "Status: unavailable";
-        contentEl.innerHTML = `<p>${message}</p>`;
-        document.title = "Record missing - Lore & Fiction";
-      };
-
-      const loadRecord = async () => {
-        const params = new URLSearchParams(window.location.search);
-        const doc = params.get("doc");
-        if (!doc) {
-          showError("Requested record could not be found.");
-          return;
-        }
-
-        try {
-          const response = await fetch(doc);
-          if (!response.ok) {
-            throw new Error("Missing");
-          }
-          const text = await response.text();
-          const fallback = doc.split("/").pop()?.replace(/\.[^.]+$/, "") || "Record";
-          const title = extractTitle(text, fallback);
-          const meta = formatDate(response.headers.get("last-modified"));
-          const contentEl = document.getElementById("record-content");
-
-          document.getElementById("record-title").textContent = title;
-          document.getElementById("record-meta").textContent = meta
-            ? `Last updated: ${meta}`
-            : "Status: archived";
-          document.title = `${title} - Lore & Fiction`;
-
-          if (window.marked) {
-            contentEl.innerHTML = window.marked.parse(text, {
-              mangle: false,
-              headerIds: false,
-            });
-          } else {
-            contentEl.textContent = text;
-          }
-        } catch (error) {
-          showError("Requested record could not be found.");
-        }
-      };
-
-      window.addEventListener("DOMContentLoaded", loadRecord);
+    <title>Redirecting...</title>
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const doc = params.get("doc");
+      const target = doc ? `view.php?doc=${encodeURIComponent(doc)}` : "view.php";
+      window.location.href = target;
     </script>
   </head>
   <body>
-    <header>
-      <div class="signal">
-        <a href="../index.html">Homepage</a> // <a href="index.html">Lore &amp; Fiction</a> // Record
-      </div>
-      <h1>Record display</h1>
-      <p>Recovered text follows. Return to the registry when finished.</p>
-    </header>
-
-    <main>
-      <article class="article">
-        <div class="article-header">
-          <div class="breadcrumbs"><a href="index.html">Lore &amp; Fiction</a> / Record</div>
-          <h1 id="record-title">Record</h1>
-          <div class="meta" id="record-meta">Status: syncing</div>
-        </div>
-        <div class="markdown" id="record-content"></div>
-      </article>
-    </main>
-
-    <footer>
-      Return to <a href="index.html">Lore &amp; Fiction</a>.
-    </footer>
+    <p>Redirecting to <a href="view.php">view.php</a>...</p>
   </body>
 </html>

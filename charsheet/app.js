@@ -51,6 +51,11 @@ const gearNameInput = document.getElementById("gear-name");
 const gearTypeInput = document.getElementById("gear-type");
 const gearTagsInput = document.getElementById("gear-tags");
 const gearDescriptionInput = document.getElementById("gear-description");
+const gearMultipleInput = document.getElementById("gear-multiple");
+const gearQuantityField = document.getElementById("gear-quantity-field");
+const gearQuantityInput = document.getElementById("gear-quantity");
+const gearQuantityMinusButton = document.getElementById("gear-quantity-minus");
+const gearQuantityPlusButton = document.getElementById("gear-quantity-plus");
 const gearCancelButton = document.getElementById("gear-cancel");
 const moveModal = document.getElementById("move-modal");
 const moveForm = document.getElementById("move-form");
@@ -98,6 +103,33 @@ const removeConfirmButton = document.getElementById("remove-confirm");
 const removeModalText = document.getElementById("remove-modal-text");
 const statRows = Array.from(document.querySelectorAll(".stat"));
 const roleSelect = document.getElementById("role");
+
+// Dice Roller Elements
+const diceRollerButton = document.getElementById("dice-roller-btn");
+const diceRollerModal = document.getElementById("dice-roller-modal");
+const diceRollerClose = document.getElementById("dice-roller-close");
+const rollNameInput = document.getElementById("roll-name");
+const characterRollSection = document.getElementById("character-roll-section");
+const shipRollSection = document.getElementById("ship-roll-section");
+const characterStatSelect = document.getElementById("character-stat-select");
+const extraModifierInput = document.getElementById("extra-modifier");
+const extraModifierField = document.getElementById("extra-modifier-field");
+const toggleExtraModifierBtn = document.getElementById("toggle-extra-modifier-btn");
+const extraModifierBtnText = document.getElementById("extra-modifier-btn-text");
+const characterStatDisplay = document.getElementById("character-stat-display");
+const characterModifierDisplay = document.getElementById("character-modifier-display");
+const shipStatSelect = document.getElementById("ship-stat-select");
+const operatorStatSelect = document.getElementById("operator-stat-select");
+const shipStatDisplay = document.getElementById("ship-stat-display");
+const operatorStatDisplay = document.getElementById("operator-stat-display");
+const operatorEdgeDisplay = document.getElementById("operator-edge-display");
+const shipModifierDisplay = document.getElementById("ship-modifier-display");
+const rollDiceButton = document.getElementById("roll-dice-btn");
+const diceDisplay = document.getElementById("dice-display");
+const totalDisplay = document.getElementById("total-display");
+const outcomeDisplay = document.getElementById("outcome-display");
+const rollHistoryContainer = document.getElementById("roll-history");
+const clearHistoryButton = document.getElementById("clear-history-btn");
 
 const STAT_SELECT_FIELDS = new Set([
   "stats.grit",
@@ -387,6 +419,60 @@ const ROLE_MOVES = {
         "When you deliberately spread or suppress a story to shape a situation, roll +WITS (planning) or +FACE (performance). 10+: pick 2. 7-9: pick 1. Options: create a distraction, sour a rival's deal, draw someone out, reduce Heat by 1, gain +1 DATA.",
     },
   ],
+  Civilian: [
+    {
+      name: "Seen it All",
+      description:
+        "When you Read the Situation in a lived-in environment (stations, colonies, outposts), on a hit ask +1 extra question. On a 10+, you also spot a shortcut or a hiding hole: take +1 forward to Get Through It if you use it immediately.",
+    },
+    {
+      name: "Practical Scrounger",
+      description:
+        "When you Scavenge the Dead or search a location for supplies, you can roll +WITS instead of +SENSORS. On a 7-9, you may choose to take a \"small but clean\" find: gain +1 resource but do not choose a cost.",
+    },
+    {
+      name: "One of the Crowd",
+      description:
+        "When you Keep It Quiet by blending into a group of people rather than using ship systems, roll +FACE. On a 10+, reduce HEAT by 2. On a 7-9, reduce HEAT by 1, but you overhear a rumor that makes you Shaken.",
+    },
+    {
+      name: "Makeshift Comforts",
+      description:
+        "During the Docks Phase, if you spend your action to improve the crew's living conditions, clear a Condition (other than Injured or Contaminated) from yourself and one ally.",
+    },
+    {
+      name: "I'm Just a Passenger",
+      description:
+        "When you Make the Deal by appearing harmless or unimportant, on a hit you can choose to avoid any Heat spikes, even on a 7-9.",
+    },
+  ],
+  Laborer: [
+    {
+      name: "Hardened Lungs",
+      description:
+        "You have spent years in poorly filtered environments. When you take the Exposed or Contaminated condition from bad air or fumes, you may roll +GRIT to ignore it. On a 10+, you ignore it completely; on a 7-9, ignore it but take the Exhausted condition instead.",
+    },
+    {
+      name: "Good Enough Fix",
+      description:
+        "When you Do the Fix using whatever is at hand, you do not need to spend PARTS. On a hit, the repair holds, but the system gains the Strained tag immediately.",
+    },
+    {
+      name: "Union Handshake",
+      description:
+        "When you Work the Crowd in industrial areas or docks, roll +GRIT instead of +FACE. On a hit, you can always ask \"Who is the real authority here?\" for free.",
+    },
+    {
+      name: "Brute Resilience",
+      description:
+        "When you Get Through It to protect the ship or an ally from physical harm, you can choose to take a Condition yourself to give the ally a 10+ result automatically.",
+    },
+    {
+      name: "Scrap-Sense",
+      description:
+        "When you Scavenge the Dead, on a 7-9 you may choose to find 1 extra PARTS instead of taking a cost, but you must mark Exhausted.",
+    },
+  ],
 };
 
 let clocks = [];
@@ -401,6 +487,7 @@ let shipModules = [];
 let pendingRemoveId = null;
 let lastFocusedElement = null;
 let activeSheet = "character";
+let rollHistory = [];
 
 const SHEET_COPY = {
   character: {
@@ -653,6 +740,8 @@ const normalizeGearItem = (item) => {
   const description = normalizeText(item && item.description);
   const allowedTypes = ["weapon", "armor", "item"];
   const type = allowedTypes.includes(item && item.type) ? item.type : "item";
+  const quantity = clampQuantityValue(item && item.quantity);
+  const multiple = Boolean(item && item.multiple) || quantity > 1;
 
   return {
     id: typeof item.id === "string" && item.id ? item.id : createEntryId(),
@@ -660,6 +749,8 @@ const normalizeGearItem = (item) => {
     type,
     tags,
     description,
+    multiple,
+    quantity: multiple ? quantity : 1,
   };
 };
 
@@ -802,6 +893,49 @@ const createEmptyState = (message) => {
   return empty;
 };
 
+const clampQuantityValue = (value) => {
+  const parsed = Number.parseInt(value, 10);
+  if (Number.isNaN(parsed)) return 1;
+  return Math.max(1, parsed);
+};
+
+const bindQuantityControls = (input, minusButton, plusButton, onCommit) => {
+  if (!input) return () => {};
+  const readValue = () => {
+    if (Number.isFinite(input.valueAsNumber)) {
+      return input.valueAsNumber;
+    }
+    return input.value;
+  };
+  const commit = (value) => {
+    const nextValue = clampQuantityValue(value);
+    input.value = String(nextValue);
+    if (onCommit) {
+      onCommit(nextValue);
+    }
+  };
+
+  input.addEventListener("input", () => commit(readValue()));
+  input.addEventListener("change", () => commit(readValue()));
+  input.addEventListener("blur", () => commit(readValue()));
+
+  if (minusButton) {
+    minusButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      commit(readValue() - 1);
+    });
+  }
+
+  if (plusButton) {
+    plusButton.addEventListener("click", (event) => {
+      event.preventDefault();
+      commit(readValue() + 1);
+    });
+  }
+
+  return commit;
+};
+
 const serialize = () => {
   const data = {};
   characterFields.forEach((field) => {
@@ -828,6 +962,8 @@ const serialize = () => {
     type: item.type,
     tags: item.tags,
     description: item.description,
+    multiple: item.multiple,
+    quantity: item.quantity,
   }));
   data["abilities.moves"] = moves.map((move) => ({
     id: move.id,
@@ -1188,8 +1324,23 @@ const openAddClockModal = () => {
   }
 };
 
-const openAddGearModal = () =>
-  openFormModal(gearModal, gearForm, gearNameInput);
+const openAddGearModal = () => {
+  if (!gearModal || !gearForm) return;
+  gearForm.reset();
+  if (gearQuantityInput) {
+    gearQuantityInput.value = "1";
+  }
+  if (gearMultipleInput) {
+    gearMultipleInput.checked = false;
+  }
+  if (gearQuantityField) {
+    gearQuantityField.classList.add("is-hidden");
+  }
+  openModal(gearModal);
+  if (gearNameInput) {
+    setTimeout(() => gearNameInput.focus(), 0);
+  }
+};
 
 const openAddMoveModal = () => {
   if (!moveModal || !moveForm) return;
@@ -1287,9 +1438,15 @@ const renderGearItems = () => {
       scheduleSave();
     });
 
+    const multipleInput = document.createElement("input");
+    multipleInput.type = "checkbox";
+    multipleInput.id = `${item.id}-gear-multiple`;
+    multipleInput.checked = item.multiple;
+
     row.appendChild(createField("Name", nameInput));
     row.appendChild(createField("Type", typeSelect));
     row.appendChild(createField("Tags", tagsInput));
+    row.appendChild(createField("Multiple", multipleInput));
 
     const descriptionInput = document.createElement("textarea");
     descriptionInput.rows = 3;
@@ -1297,6 +1454,57 @@ const renderGearItems = () => {
     descriptionInput.value = item.description;
     descriptionInput.addEventListener("input", () => {
       item.description = descriptionInput.value;
+      scheduleSave();
+    });
+
+    const quantityField = document.createElement("div");
+    quantityField.className = "field";
+    const quantityLabel = document.createElement("label");
+    quantityLabel.textContent = "Quantity";
+
+    const quantityControls = document.createElement("div");
+    quantityControls.className = "quantity-controls";
+    const quantityMinusButton = document.createElement("button");
+    quantityMinusButton.type = "button";
+    quantityMinusButton.className = "btn ghost small qty-btn";
+    quantityMinusButton.textContent = "-";
+    const quantityInput = document.createElement("input");
+    quantityInput.type = "number";
+    quantityInput.min = "1";
+    quantityInput.step = "1";
+    quantityInput.inputMode = "numeric";
+    quantityInput.id = `${item.id}-gear-quantity`;
+    quantityInput.value = item.quantity;
+    quantityLabel.setAttribute("for", quantityInput.id);
+    const quantityPlusButton = document.createElement("button");
+    quantityPlusButton.type = "button";
+    quantityPlusButton.className = "btn ghost small qty-btn";
+    quantityPlusButton.textContent = "+";
+
+    quantityControls.appendChild(quantityMinusButton);
+    quantityControls.appendChild(quantityInput);
+    quantityControls.appendChild(quantityPlusButton);
+    quantityField.appendChild(quantityLabel);
+    quantityField.appendChild(quantityControls);
+    quantityField.classList.toggle("is-hidden", !item.multiple);
+
+    bindQuantityControls(
+      quantityInput,
+      quantityMinusButton,
+      quantityPlusButton,
+      (value) => {
+        item.quantity = value;
+        scheduleSave();
+      }
+    );
+
+    multipleInput.addEventListener("change", () => {
+      item.multiple = multipleInput.checked;
+      if (!item.multiple) {
+        item.quantity = 1;
+        quantityInput.value = "1";
+      }
+      quantityField.classList.toggle("is-hidden", !item.multiple);
       scheduleSave();
     });
 
@@ -1314,6 +1522,7 @@ const renderGearItems = () => {
     actions.appendChild(removeButton);
 
     card.appendChild(row);
+    card.appendChild(quantityField);
     card.appendChild(createField("Description", descriptionInput));
     card.appendChild(actions);
     gearList.appendChild(card);
@@ -1834,6 +2043,309 @@ const addShipModule = (item) => {
   scheduleSave("ship");
 };
 
+// Dice Roller Functions
+const rollDice = (numDice) => {
+  const results = [];
+  for (let i = 0; i < numDice; i++) {
+    results.push(Math.floor(Math.random() * 6) + 1);
+  }
+  return results;
+};
+
+const getOutcome = (total) => {
+  if (total >= 10) return "Success";
+  if (total >= 7) return "Success with a Catch";
+  return "Failure";
+};
+
+const parseStatValue = (value) => {
+  if (value === null || value === undefined || value === "") return 0;
+  const str = value.toString().trim();
+  if (str === "+1" || str === "1") return 1;
+  if (str === "+2" || str === "2") return 2;
+  if (str === "-1") return -1;
+  if (str === "0" || str === "+0") return 0;
+  const parsed = parseInt(str, 10);
+  return isNaN(parsed) ? 0 : parsed;
+};
+
+const getCharacterStat = (statName) => {
+  const baseField = document.querySelector(`[data-field="stats.${statName}"]`);
+  const modifierField = document.querySelector(`[data-field="stats.${statName}Modifier"]`);
+
+  const baseValue = baseField ? parseStatValue(baseField.value) : 0;
+  const modifierValue = modifierField ? parseStatValue(modifierField.value) : 0;
+
+  return baseValue + modifierValue;
+};
+
+const getShipStat = (statName) => {
+  const field = document.querySelector(`[data-field="ship.stats.${statName}"]`);
+  return field ? parseStatValue(field.value) : 0;
+};
+
+const calculateOperatorEdge = (characterStatValue) => {
+  const stat = parseStatValue(characterStatValue);
+  if (stat >= 2) return 1;
+  if (stat >= 0) return 0;
+  return -1;
+};
+
+const formatStatValue = (value) => {
+  const num = parseStatValue(value);
+  if (num > 0) return `+${num}`;
+  return num.toString();
+};
+
+const performCharacterRoll = () => {
+  const statName = characterStatSelect.value;
+  const statValue = getCharacterStat(statName);
+  const extraMod = parseInt(extraModifierInput.value, 10) || 0;
+  const dice = rollDice(2);
+  const diceTotal = dice.reduce((sum, d) => sum + d, 0);
+  const total = diceTotal + statValue + extraMod;
+  const outcome = getOutcome(total);
+  const rollName = rollNameInput.value.trim();
+
+  const roll = {
+    timestamp: new Date(),
+    name: rollName,
+    type: "character",
+    stat: statName.toUpperCase(),
+    dice: dice,
+    modifier: statValue + extraMod,
+    total: total,
+    outcome: outcome
+  };
+
+  return roll;
+};
+
+const performShipRoll = () => {
+  const shipStatName = shipStatSelect.value;
+  const operatorStatName = operatorStatSelect.value;
+  const shipStatValue = getShipStat(shipStatName);
+  const operatorStatValue = getCharacterStat(operatorStatName);
+  const operatorEdge = calculateOperatorEdge(operatorStatValue);
+  const dice = rollDice(2);
+  const diceTotal = dice.reduce((sum, d) => sum + d, 0);
+  const total = diceTotal + shipStatValue + operatorEdge;
+  const outcome = getOutcome(total);
+  const rollName = rollNameInput.value.trim();
+
+  const roll = {
+    timestamp: new Date(),
+    name: rollName,
+    type: "ship",
+    stat: shipStatName.toUpperCase(),
+    operatorStat: operatorStatName.toUpperCase(),
+    operatorEdge: operatorEdge,
+    dice: dice,
+    modifier: shipStatValue + operatorEdge,
+    total: total,
+    outcome: outcome
+  };
+
+  return roll;
+};
+
+const displayRollResult = (roll) => {
+  const diceText = roll.dice.map(d => `[${d}]`).join(" ");
+  const modText = formatStatValue(roll.modifier);
+
+  diceDisplay.textContent = diceText;
+  totalDisplay.textContent = `${diceText} ${modText >= 0 ? '+' : ''}${modText} = ${roll.total}`;
+  outcomeDisplay.textContent = roll.outcome;
+  outcomeDisplay.className = "outcome-display";
+
+  if (roll.outcome === "Success") {
+    outcomeDisplay.classList.add("success");
+  } else if (roll.outcome === "Success with a Catch") {
+    outcomeDisplay.classList.add("partial");
+  } else {
+    outcomeDisplay.classList.add("failure");
+  }
+};
+
+const addRollToHistory = (roll) => {
+  rollHistory.unshift(roll);
+  if (rollHistory.length > 10) {
+    rollHistory.pop();
+  }
+  renderRollHistory();
+};
+
+const renderRollHistory = () => {
+  if (!rollHistoryContainer) return;
+
+  rollHistoryContainer.innerHTML = "";
+
+  if (rollHistory.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "history-empty";
+    empty.textContent = "No rolls yet.";
+    rollHistoryContainer.appendChild(empty);
+    return;
+  }
+
+  rollHistory.forEach((roll) => {
+    const item = document.createElement("div");
+    item.className = "history-item";
+
+    const diceText = roll.dice.map(d => `[${d}]`).join(" ");
+    const modText = formatStatValue(roll.modifier);
+
+    let rollDescription = "";
+    if (roll.type === "ship") {
+      rollDescription = `${roll.stat} (${roll.operatorStat})`;
+    } else {
+      rollDescription = roll.stat;
+    }
+
+    const nameText = roll.name ? `${roll.name}: ` : "";
+    const resultText = `${nameText}${rollDescription} ${diceText}${modText >= 0 ? '+' : ''}${modText} = ${roll.total}`;
+
+    const resultLine = document.createElement("p");
+    resultLine.className = "history-result";
+    resultLine.textContent = resultText;
+
+    const outcomeLine = document.createElement("p");
+    outcomeLine.className = "history-outcome";
+    outcomeLine.textContent = roll.outcome;
+
+    if (roll.outcome === "Success") {
+      outcomeLine.classList.add("success");
+    } else if (roll.outcome === "Success with a Catch") {
+      outcomeLine.classList.add("partial");
+    } else {
+      outcomeLine.classList.add("failure");
+    }
+
+    item.appendChild(resultLine);
+    item.appendChild(outcomeLine);
+    rollHistoryContainer.appendChild(item);
+  });
+};
+
+const updateDiceRollerDisplay = () => {
+  const isShipSheet = activeSheet === "ship";
+
+  if (characterRollSection && shipRollSection) {
+    characterRollSection.classList.toggle("is-hidden", isShipSheet);
+    shipRollSection.classList.toggle("is-hidden", !isShipSheet);
+  }
+
+  if (!isShipSheet) {
+    updateCharacterRollDisplay();
+  } else {
+    updateShipRollDisplay();
+  }
+};
+
+const updateCharacterRollDisplay = () => {
+  if (!characterStatSelect || !characterStatDisplay) return;
+  const statName = characterStatSelect.value;
+  const statValue = getCharacterStat(statName);
+  const extraMod = parseInt(extraModifierInput.value, 10) || 0;
+  const totalMod = statValue + extraMod;
+
+  characterStatDisplay.textContent = `Current stat: ${formatStatValue(statValue)}`;
+
+  if (characterModifierDisplay) {
+    if (extraMod !== 0) {
+      characterModifierDisplay.textContent = `Roll modifier: ${formatStatValue(totalMod)}`;
+      characterModifierDisplay.style.display = "block";
+    } else {
+      characterModifierDisplay.style.display = "none";
+    }
+  }
+};
+
+const updateShipRollDisplay = () => {
+  if (!shipStatSelect || !operatorStatSelect) return;
+
+  const shipStatName = shipStatSelect.value;
+  const operatorStatName = operatorStatSelect.value;
+  const shipStatValue = getShipStat(shipStatName);
+  const operatorStatValue = getCharacterStat(operatorStatName);
+  const operatorEdge = calculateOperatorEdge(operatorStatValue);
+  const totalMod = shipStatValue + operatorEdge;
+
+  if (shipStatDisplay) {
+    shipStatDisplay.textContent = `Ship stat: ${formatStatValue(shipStatValue)}`;
+  }
+  if (operatorStatDisplay) {
+    operatorStatDisplay.textContent = `Operator stat: ${formatStatValue(operatorStatValue)}`;
+  }
+  if (operatorEdgeDisplay) {
+    operatorEdgeDisplay.textContent = `Operator edge: ${formatStatValue(operatorEdge)}`;
+  }
+  if (shipModifierDisplay) {
+    if (operatorEdge !== 0) {
+      shipModifierDisplay.textContent = `Roll modifier: ${formatStatValue(totalMod)}`;
+      shipModifierDisplay.style.display = "block";
+    } else {
+      shipModifierDisplay.style.display = "none";
+    }
+  }
+};
+
+const performRoll = () => {
+  const roll = activeSheet === "ship" ? performShipRoll() : performCharacterRoll();
+  displayRollResult(roll);
+  addRollToHistory(roll);
+};
+
+const openDiceRollerModal = () => {
+  if (!diceRollerModal) return;
+  updateDiceRollerDisplay();
+  renderRollHistory();
+  openModal(diceRollerModal);
+  if (rollNameInput) {
+    rollNameInput.value = "";
+  }
+  if (extraModifierInput) {
+    extraModifierInput.value = "0";
+  }
+  // Hide extra modifier field by default
+  if (extraModifierField) {
+    extraModifierField.classList.add("is-hidden");
+  }
+  if (extraModifierBtnText) {
+    extraModifierBtnText.textContent = "Add Extra Modifier";
+  }
+};
+
+const toggleExtraModifier = () => {
+  if (!extraModifierField || !extraModifierBtnText) return;
+
+  const isHidden = extraModifierField.classList.contains("is-hidden");
+
+  if (isHidden) {
+    extraModifierField.classList.remove("is-hidden");
+    extraModifierBtnText.textContent = "Hide Extra Modifier";
+    if (extraModifierInput) {
+      extraModifierInput.focus();
+    }
+  } else {
+    extraModifierField.classList.add("is-hidden");
+    extraModifierBtnText.textContent = "Add Extra Modifier";
+    if (extraModifierInput) {
+      extraModifierInput.value = "0";
+    }
+    updateCharacterRollDisplay();
+  }
+};
+
+const clearRollHistory = () => {
+  rollHistory = [];
+  renderRollHistory();
+  diceDisplay.textContent = "—";
+  totalDisplay.textContent = "—";
+  outcomeDisplay.textContent = "—";
+  outcomeDisplay.className = "outcome-display";
+};
+
 characterFields.forEach((field) => {
   if (field === radsInput) return;
   const handler = () => {
@@ -1937,6 +2449,23 @@ if (gearCancelButton) {
   gearCancelButton.addEventListener("click", () => closeModal(gearModal));
 }
 
+if (gearMultipleInput && gearQuantityField && gearQuantityInput) {
+  gearMultipleInput.addEventListener("change", () => {
+    gearQuantityField.classList.toggle("is-hidden", !gearMultipleInput.checked);
+    if (!gearMultipleInput.checked) {
+      gearQuantityInput.value = "1";
+    }
+  });
+}
+
+if (gearQuantityInput) {
+  bindQuantityControls(
+    gearQuantityInput,
+    gearQuantityMinusButton,
+    gearQuantityPlusButton
+  );
+}
+
 if (moveCancelButton) {
   moveCancelButton.addEventListener("click", () => closeModal(moveModal));
 }
@@ -2002,6 +2531,10 @@ if (gearForm) {
     const description = gearDescriptionInput
       ? gearDescriptionInput.value.trim()
       : "";
+    const multiple = gearMultipleInput ? gearMultipleInput.checked : false;
+    const quantity = multiple
+      ? clampQuantityValue(gearQuantityInput ? gearQuantityInput.value : 1)
+      : 1;
 
     addGearItem({
       id: createEntryId(),
@@ -2009,6 +2542,8 @@ if (gearForm) {
       type,
       tags,
       description,
+      multiple,
+      quantity,
     });
     closeModal(gearModal);
   });
@@ -2214,6 +2749,44 @@ importInput.addEventListener("change", (event) => {
   importSheet(file, activeSheet);
   event.target.value = "";
 });
+
+// Dice Roller Event Listeners
+if (diceRollerButton) {
+  diceRollerButton.addEventListener("click", openDiceRollerModal);
+}
+
+if (diceRollerClose) {
+  diceRollerClose.addEventListener("click", () => closeModal(diceRollerModal));
+}
+
+if (rollDiceButton) {
+  rollDiceButton.addEventListener("click", performRoll);
+}
+
+if (clearHistoryButton) {
+  clearHistoryButton.addEventListener("click", clearRollHistory);
+}
+
+if (characterStatSelect) {
+  characterStatSelect.addEventListener("change", updateCharacterRollDisplay);
+}
+
+if (shipStatSelect) {
+  shipStatSelect.addEventListener("change", updateShipRollDisplay);
+}
+
+if (operatorStatSelect) {
+  operatorStatSelect.addEventListener("change", updateShipRollDisplay);
+}
+
+if (toggleExtraModifierBtn) {
+  toggleExtraModifierBtn.addEventListener("click", toggleExtraModifier);
+}
+
+if (extraModifierInput) {
+  extraModifierInput.addEventListener("input", updateCharacterRollDisplay);
+  extraModifierInput.addEventListener("change", updateCharacterRollDisplay);
+}
 
 renderClocks();
 renderGearItems();

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>The Quiet End - Crew Dashboard</title>
+    <meta property="og:title" content="The Quiet End - Crew Dashboard" />
+    <meta
+      property="og:description"
+      content="Live crew, ship, and lore status for The Quiet End tabletop game."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://thequietend.com/dashboard/" />
+    <meta property="og:image" content="https://thequietend.com/embed.png" />
+    <meta property="og:image:alt" content="The Quiet End" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="The Quiet End - Crew Dashboard" />
+    <meta
+      name="twitter:description"
+      content="Live crew, ship, and lore status for The Quiet End tabletop game."
+    />
+    <meta name="twitter:image" content="https://thequietend.com/embed.png" />
+    <meta content="#0a0d0d" data-react-helmet="true" name="theme-color" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=B612+Mono:wght@400;700&family=Share+Tech+Mono&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="app.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <div class="bg-grid" aria-hidden="true"></div>
+    <header class="dash-header">
+      <div class="brand">
+        <p class="eyebrow"><a href="../">Homepage</a> // Crew Dashboard</p>
+        <h1>The Quiet End</h1>
+        <p class="subtitle">
+          Live operational dashboard.
+        </p>
+      </div>
+      <div class="location-panel">
+        <p class="location-label" id="location-label">CURRENT LOCATION:</p>
+        <p class="location-value" aria-live="polite">
+          <span id="location-value">Unknown</span>
+        </p>
+        <p class="sync-status" id="sync-status">Live feed pending...</p>
+      </div>
+    </header>
+
+    <main>
+      <section class="panel terminal-panel">
+        <div class="panel-header">
+          <h2>Terminal Access</h2>
+          <p id="terminal-status">Code required</p>
+        </div>
+
+        <div class="terminal-body">
+          <!-- State 1: Locked (code entry) -->
+          <div class="terminal-state" data-state="locked">
+            <div class="terminal-messages terminal-messages-readonly" id="terminal-messages-public"></div>
+            <div class="terminal-code-entry">
+              <input type="text" id="terminal-code-input" placeholder="ENTER ACCESS CODE" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore />
+              <button id="terminal-code-submit">ACCESS</button>
+            </div>
+            <p class="terminal-error" id="terminal-error"></p>
+          </div>
+
+          <!-- State 2: Character mode (rolling interface) -->
+          <div class="terminal-state hidden" data-state="character">
+            <div class="terminal-character-info">
+              <span id="terminal-char-name"></span>
+              <button class="terminal-logout">LOGOUT</button>
+            </div>
+
+            <div class="terminal-messages" id="terminal-messages"></div>
+
+            <div class="terminal-input-section">
+              <select id="terminal-message-type">
+                <option value="ooc">OOC</option>
+                <option value="say">Say</option>
+                <option value="act">Act</option>
+              </select>
+              <input type="text" id="terminal-message-input" placeholder="Type message..." />
+              <button id="terminal-send-message">SEND</button>
+            </div>
+
+            <div class="terminal-roll-interface">
+              <select id="terminal-roll-type">
+                <option value="character">Character Roll</option>
+                <option value="ship">Ship Roll</option>
+              </select>
+
+              <div class="terminal-character-roll">
+                <select id="terminal-stat">
+                  <option value="grit">GRIT</option>
+                  <option value="wits">WITS</option>
+                  <option value="tech">TECH</option>
+                  <option value="tact">TACT</option>
+                  <option value="face">FACE</option>
+                </select>
+                <input type="number" id="terminal-modifier" placeholder="+/-" />
+                <button id="terminal-roll-btn">ROLL</button>
+              </div>
+
+              <div class="terminal-ship-roll hidden">
+                <select id="terminal-ship-stat">
+                  <option value="hull">HULL</option>
+                  <option value="drive">DRIVE</option>
+                  <option value="shields">SHIELDS</option>
+                  <option value="sensors">SENSORS</option>
+                  <option value="weapons">WEAPONS</option>
+                </select>
+                <select id="terminal-operator-stat">
+                  <option value="grit">Operator: GRIT</option>
+                  <option value="wits">Operator: WITS</option>
+                  <option value="tech">Operator: TECH</option>
+                  <option value="tact">Operator: TACT</option>
+                  <option value="face">Operator: FACE</option>
+                </select>
+                <button id="terminal-ship-roll-btn">ROLL SHIP</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- State 3: GM mode (edit interface) -->
+          <div class="terminal-state hidden" data-state="gm">
+            <div class="terminal-gm-header">
+              <span>GM ACCESS GRANTED</span>
+              <div class="terminal-lock-toggle">
+                <label class="lock-switch">
+                  <input type="checkbox" id="terminal-lock-checkbox" />
+                  <span class="lock-slider"></span>
+                </label>
+                <span class="lock-label" id="terminal-lock-label">UNLOCKED</span>
+              </div>
+              <button class="terminal-logout">LOGOUT</button>
+            </div>
+
+            <div class="terminal-messages" id="terminal-gm-messages"></div>
+
+            <div class="terminal-input-section">
+              <select id="terminal-gm-message-type">
+                <option value="world">World</option>
+                <option value="gm">GM</option>
+                <option value="npc">NPC</option>
+              </select>
+              <input type="text" id="terminal-gm-message-input" placeholder="Type message... (NPC: [Name] Say/Act text)" />
+              <button id="terminal-gm-send-message">SEND</button>
+              <button type="button" id="terminal-clear-history" class="terminal-clear-btn">CLEAR HISTORY</button>
+            </div>
+
+            <div class="terminal-gm-roll-section">
+              <div class="terminal-gm-roll-row">
+                <input type="number" id="terminal-gm-roll-dice" min="1" max="10" value="2" title="Number of dice" />
+                <span class="roll-label">d6</span>
+                <input type="number" id="terminal-gm-roll-modifier" placeholder="+/-" title="Modifier" />
+                <button id="terminal-gm-roll-btn">ROLL</button>
+              </div>
+              <div class="terminal-gm-roll-row">
+                <input type="text" id="terminal-gm-roll-name" placeholder="Roll name (optional)" />
+                <input type="text" id="terminal-gm-roll-npc" placeholder="NPC name (optional)" />
+              </div>
+            </div>
+
+            <div class="terminal-gm-form">
+              <button type="button" class="terminal-gm-toggle" id="terminal-gm-toggle">
+                <span class="toggle-icon"></span>
+                <span class="toggle-text">Edit Panel</span>
+              </button>
+              <div class="terminal-gm-content" id="terminal-gm-content">
+              <div class="terminal-field">
+                <label>Location Display</label>
+                <div id="terminal-location-parts"></div>
+                <button type="button" id="terminal-add-location-part">+ Add Part</button>
+              </div>
+
+              <div class="terminal-field">
+                <label>Lore Feed</label>
+                <textarea id="terminal-lore" rows="6"></textarea>
+              </div>
+
+              <div class="terminal-field">
+                <label>Location Info</label>
+                <textarea id="terminal-location-info" rows="6"></textarea>
+              </div>
+
+              <div class="terminal-field">
+                <label>Notable Characters</label>
+                <div id="terminal-notable-list"></div>
+                <button type="button" id="terminal-add-notable">+ Add Character</button>
+              </div>
+
+              <button type="button" id="terminal-apply" class="terminal-apply-btn">APPLY CHANGES</button>
+              <p class="terminal-feedback" id="terminal-feedback"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="dashboard-grid">
+        <div class="dash-column dash-column-left">
+          <section class="panel crew-panel">
+            <div class="panel-header">
+              <h2>The Crew</h2>
+              <p>Crew and player-character roster.</p>
+            </div>
+            <div class="crew-grid" id="crew-list"></div>
+          </section>
+
+          <section class="panel panel-compact ship-panel">
+            <div class="panel-header">
+              <h2>Ship</h2>
+              <p>Crew ship status.</p>
+            </div>
+            <div class="ship-body" id="ship-panel"></div>
+          </section>
+
+          <section class="panel lore-panel">
+            <div class="panel-header">
+              <h2>Lore Feed</h2>
+            </div>
+            <div class="lore-content" id="lore-content"></div>
+          </section>
+        </div>
+
+        <div class="dash-column dash-column-right">
+          <section class="panel location-info-panel" id="location-info-panel">
+            <div class="panel-header">
+              <h2>Location Info</h2>
+            </div>
+            <div class="lore-content" id="location-info"></div>
+          </section>
+
+          <section class="panel panel-compact notable-panel">
+            <div class="panel-header">
+              <h2>Notable Characters</h2>
+              <p>Notable NPCs and other characters.</p>
+            </div>
+            <div class="notable-list" id="notable-list"></div>
+          </section>
+        </div>
+      </div>
+    </main>
+
+    <footer>
+      RECIEVERS ONLINE --- DATA RECIEVED
+    </footer>
+
+    <!-- Character Detail Overlay -->
+    <div class="character-detail-overlay" id="character-detail-overlay">
+      <div class="character-detail-panel" id="character-detail-panel"></div>
+    </div>
+  </body>
+</html>

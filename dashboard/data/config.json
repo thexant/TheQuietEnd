@@ -1,0 +1,38 @@
+{
+    "locationLabel": "CURRENT STATUS:",
+    "location": "SESSION ON ",
+    "locationParts": [
+        {
+            "text": "STATUS ",
+            "color": "#d2a95a"
+        },
+        {
+            "text": "PREPARING...",
+            "color": "#8E5EFF"
+        }
+    ],
+    "crewFiles": [],
+    "shipFile": "",
+    "loreFile": "data\/lore.md",
+    "locationInfoEnabled": true,
+    "locationInfoFile": "data\/location_info.md",
+    "notableCharactersFile": "data\/notable_characters.json",
+    "refreshSeconds": 5,
+    "terminal": {
+        "enabled": true,
+        "gmCode": "CHUNGUS",
+        "characterCodes": [
+            {
+                "code": "VENAN1",
+                "characterFile": "tqe-marcus.tqechar",
+                "characterName": "Marcus"
+            },
+            {
+                "code": "BETA-2",
+                "characterFile": "tqe-felix.tqechar",
+                "characterName": "Felix"
+            }
+        ],
+        "lockedDown": true
+    }
+}

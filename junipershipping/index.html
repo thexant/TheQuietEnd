@@ -3,379 +3,399 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="color-scheme" content="light" />
+  <meta name="color-scheme" content="dark" />
   <title>Juniper Shipping Co. // Gate-to-Gate Logistics</title>
   <style>
     :root{
-      --bg:#f4f1ec;
-      --panel:#ffffff;
-      --panel2:#f7f3ed;
-      --edge:#d6cfc4;
-      --txt:#1f2b2f;
-      --muted:#526066;
-      --faint:#7a877f;
+      --bg:#2a2c28;
+      --panel:#3d3f3a;
+      --panel-light:#494b44;
+      --border:#5a5c54;
+      --txt:#c8d4ba;
+      --muted:#8a947e;
+      --faint:#6d7569;
 
-      --accent:#2f7f6b;
-      --accent2:#c77f2a;
-      --accent3:#2c5f79;
+      --accent:#6fa882;
+      --accent-dark:#4a7a5f;
 
-      --sans:"Trebuchet MS","Tahoma","Verdana",sans-serif;
+      --sans:"Verdana","Tahoma",sans-serif;
       --serif:"Georgia","Times New Roman",serif;
       --mono:"Courier New",Courier,monospace;
-
-      --radius: 18px;
-      --shadow: 0 18px 40px rgba(23,32,36,.12);
     }
     *{ box-sizing:border-box; }
     html,body{ height:100%; }
     body{
       margin:0;
       font-family:var(--sans);
+      font-size:14px;
       color:var(--txt);
-      background:
-        radial-gradient(1200px 700px at 10% -10%, rgba(47,127,107,.12), rgba(0,0,0,0)),
-        radial-gradient(900px 500px at 95% 0%, rgba(199,127,42,.12), rgba(0,0,0,0)),
-        linear-gradient(135deg, rgba(31,43,47,.04), rgba(31,43,47,0)),
-        var(--bg);
+      background:var(--bg);
+      line-height:1.5;
+      text-shadow:0 0 1px rgba(200,212,186,0.3);
+      position:relative;
     }
-    a{ color:inherit; }
+    body:before{
+      content:"";
+      position:fixed;
+      inset:0;
+      background:
+        linear-gradient(transparent 97%, rgba(0,0,0,0.05) 100%),
+        linear-gradient(90deg, transparent 98%, rgba(0,0,0,0.03) 100%);
+      background-size:3px 3px, 3px 3px;
+      pointer-events:none;
+      opacity:0.3;
+    }
+    a{ color:var(--accent); text-decoration:underline; }
+    a:hover{ color:var(--txt); }
     .wrap{
-      width:min(1120px, 100%);
+      max-width:960px;
       margin:0 auto;
-      padding:22px;
-      display:flex;
-      flex-direction:column;
-      gap:14px;
+      background:var(--panel);
       min-height:100%;
+      box-shadow: 0 0 0 1px var(--border);
     }
 
     /* Header */
     header{
-      border:1px solid var(--edge);
-      border-radius:var(--radius);
-      background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(247,243,237,.92));
-      box-shadow:var(--shadow);
-      overflow:hidden;
-    }
-    .topbar{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:14px 14px 10px 14px;
-    }
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      min-width:0;
-    }
-    .mark{
-      width:36px; height:36px;
-      border-radius:12px;
-      border:1px solid rgba(47,127,107,.28);
-      background:
-        radial-gradient(circle at 30% 30%, rgba(47,127,107,.25), rgba(0,0,0,0)),
-        linear-gradient(180deg, rgba(255,255,255,.9), rgba(247,243,237,.9));
-      position:relative;
-      flex:0 0 auto;
-    }
-    .mark:before{
-      content:"";
-      position:absolute; inset:7px 8px;
-      border:1px solid rgba(47,127,107,.28);
-      border-radius:8px;
-      box-shadow: inset 0 0 14px rgba(47,127,107,.08);
+      border:3px double var(--accent);
+      padding:20px 24px;
+      background:var(--panel-light);
+      box-shadow:0 0 12px rgba(111,168,130,0.3);
     }
     .brand h1{
-      margin:0;
+      margin:0 0 6px 0;
       font-family:var(--serif);
-      font-size:18px;
-      letter-spacing:.02em;
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
+      font-size:28px;
+      font-weight:bold;
+      color:var(--accent);
+      text-shadow:0 0 8px rgba(111,168,130,0.6);
+      letter-spacing:0.02em;
     }
     .brand .sub{
-      margin:2px 0 0 0;
-      font-size:12px;
-      color:var(--muted);
-      white-space:nowrap;
-      overflow:hidden;
-      text-overflow:ellipsis;
+      margin:0;
+      font-size:13px;
+      color:var(--txt);
+      font-weight:bold;
     }
     .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:7px 10px;
-      border-radius:999px;
-      border:1px solid rgba(82,96,102,.18);
-      background: rgba(255,255,255,.8);
-      color:var(--muted);
-      font-size:11px;
-      white-space:nowrap;
-    }
-    .dot{
-      width:8px; height:8px; border-radius:50%;
-      background:var(--accent);
-      box-shadow:0 0 12px rgba(47,127,107,.2);
+      display:inline-block;
+      margin-top:10px;
+      padding:6px 12px;
+      border:2px solid var(--accent);
+      background:var(--panel);
+      color:var(--accent);
+      font-size:12px;
+      font-family:var(--mono);
+      font-weight:bold;
+      text-transform:uppercase;
+      box-shadow:0 0 8px rgba(111,168,130,0.4);
     }
 
     nav{
+      margin-top:16px;
+      padding-top:14px;
+      border-top:2px solid var(--accent-dark);
       display:flex;
-      gap:8px;
-      padding:0 12px 12px 12px;
+      gap:20px;
       flex-wrap:wrap;
     }
     nav a{
       text-decoration:none;
-      color:var(--muted);
-      border:1px solid rgba(82,96,102,.18);
-      background: rgba(255,255,255,.7);
-      padding:9px 10px;
-      border-radius:12px;
-      font-size:12px;
-      letter-spacing:.02em;
-      transition: border-color .12s ease, color .12s ease, transform .06s ease;
+      color:var(--accent);
+      font-size:13px;
+      font-weight:bold;
+      text-transform:uppercase;
+      letter-spacing:0.05em;
+      padding:4px 8px;
+      border-bottom:2px solid transparent;
+      transition:all 0.2s;
     }
-    nav a:hover{ color:var(--txt); border-color: rgba(47,127,107,.35); }
-    nav a:active{ transform: translateY(1px); }
+    nav a:hover{
+      color:var(--txt);
+      border-bottom-color:var(--accent);
+      text-shadow:0 0 6px rgba(111,168,130,0.6);
+    }
 
-    /* Layout blocks */
-    .panel{
-      border:1px solid var(--edge);
-      border-radius:var(--radius);
-      background: linear-gradient(180deg, rgba(255,255,255,.96), rgba(247,243,237,.92));
-      box-shadow:var(--shadow);
-      padding:16px;
+    /* Content sections */
+    section{
+      padding:28px 24px;
+      border-bottom:2px solid var(--border);
+      position:relative;
     }
-    .hero{
-      display:grid;
-      grid-template-columns: 1.25fr .75fr;
-      gap:16px;
-      align-items:start;
+    section:last-of-type{
+      border-bottom:none;
     }
-    @media (max-width: 980px){
-      .hero{ grid-template-columns: 1fr; }
+    section:first-of-type{
+      background:linear-gradient(180deg, var(--panel-light) 0%, var(--panel) 100%);
+      border:3px double var(--accent);
+      border-left:none;
+      border-right:none;
+      box-shadow:inset 0 0 20px rgba(0,0,0,0.3);
     }
     .kicker{
-      font-family:var(--sans);
+      font-family:var(--mono);
       font-size:11px;
-      color:var(--faint);
-      letter-spacing:.10em;
+      color:var(--accent);
       text-transform:uppercase;
-      margin-bottom:8px;
+      margin:0 0 14px 0;
+      letter-spacing:0.1em;
+      font-weight:bold;
+      text-shadow:0 0 4px rgba(111,168,130,0.5);
     }
-    .headline{
-      margin:0 0 10px 0;
+    h2{
+      margin:0 0 16px 0;
       font-family:var(--serif);
-      font-size:30px;
-      line-height:1.1;
-      letter-spacing:.01em;
+      font-size:22px;
+      font-weight:bold;
+      color:var(--accent);
+      text-transform:uppercase;
+      letter-spacing:0.05em;
+      text-shadow:0 0 6px rgba(111,168,130,0.5);
+      padding:8px 0 8px 16px;
+      border-left:4px solid var(--accent);
+      border-bottom:2px solid var(--accent-dark);
+      position:relative;
+    }
+    h2:before{
+      content:"▶";
+      position:absolute;
+      left:-2px;
+      color:var(--accent);
+      text-shadow:0 0 8px rgba(111,168,130,0.8);
+    }
+    h3{
+      margin:0 0 8px 0;
+      font-family:var(--sans);
+      font-size:15px;
+      font-weight:bold;
+      color:var(--accent);
+      text-transform:uppercase;
+      letter-spacing:0.03em;
+    }
+    p{
+      margin:0 0 12px 0;
+      color:var(--txt);
     }
     .lead{
-      margin:0;
-      color:var(--muted);
       font-size:15px;
-      line-height:1.6;
-      max-width: 74ch;
+      line-height:1.7;
+      color:var(--txt);
+      border-left:4px solid var(--accent);
+      padding-left:16px;
+      margin-bottom:20px;
     }
-    .ctaRow{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:14px;
+    .mono{ font-family:var(--mono); font-size:13px; }
+    .muted{ color:var(--muted); }
+
+    .infobox{
+      margin-top:20px;
+      padding:16px;
+      border:3px double var(--accent-dark);
+      background:var(--panel);
+      box-shadow:inset 0 0 8px rgba(0,0,0,0.3);
+    }
+    .infobox .kicker{
+      color:var(--accent);
+      font-weight:bold;
+    }
+    .infobox .mono{
+      display:block;
+      margin:6px 0;
+    }
+
+    @keyframes pulse{
+      0%, 100%{ box-shadow:0 0 12px rgba(111,168,130,0.5), inset 0 0 8px rgba(111,168,130,0.2); }
+      50%{ box-shadow:0 0 18px rgba(111,168,130,0.7), inset 0 0 12px rgba(111,168,130,0.3); }
     }
     .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      border-radius:12px;
-      padding:10px 12px;
-      font-size:12px;
-      letter-spacing:.02em;
-      cursor:pointer;
-      user-select:none;
+      display:inline-block;
+      padding:10px 20px;
+      margin:8px 12px 8px 0;
+      font-size:14px;
+      font-weight:bold;
       text-decoration:none;
-      border:1px solid rgba(47,127,107,.40);
-      background: linear-gradient(180deg, rgba(47,127,107,.12), rgba(255,255,255,.9));
+      text-transform:uppercase;
+      letter-spacing:0.05em;
+      border:3px solid var(--accent);
+      background:var(--accent-dark);
       color:var(--txt);
-      transition: transform .06s ease, filter .12s ease, border-color .12s ease;
+      cursor:pointer;
+      box-shadow:0 0 12px rgba(111,168,130,0.5), inset 0 0 8px rgba(111,168,130,0.2);
+      text-shadow:0 0 4px rgba(200,212,186,0.8);
+      animation:pulse 3s ease-in-out infinite;
+      transition:all 0.2s;
+    }
+    .btn:hover{
+      background:var(--accent);
+      box-shadow:0 0 20px rgba(111,168,130,1), inset 0 0 16px rgba(111,168,130,0.4);
+      animation:none;
     }
     .btn.secondary{
-      border-color: rgba(82,96,102,.22);
-      background: rgba(255,255,255,.7);
+      border-color:var(--border);
+      background:var(--panel);
       color:var(--muted);
+      box-shadow:0 0 6px rgba(0,0,0,0.3);
+      animation:none;
     }
-    .btn:hover{ filter:brightness(1.05); border-color: rgba(47,127,107,.60); }
-    .btn.secondary:hover{ border-color: rgba(82,96,102,.38); color: var(--txt); }
-    .btn:active{ transform: translateY(1px); }
-
-    .card{
-      border-radius:14px;
-      border:1px solid rgba(82,96,102,.16);
-      background: rgba(255,255,255,.78);
-      padding:12px;
-    }
-    .card h3{
-      margin:0 0 8px 0;
-      font-family:var(--serif);
-      font-size:14px;
-      letter-spacing:.02em;
-    }
-    .mono{ font-family:var(--mono); }
-    .muted{ color:var(--muted); }
-    .faint{ color:var(--faint); }
-
-    .hr{
-      height:1px;
-      background: linear-gradient(90deg, rgba(82,96,102,0), rgba(82,96,102,.22), rgba(82,96,102,0));
-      margin:12px 0;
+    .btn.secondary:hover{
+      background:var(--panel-light);
+      color:var(--txt);
+      border-color:var(--accent);
+      box-shadow:0 0 10px rgba(111,168,130,0.4);
     }
 
     .grid3{
       display:grid;
       grid-template-columns: repeat(3, 1fr);
-      gap:14px;
+      gap:20px;
+      margin-top:16px;
     }
-    @media (max-width: 980px){
+    @media (max-width: 768px){
       .grid3{ grid-template-columns: 1fr; }
     }
-
-    .list{
-      margin:0;
-      padding-left:18px;
-      color:var(--muted);
-      line-height:1.65;
-      font-size:14px;
+    .grid3 > div{
+      border:2px solid var(--accent-dark);
+      padding:14px;
+      background:var(--panel);
+      box-shadow:inset 0 0 6px rgba(0,0,0,0.2);
+      position:relative;
+    }
+    .grid3 > div:before,
+    .grid3 > div:after{
+      content:"┌───";
+      position:absolute;
+      top:0;
+      left:0;
+      font-family:var(--mono);
+      font-size:10px;
+      color:var(--accent);
+      line-height:1;
+    }
+    .grid3 > div:after{
+      content:"───┐";
+      left:auto;
+      right:0;
     }
 
-    .table{
+    ul{
+      margin:12px 0;
+      padding-left:24px;
+    }
+    li{
+      margin:8px 0;
+      color:var(--muted);
+    }
+
+    table{
       width:100%;
       border-collapse: collapse;
-      overflow:hidden;
-      border-radius:14px;
-      border:1px solid rgba(82,96,102,.14);
-      background: rgba(255,255,255,.75);
-      font-size:12px;
+      margin:20px 0;
+      font-size:13px;
+      border:2px solid var(--accent-dark);
+      box-shadow:0 0 8px rgba(0,0,0,0.3);
     }
-    .table th,.table td{
-      padding:10px 10px;
-      border-bottom:1px solid rgba(82,96,102,.10);
+    th, td{
+      padding:12px 14px;
+      border:1px solid var(--border);
       text-align:left;
-      vertical-align:top;
     }
-    .table th{
+    th{
+      background:var(--panel-light);
+      font-weight:bold;
+      font-family:var(--mono);
       font-size:11px;
-      letter-spacing:.08em;
       text-transform:uppercase;
-      color:var(--faint);
-      background: rgba(247,243,237,.9);
+      color:var(--accent);
+      text-shadow:0 0 3px rgba(111,168,130,0.5);
+      border-bottom:2px solid var(--accent-dark);
+    }
+    td{
+      background:var(--panel);
     }
 
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:6px 9px;
-      border-radius:999px;
-      border:1px solid rgba(82,96,102,.16);
-      background: rgba(255,255,255,.76);
+    .tags{
+      margin-top:20px;
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+    }
+    .tag{
+      display:inline-block;
+      padding:6px 12px;
+      border:2px solid var(--accent-dark);
+      background:var(--panel);
+      font-size:12px;
+      font-family:var(--mono);
       color:var(--muted);
-      white-space:nowrap;
-      font-size:11px;
+      box-shadow:0 0 6px rgba(0,0,0,0.3);
     }
-    .pill b{ color:var(--txt); font-weight:650; }
+    .tag b{
+      color:var(--accent);
+      font-weight:bold;
+      text-shadow:0 0 3px rgba(111,168,130,0.6);
+    }
 
-    .heroVisual{
-      border-radius:16px;
-      border:1px solid rgba(47,127,107,.22);
-      background:
-        radial-gradient(220px 180px at 80% 20%, rgba(199,127,42,.14), rgba(0,0,0,0)),
-        linear-gradient(180deg, rgba(47,127,107,.08), rgba(255,255,255,.9));
-      padding:14px;
-      position:relative;
-      overflow:hidden;
-    }
-    .heroVisual:before{
-      content:"";
-      position:absolute;
-      inset:0;
-      background:
-        repeating-linear-gradient(120deg, rgba(44,95,121,.10), rgba(44,95,121,.10) 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0) 26px),
-        repeating-linear-gradient(0deg, rgba(47,127,107,.08), rgba(47,127,107,.08) 1px, rgba(0,0,0,0) 1px, rgba(0,0,0,0) 18px);
-      opacity:.45;
-      pointer-events:none;
-    }
-    .heroVisual > *{
-      position:relative;
-      z-index:1;
-    }
-    .statGrid{
+    .statbox{
+      margin-top:20px;
+      padding:16px;
+      border:3px double var(--accent);
+      background:var(--panel);
       display:grid;
       grid-template-columns: repeat(2, 1fr);
-      gap:10px;
-      margin-top:10px;
+      gap:16px;
+      box-shadow:0 0 10px rgba(111,168,130,0.3), inset 0 0 8px rgba(0,0,0,0.3);
     }
     .stat{
-      border-radius:12px;
-      border:1px solid rgba(82,96,102,.16);
-      background: rgba(255,255,255,.8);
-      padding:10px;
+      border-left:4px solid var(--accent);
+      padding-left:12px;
     }
     .statValue{
-      font-family:var(--serif);
+      font-family:var(--mono);
       font-size:20px;
-      color:var(--txt);
+      font-weight:bold;
+      color:var(--accent);
+      text-shadow:0 0 6px rgba(111,168,130,0.7);
     }
     .statLabel{
       font-size:12px;
-      color:var(--muted);
+      color:var(--txt);
+      text-transform:uppercase;
+      letter-spacing:0.03em;
     }
 
     footer{
-      margin-top:auto;
-      padding:10px 6px 2px 6px;
+      padding:18px 24px;
+      border-top:2px solid var(--border);
+      background:var(--panel-light);
       display:flex;
       justify-content:space-between;
-      gap:10px;
+      gap:12px;
       flex-wrap:wrap;
-      font-size:11px;
-      color:var(--faint);
-      opacity:.9;
+      font-size:12px;
+      color:var(--muted);
     }
     footer a{
-      color:var(--muted);
-      text-decoration:none;
-      border-bottom: 1px dashed rgba(82,96,102,.22);
-    }
-    footer a:hover{
-      color:var(--txt);
-      border-bottom-color: rgba(47,127,107,.35);
+      color:var(--accent);
     }
 
-    /* tiny toast */
     .toast{
       position:fixed;
       left:50%;
-      bottom:22px;
+      bottom:24px;
       transform: translateX(-50%);
-      background: rgba(255,255,255,.95);
-      border:1px solid rgba(82,96,102,.22);
-      color: var(--txt);
-      padding:10px 12px;
-      border-radius: 999px;
-      font-size:12px;
-      box-shadow: var(--shadow);
+      background:var(--panel-light);
+      border:2px solid var(--border);
+      color:var(--txt);
+      padding:10px 16px;
+      font-size:13px;
+      font-family:var(--mono);
       opacity:0;
       pointer-events:none;
-      transition: opacity .18s ease, transform .18s ease;
+      transition: opacity .2s ease;
+      box-shadow:0 0 8px rgba(0,0,0,0.5);
     }
     .toast.show{
       opacity:1;
-      transform: translateX(-50%) translateY(-4px);
     }
   </style>
 </head>
@@ -384,20 +404,12 @@
   <div class="wrap">
 
     <header>
-      <div class="topbar">
-        <div class="brand">
-          <div class="mark" aria-hidden="true"></div>
-          <div style="min-width:0">
-            <h1>Juniper Shipping Co.</h1>
-            <div class="sub">Parcel | Freight | Cold-Chain | Gate Concourse Pickup</div>
-          </div>
-        </div>
-
-        <div class="badge" aria-label="Service tagline">
-          <span class="dot" aria-hidden="true"></span>
-          <span>Gate-to-Gate shipping for everyday life</span>
-        </div>
+      <div class="brand">
+        <h1>Juniper Shipping Co.</h1>
+        <div class="sub">Parcel | Freight | Cold-Chain | Gate Concourse Pickup</div>
       </div>
+
+      <div class="badge">Gate-to-Gate shipping for everyday life</div>
 
       <nav aria-label="Primary navigation">
         <a href="#services">Services</a>
@@ -408,134 +420,117 @@
       </nav>
     </header>
 
-    <section class="panel hero" aria-label="Hero">
+    <section aria-label="Hero">
+      <div class="kicker">Civilian carrier | Licensed handling | Concourse desk service</div>
+      <h2>Everyday shipping for life between gates.</h2>
+      <p class="lead">
+        Juniper Shipping is a civilian carrier for parcels and freight moving through Gate concourses.
+        From care packages and household parts to clinic supplies and temperature-sensitive goods, we keep it simple:
+        clear intake, clean seals, and a straightforward handoff.
+      </p>
+
       <div>
-        <div class="kicker">Civilian carrier | Licensed handling | Concourse desk service</div>
-        <h2 class="headline">Everyday shipping for life between gates.</h2>
-        <p class="lead">
-          Juniper Shipping is a civilian carrier for parcels and freight moving through Gate concourses.
-          From care packages and household parts to clinic supplies and temperature-sensitive goods, we keep it simple:
-          clear intake, clean seals, and a straightforward handoff.
-        </p>
-
-        <div class="ctaRow">
-          <a class="btn" href="#contact">Get a quote</a>
-          <a class="btn secondary" href="#how">How shipping works</a>
-        </div>
-
-        <div class="hr"></div>
-
-        <div style="display:flex; flex-wrap:wrap; gap:8px;">
-          <span class="pill"><b>Pickup</b> at Gate concourse desks</span>
-          <span class="pill"><b>Delivery</b> to concourse lockers / desk hold</span>
-          <span class="pill"><b>Seals</b> verified at handoff</span>
-          <span class="pill"><b>Scheduling</b> follows posted windows</span>
-        </div>
+        <a class="btn" href="#contact">Get a quote</a>
+        <a class="btn secondary" href="#how">How shipping works</a>
       </div>
 
-      <div class="heroVisual">
+      <div class="infobox">
         <div class="kicker">Service highlights</div>
-        <div class="muted" style="font-size:14px; line-height:1.6;">
-          <div><span class="mono faint">Focus:</span> households, small shops, clinic partners</div>
-          <div><span class="mono faint">Handoff:</span> desk hold, lockers, local carrier handoff</div>
-          <div><span class="mono faint">Care:</span> clear seals, documented intake, gentle handling</div>
-        </div>
+        <span class="mono"><b>Focus:</b> households, small shops, clinic partners</span>
+        <span class="mono"><b>Handoff:</b> desk hold, lockers, local carrier handoff</span>
+        <span class="mono"><b>Care:</b> clear seals, documented intake, gentle handling</span>
+      </div>
 
-        <div class="statGrid">
-          <div class="stat">
-            <div class="statValue">3-6</div>
-            <div class="statLabel">gate windows per cycle</div>
-          </div>
-          <div class="stat">
-            <div class="statValue">24</div>
-            <div class="statLabel">desk hours posted weekly</div>
-          </div>
-          <div class="stat">
-            <div class="statValue">Cold</div>
-            <div class="statLabel">chain slots by request</div>
-          </div>
-          <div class="stat">
-            <div class="statValue">ID</div>
-            <div class="statLabel">required at pickup</div>
-          </div>
+      <div class="statbox">
+        <div class="stat">
+          <div class="statValue">3-6</div>
+          <div class="statLabel">gate windows per cycle</div>
+        </div>
+        <div class="stat">
+          <div class="statValue">24</div>
+          <div class="statLabel">desk hours posted weekly</div>
+        </div>
+        <div class="stat">
+          <div class="statValue">Cold</div>
+          <div class="statLabel">chain slots by request</div>
+        </div>
+        <div class="stat">
+          <div class="statValue">ID</div>
+          <div class="statLabel">required at pickup</div>
         </div>
       </div>
     </section>
 
-    <section id="services" class="panel" aria-label="Services">
+    <section id="services" aria-label="Services">
       <div class="kicker">Services</div>
       <div class="grid3">
-        <div class="card">
+        <div>
           <h3>Parcel</h3>
-          <div class="muted" style="font-size:14px; line-height:1.6;">
+          <p class="muted">
             Personal packages, shop orders, care kits.
             Concourse pickup and desk-hold options.
-          </div>
+          </p>
         </div>
-        <div class="card">
+        <div>
           <h3>Freight</h3>
-          <div class="muted" style="font-size:14px; line-height:1.6;">
+          <p class="muted">
             Crates and pallets for shops and habitats.
             Clear labeling and seal integrity required.
-          </div>
+          </p>
         </div>
-        <div class="card">
+        <div>
           <h3>Cold-Chain</h3>
-          <div class="muted" style="font-size:14px; line-height:1.6;">
+          <p class="muted">
             Temperature-sensitive goods (food, reagents, meds).
             Validated containers only.
-          </div>
+          </p>
         </div>
       </div>
 
-      <div class="hr"></div>
-
-      <ul class="list">
+      <ul>
         <li><span class="mono">Sealed Medical</span> available for clinics and authorized customers.</li>
         <li><span class="mono">Desk Hold</span> for recipients without reliable local delivery access.</li>
         <li><span class="mono">Returns</span> supported when lanes and windows permit.</li>
       </ul>
     </section>
 
-    <section id="how" class="panel" aria-label="How it works">
+    <section id="how" aria-label="How it works">
       <div class="kicker">How it works</div>
       <div class="grid3">
-        <div class="card">
+        <div>
           <h3>1) Drop off</h3>
-          <div class="muted" style="font-size:14px; line-height:1.6;">
+          <p class="muted">
             Bring your parcel to the Juniper concourse desk. We verify label and seal and issue a receipt slip.
-          </div>
+          </p>
         </div>
-        <div class="card">
+        <div>
           <h3>2) Transfer</h3>
-          <div class="muted" style="font-size:14px; line-height:1.6;">
+          <p class="muted">
             Shipments move on posted Gate windows and available carrier capacity.
             Some routes may be quiet between windows.
-          </div>
+          </p>
         </div>
-        <div class="card">
+        <div>
           <h3>3) Pickup</h3>
-          <div class="muted" style="font-size:14px; line-height:1.6;">
+          <p class="muted">
             Recipient collects from desk hold or lockers (where supported). A receipt slip is your proof of pickup.
-          </div>
+          </p>
         </div>
       </div>
 
-      <div class="hr"></div>
-
-      <div class="muted" style="font-size:14px; line-height:1.65;">
+      <p class="muted">
         We keep our public info simple because it should be. If you need detailed chain-of-custody or special handling,
         we will tell you what paperwork to bring to the desk.
-      </div>
+      </p>
     </section>
 
-    <section id="lanes" class="panel" aria-label="Coverage">
+    <section id="lanes" aria-label="Coverage">
       <div class="kicker">Coverage</div>
-      <div class="muted" style="font-size:14px; line-height:1.65; margin-bottom:10px;">
+      <p class="muted">
         Example lanes shown below. Availability depends on posted Gate windows and local handling load.
-      </div>
+      </p>
 
-      <table class="table" aria-label="Coverage table">
+      <table aria-label="Coverage table">
         <thead>
           <tr>
             <th>Lane</th>
@@ -547,96 +542,91 @@
         <tbody>
           <tr>
             <td>Frame Station -> Harmony</td>
-            <td class="muted">Parcel / Freight</td>
-            <td class="muted">Desk hold / lockers</td>
-            <td class="muted">High-volume; expect queue at intake</td>
+            <td>Parcel / Freight</td>
+            <td>Desk hold / lockers</td>
+            <td>High-volume; expect queue at intake</td>
           </tr>
           <tr>
             <td>Splendor -> H-8 Reclaim</td>
-            <td class="muted">Parcel / Cold-chain</td>
-            <td class="muted">Desk hold</td>
-            <td class="muted">Cold-chain slots limited per window</td>
+            <td>Parcel / Cold-chain</td>
+            <td>Desk hold</td>
+            <td>Cold-chain slots limited per window</td>
           </tr>
           <tr>
             <td>Calder Outpost -> Mesa Station</td>
-            <td class="muted">Parcel</td>
-            <td class="muted">Desk pickup</td>
-            <td class="muted">Quiet between windows</td>
+            <td>Parcel</td>
+            <td>Desk pickup</td>
+            <td>Quiet between windows</td>
           </tr>
         </tbody>
       </table>
 
-      <div class="hr"></div>
-
-      <div style="display:flex; flex-wrap:wrap; gap:8px;">
-        <span class="pill"><b>Standard</b> household goods</span>
-        <span class="pill"><b>Tracked</b> via receipt slip</span>
-        <span class="pill"><b>Cold-chain</b> validated containers</span>
-        <span class="pill"><b>Medical</b> authorized intake</span>
+      <div class="tags">
+        <span class="tag"><b>Standard</b> household goods</span>
+        <span class="tag"><b>Tracked</b> via receipt slip</span>
+        <span class="tag"><b>Cold-chain</b> validated containers</span>
+        <span class="tag"><b>Medical</b> authorized intake</span>
       </div>
     </section>
 
-    <section id="faq" class="panel" aria-label="FAQ">
+    <section id="faq" aria-label="FAQ">
       <div class="kicker">FAQ</div>
       <div class="grid3">
-        <div class="card">
+        <div>
           <h3>Do you deliver door-to-door?</h3>
-          <div class="muted" style="font-size:14px; line-height:1.6;">
+          <p class="muted">
             Where local carriers exist, we can hand off to them. Otherwise we use desk hold and lockers.
-          </div>
+          </p>
         </div>
-        <div class="card">
+        <div>
           <h3>What do I need for pickup?</h3>
-          <div class="muted" style="font-size:14px; line-height:1.6;">
+          <p class="muted">
             Your receipt slip (or recipient token, where supported) and basic ID check at the concourse desk.
-          </div>
+          </p>
         </div>
-        <div class="card">
+        <div>
           <h3>Why do ETAs change?</h3>
-          <div class="muted" style="font-size:14px; line-height:1.6;">
+          <p class="muted">
             Gate windows vary and handling load changes. We cannot guarantee arrival times will be exact.
-          </div>
+          </p>
         </div>
       </div>
     </section>
 
-    <section id="contact" class="panel" aria-label="Contact">
+    <section id="contact" aria-label="Contact">
       <div class="kicker">Contact</div>
 
       <div class="grid3">
-        <div class="card">
+        <div>
           <h3>Concourse Desk</h3>
-          <div class="muted" style="font-size:14px; line-height:1.6;">
+          <p class="muted">
             Desk channel: <span class="mono">JUNIPER-DESK / PUBLIC</span><br/>
             Hours: posted desk schedule
-          </div>
-          <div class="ctaRow" style="margin-top:10px;">
-            <a class="btn secondary" href="#" id="copyDesk">Copy desk channel</a>
-          </div>
+          </p>
+          <a class="btn secondary" href="#" id="copyDesk">Copy desk channel</a>
         </div>
 
-        <div class="card">
+        <div>
           <h3>Quote request</h3>
-          <div class="muted" style="font-size:14px; line-height:1.6;">
+          <p class="muted">
             Send: origin, destination, size/weight, and service (parcel/freight/cold-chain).
-          </div>
-          <div class="hr"></div>
-          <div class="muted" style="font-size:13px; line-height:1.6;">
+          </p>
+          <p class="muted">
             For cold-chain: include container type and temperature band.
-          </div>
+          </p>
         </div>
 
-        <div class="card">
+        <div>
           <h3>Claims</h3>
-          <div class="muted" style="font-size:14px; line-height:1.6;">
+          <p class="muted">
             Claims require a receipt slip and desk receipt. Ask the concourse desk for the packet.
-          </div>
+          </p>
         </div>
       </div>
     </section>
 
     <footer>
-      <div>Juniper Shipping Co. - civilian carrier registry JSC-27</div>
+      <div>Juniper Shipping Co. - civilian carrier registry JSC-27 - Use CODE GATETOGATE in >GATE_CONTROL to unlock a special Juniper Shipping theme!</div>
       <div><a href="#faq">help</a> | <a href="#contact">contact</a> | <a href="#services">services</a></div>
     </footer>
 

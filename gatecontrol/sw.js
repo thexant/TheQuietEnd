@@ -1,4 +1,4 @@
-const CACHE_VERSION = "gatecontrol-v3";
+const CACHE_VERSION = "gatecontrol-v11.1";
 const PRECACHE_URLS = [
   "./",
   "./index.html",
@@ -15,14 +15,29 @@ const PRECACHE_URLS = [
   "./offline.ogg",
   "./processing.ogg",
   "./purge.ogg",
-	"./clack.ogg",
+  "./clack.ogg",
   "./reset.ogg",
   "./restore.ogg",
   "./scan.ogg",
   "./startup.ogg",
-	"./klaxon.ogg",
-	"./pingplayer.ogg",
-	"./ping.ogg"
+  "./klaxon.ogg",
+  "./pingplayer.ogg",
+  "./ping.ogg",
+  "./amb1.ogg",
+  "./amb2.ogg",
+  "./amb3.ogg",
+  "./amb4.ogg",
+  "./amb5.ogg",
+  "./amb6.ogg",
+	"./qrying.ogg",
+	"./alert.ogg",
+	"./warn.ogg",
+	"./danger.ogg",
+	"./deduction.ogg",
+	"./spend.ogg",
+	"./stress.ogg",
+	"./complete.ogg",
+	"./relaydown.ogg"
 ];
 
 self.addEventListener("install", (event) => {
@@ -78,6 +93,7 @@ self.addEventListener("fetch", (event) => {
         if (
           response &&
           response.ok &&
+          response.status !== 206 &&
           (request.url.startsWith(self.location.origin) ||
             request.destination === "style" ||
             request.destination === "font")

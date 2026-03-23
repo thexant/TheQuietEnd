@@ -1,0 +1,8 @@
+# Set index.php as the directory index
+DirectoryIndex index.php index.html
+
+# Ensure PHP files are processed
+AddType application/x-httpd-php .php
+
+# Prevent directory listing
+Options -Indexes

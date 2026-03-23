@@ -1,0 +1,118 @@
+{
+    "identity.name": "Marcus",
+    "identity.callsign": "Magellan",
+    "identity.role": "Navigator",
+    "identity.background": "",
+    "identity.pronouns": "He\/Him",
+    "stats.grit": "0",
+    "stats.gritModifier": "",
+    "stats.wits": "+2",
+    "stats.witsModifier": "",
+    "stats.tech": "+1",
+    "stats.techModifier": "",
+    "stats.tact": "-1",
+    "stats.tactModifier": "",
+    "stats.face": "+1",
+    "stats.faceModifier": "",
+    "conditions.injured": false,
+    "conditions.exposed": false,
+    "conditions.shaken": false,
+    "conditions.exhausted": false,
+    "conditions.contaminated": false,
+    "conditions.compromised": false,
+    "wounds.wound1": false,
+    "wounds.wound2": false,
+    "wounds.wound3": false,
+    "health.clock1": false,
+    "health.clock2": false,
+    "health.clock3": false,
+    "health.clock4": false,
+    "tracks.rads": "0",
+    "clocks.list": [],
+    "gear.items": [
+        {
+            "id": "entry-1766972493662-665977",
+            "name": "Work suit",
+            "type": "armor",
+            "tags": "rugged",
+            "description": ""
+        },
+        {
+            "id": "entry-1766972590781-9cd89c",
+            "name": "Signal tracer",
+            "type": "item",
+            "tags": "precise",
+            "description": ""
+        },
+        {
+            "id": "entry-1766972892762-0024a7",
+            "name": "Decon wipes",
+            "type": "item",
+            "tags": "medical, limited",
+            "description": ""
+        },
+        {
+            "id": "entry-1766973073145-32a9c5",
+            "name": "Sidearm",
+            "type": "weapon",
+            "tags": "rugged",
+            "description": ""
+        },
+        {
+            "id": "entry-1766973147297-269a3a",
+            "name": "Lockbox",
+            "type": "item",
+            "tags": "rugged",
+            "description": ""
+        }
+    ],
+    "abilities.moves": [
+        {
+            "id": "entry-1766971462034-1dd037",
+            "name": "Get Through It",
+            "description": "When you endure danger, roll +GRIT. 10+: hold steady; choose 2. 7-9: choose 1 and GM chooses 1. Choices: avoid harm, keep gear intact, do not lose time, do not gain RADS.",
+            "isBase": true
+        },
+        {
+            "id": "entry-1766971462034-98383d",
+            "name": "Read the Situation",
+            "description": "Roll +WITS. Ask 2 (10+) or 1 (7-9): What's the real threat here? What's about to fail? Who has leverage? What's being hidden\/missing? What's my best way in\/out?",
+            "isBase": true
+        },
+        {
+            "id": "entry-1766971462034-b2000e",
+            "name": "Do the Fix",
+            "description": "Roll +TECH. On a hit, stabilize a system or repair something. 10+: also clear Strained or regain +1 PARTS. 7-9: it works but costs time, Parts, or creates a new flaw.",
+            "isBase": true
+        },
+        {
+            "id": "entry-1766971462034-dbeb21",
+            "name": "Put Pressure On",
+            "description": "Roll +TACT. On a hit, you gain advantage in a standoff\/fight. 10+: pick 2. 7-9: pick 1. Options: disarm, take position, force retreat, protect someone, capture.",
+            "isBase": true
+        },
+        {
+            "id": "entry-1766971462034-a0a32d",
+            "name": "Make the Deal",
+            "description": "Roll +FACE. 10+: favorable terms + useful info. 7-9: fair terms or good info (pick one). 6-: you still get something, but you owe, get tagged, or Heat spikes.",
+            "isBase": true
+        },
+        {
+            "id": "entry-1766971731971-521d1a",
+            "name": "Sense the Sour",
+            "description": "When you Read the Situation about a route, gate, or Corridor, on a hit ask +1 extra question. On a 10+, also gain +1 DATA.",
+            "isBase": false
+        },
+        {
+            "id": "entry-1766971769939-d80012",
+            "name": "Stitch the Window",
+            "description": "Once per Corridor Run, you may turn a 7-9 on Run a Gated Corridor into a 10+. If you do, mark Exhausted or tick Ship System Strain +1.",
+            "isBase": false
+        }
+    ],
+    "abilities.stress": [],
+    "notes.contacts": [],
+    "notes.general": [],
+    "mods.items": [],
+    "debts.list": []
+}

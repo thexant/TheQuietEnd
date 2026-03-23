@@ -1,0 +1,110 @@
+{
+  "identity.name": "Felix",
+  "identity.callsign": "",
+  "identity.role": "Engineer",
+  "identity.background": "",
+  "identity.pronouns": "",
+  "stats.grit": "+1",
+  "stats.gritModifier": "",
+  "stats.wits": "+1",
+  "stats.witsModifier": "",
+  "stats.tech": "+2",
+  "stats.techModifier": "",
+  "stats.tact": "0",
+  "stats.tactModifier": "",
+  "stats.face": "-1",
+  "stats.faceModifier": "",
+  "conditions.injured": false,
+  "conditions.exposed": false,
+  "conditions.shaken": false,
+  "conditions.exhausted": false,
+  "conditions.contaminated": false,
+  "conditions.compromised": false,
+  "wounds.wound1": false,
+  "wounds.wound2": false,
+  "wounds.wound3": false,
+  "health.clock1": false,
+  "health.clock2": false,
+  "health.clock3": false,
+  "health.clock4": false,
+  "tracks.rads": "0",
+  "clocks.list": [],
+  "gear.items": [
+    {
+      "id": "entry-1766031306911-775d3b",
+      "name": "Tool Harness",
+      "type": "item",
+      "tags": "Rugged",
+      "description": "Holds various tools",
+      "multiple": false,
+      "quantity": 1
+    },
+    {
+      "id": "entry-1766031340440-e4cf0c",
+      "name": "Patch-Foam Canister",
+      "type": "item",
+      "tags": "Rugged, Limited",
+      "description": "can repair small holes and breaches in ship hulls and other damages.",
+      "multiple": false,
+      "quantity": 1
+    },
+    {
+      "id": "entry-1766031352822-f6d997",
+      "name": "Insulated Gloves",
+      "type": "armor",
+      "tags": "Insulated",
+      "description": "Keeps your hands warm and protected.",
+      "multiple": false,
+      "quantity": 1
+    }
+  ],
+  "abilities.moves": [
+    {
+      "id": "entry-1766030897828-78a70b",
+      "name": "Hard Reset",
+      "description": "When you take a quiet moment to rebuild a failing subsystem, spend 1 PARTS to clear Strained on one ship system without a roll.",
+      "isBase": false
+    },
+    {
+      "id": "entry-1766030909721-4d8a70",
+      "name": "EM-Hardened Instinct",
+      "description": "When Static Fog hits, you and your gear ignore the first “systems go blind” consequence (you still feel it, just not as badly).",
+      "isBase": false
+    },
+    {
+      "id": "entry-1766275849449-0cf7cf",
+      "name": "Get Through It",
+      "description": "When you endure danger, roll +GRIT. 10+: hold steady; choose 2. 7-9: choose 1 and GM chooses 1. Choices: avoid harm, keep gear intact, do not lose time, do not gain RADS.",
+      "isBase": true
+    },
+    {
+      "id": "entry-1766275849449-ffd96f",
+      "name": "Read the Situation",
+      "description": "Roll +WITS. Ask 2 (10+) or 1 (7-9): What's the real threat here? What's about to fail? Who has leverage? What's being hidden/missing? What's my best way in/out?",
+      "isBase": true
+    },
+    {
+      "id": "entry-1766275849449-3c3bd9",
+      "name": "Do the Fix",
+      "description": "Roll +TECH. On a hit, stabilize a system or repair something. 10+: also clear Strained or regain +1 PARTS. 7-9: it works but costs time, Parts, or creates a new flaw.",
+      "isBase": true
+    },
+    {
+      "id": "entry-1766275849449-f9d066",
+      "name": "Put Pressure On",
+      "description": "Roll +TACT. On a hit, you gain advantage in a standoff/fight. 10+: pick 2. 7-9: pick 1. Options: disarm, take position, force retreat, protect someone, capture.",
+      "isBase": true
+    },
+    {
+      "id": "entry-1766275849449-f64441",
+      "name": "Make the Deal",
+      "description": "Roll +FACE. 10+: favorable terms + useful info. 7-9: fair terms or good info (pick one). 6-: you still get something, but you owe, get tagged, or Heat spikes.",
+      "isBase": true
+    }
+  ],
+  "abilities.stress": [],
+  "notes.contacts": [],
+  "notes.general": [],
+  "mods.items": [],
+  "debts.list": []
+}

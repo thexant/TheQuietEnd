@@ -1,3 +1,5 @@
+# Environmental Hazards within Corridors
+
 Even when a Corridor is stable and a Gate is fully operational, the internal medium of the Corridor is an actively hostile environment. The following subsections detail the persistent, unavoidable environmental threats that all crews must be prepared to mitigate during every transit. These are not risks that can be avoided, only managed.
 
 ### Pervasive Threat: Corridor Radiation
